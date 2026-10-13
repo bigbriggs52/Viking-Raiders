@@ -447,7 +447,7 @@ function resize() {
 function layout() {
   const { R, C } = S;
   const boardH = H * .64;
-  const cell = Math.max(8, Math.min(56, W / (C + 2.2), boardH / (R + 2.6)));
+  const cell = Math.max(8, Math.min(56, W / (C + 3.4), boardH / (R + 2.6))); // room for the fjord's full width on both sides
   const gap = cell * .9;
   const bw = C * cell, bh = R * cell;
   const bx = (W - bw) / 2, by = gap + cell * 1.0;
@@ -465,8 +465,8 @@ function layout() {
   const trayW = nT * (slot + 6) - 6, cw = slot * 1.15;
   const trayX = Math.max(cw + 10, (W - trayW) / 2);
   const qTop = trayY + slot + 12;
-  const K = S.cols.length, colW = Math.min(124, (W - 8) / K);
-  const js = Math.max(26, Math.min(78, colW * .84, (H - qTop - 4) / 3.0));
+  const K = S.cols.length, colW = Math.min(150, (W - 8) / K);
+  const js = Math.max(26, Math.min(96, colW * .84, (H - qTop - 4) / 3.0));
   G = { cell, gap, bx, by, bw, bh, L0, R0, T0, B0, w, h, len, lanes, speed: cell * 8.5, spacing: cell * 1.9,
     trayY, slot, trayX, cw, qTop, colW, js, qX: (W - colW * K) / 2 };
 }
@@ -888,7 +888,7 @@ function hud() {
   $('lvl').textContent = 'Raid ' + S.n;
   $('prog').style.width = (100 * (S.total - S.left) / S.total) + '%';
   const f = save.fails[S.n] || 0;
-  $('try').textContent = f ? `Try ${f + 1} · easier` : 'Try 1';
+  $('try').textContent = f ? `Try ${f + 1}: easier` : 'First try';
   $('try').classList.toggle('easy', f > 0);
   $('nBomb').textContent = S.bombs; $('nSlot').textContent = S.slotBoosts;
   $('bBomb').disabled = !S.bombs; $('bSlot').disabled = !S.slotBoosts;
@@ -908,7 +908,7 @@ function showCard(kind, extra) {
   if (S && kind === 'restart') S.mode = 'paused';
   let html = '';
   if (kind === 'help') {
-    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 38298a8e</small></h2>
+    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 4d6553f5</small></h2>
       <ul>
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
@@ -941,7 +941,7 @@ function showCard(kind, extra) {
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
     let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
-    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build 38298a8e</div>`;
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build 4d6553f5</div>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
   card.innerHTML = html; $('ov').hidden = false;
