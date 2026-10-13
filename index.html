@@ -168,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2234",date:"2026-10-13 22:34 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2253",date:"2026-10-13 22:53 UTC"};</script>
 
 
 <div id="app">
@@ -532,7 +532,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.025';
+const BUILD = 'VR1.026';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1185,16 +1185,17 @@ function draw() {
       ctx.strokeStyle = '#e3e8ee'; ctx.lineWidth = Math.max(1.5, s * .045); ctx.setLineDash([s * .1, s * .07]); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
       knotTag(x, y, s, j.link); knotTag(x2, y2, s2, j.link); return;
     }
-    const dx = x2 - x, dy = y2 - y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, px = -uy, py = ux;
-    const ax = x + ux * s * .33, ay = y + uy * s * .33, bx = x2 - ux * s2 * .36, by = y2 - uy * s2 * .36;
-    ctx.strokeStyle = '#c27a2c'; ctx.lineWidth = Math.max(3, s * .09); ctx.lineCap = 'round'; ctx.beginPath();
-    ctx.moveTo(ax + px * s * .3, ay + py * s * .3); ctx.lineTo(bx + px * s2 * .3, by + py * s2 * .3);
-    ctx.moveTo(ax - px * s * .3, ay - py * s * .3); ctx.lineTo(bx - px * s2 * .3, by - py * s2 * .3); ctx.stroke();
-    // the tag sits on the ropes, beside the sails so it never covers a number
-    const vert = Math.abs(dx) < s * .5, mx = (ax + bx) / 2, my = (ay + by) / 2, th = Math.max(13, s * .26), fs = Math.round(th * .6);
-    ctx.font = `800 ${fs}px ${BODY_FONT}`; const tw = ctx.measureText('LASHED').width + th * .9, tx = vert ? x + s * .62 : mx, ty = vert ? my : my - s * .3;
-    rr(tx - tw / 2, ty - th / 2, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
-    ctx.fillStyle = '#f3e9d2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LASHED', tx, ty + 1);
+    // same line: one tether of linked beads from hull to hull, a bracket round both boats, and a tag
+    const top = Math.min(y, y2) - s * .62, bottom = Math.max(y, y2) + s * .5, left = Math.min(x, x2) - s * .52, right = Math.max(x, x2) + s * .52;
+    ctx.save(); ctx.globalAlpha = .9; ctx.lineWidth = Math.max(2, s * .05); ctx.strokeStyle = '#8d4f1c'; ctx.setLineDash([s * .12, s * .08]);
+    rr(left, top, right - left, bottom - top, s * .22); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+    const ax = x, ay = y + s * .34, bx = x2, by = y2 + s * .34, L = Math.hypot(bx - ax, by - ay) || 1, nb = Math.max(4, Math.round(L / (s * .16)));
+    for (let t = 0; t <= nb; t++) { const f = t / nb, px = ax + (bx - ax) * f, py = ay + (by - ay) * f;
+      ctx.beginPath(); ctx.arc(px, py, Math.max(1.8, s * .045), 0, 6.3); ctx.fillStyle = t % 2 ? '#c27a2c' : '#e0a24f'; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = '#5b3513'; ctx.stroke(); }
+    const mx = (ax + bx) / 2, my = (ay + by) / 2, th = Math.max(14, s * .26), fs = Math.round(th * .6);
+    ctx.font = `800 ${fs}px ${BODY_FONT}`; const tw = ctx.measureText('LASHED').width + th * .9;
+    rr(mx - tw / 2, my - th / 2 - s * .02, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+    ctx.fillStyle = '#f3e9d2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LASHED', mx, my - s * .02 + 1);
   }); });
   // particles
   for (const p of S.parts) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); }
