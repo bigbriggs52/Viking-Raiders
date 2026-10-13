@@ -169,7 +169,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2304",date:"2026-10-13 23:04 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2306",date:"2026-10-13 23:06 UTC"};</script>
 
 
 <div id="app">
@@ -533,7 +533,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.027';
+const BUILD = 'VR1.028';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1316,7 +1316,7 @@ function showCard(kind, extra) {
     });
   } else if (kind === 'lhHelp') {
     html = `<h2>The Longhouse</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">A merge puzzle. Winning raids gives you chests of pieces. Merge pieces to make better ones, deliver them to build halls, and each hall gives your raids a bonus.</p><ul>
-      <li><span>1</span><div><b>Tap a chest and choose its corner.</b> Its pieces wait, then you tap an empty dashed cell in that corner to place each one. Corners: timber top left, iron top right, food bottom left, wool bottom right.</div></li>
+      <li><span>1</span><div><b>Tap a chest and choose its kind.</b> Its pieces wait, then you tap any empty dashed cell to place each one wherever you like. The four corner boxes are timber, iron, food and wool.</div></li>
       <li><span>2</span><div><b>Drag a piece onto one just like it.</b> The two become one better piece. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
       <li><span>4</span><div><b>Glowing pieces</b> are the ones the hall wants right now. A level VI piece is the top: tap it for a tribute (a dock token and silver).</div></li>
@@ -1339,9 +1339,9 @@ function showCard(kind, extra) {
     setTimeout(() => { $('runeGo').onclick = raiseRune; $('runeNo').onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'chest') {
     const kind2 = extra.kind, [count] = CHEST_SPILL[kind2], hall = HALLS[Math.min(LH.hall, HALLS.length - 1)];
-    const room = c => lhEmpties().filter(i => quadOf(i) === c).length;
+    const room = () => lhEmpties().length; // placement is board-wide now
     const need = c => hall.wants.filter(([ch, t, n]) => ch === c && (LH.done[ch + t] || 0) < n).length;
-    html = `<h2>Open the ${CHEST_NAME[kind2]}</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">${count} pieces. Choose the corner, then place each one where you like:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${QUAD.map(c => `<button class="link" data-ch="${c}" ${room(c) < count ? 'disabled' : ''} style="background:${LH_CHAINS[c].color};color:#fff;border-radius:12px;padding:12px 8px;font-size:16px;text-align:left;line-height:1.2">${LH_CHAINS[c].icon} ${LH_CHAINS[c].name}<br><small style="font-weight:600;opacity:.9">${room(c) < count ? 'corner too full' : need(c) ? `the ${hall.name} wants ${need(c)} kind${need(c) > 1 ? 's' : ''}` : `${room(c)} free cells`}</small></button>`).join('')}</div><button class="link" id="chestNo">Not now</button>`;
+    html = `<h2>Open the ${CHEST_NAME[kind2]}</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">${count} pieces. Choose the kind, then place each one where you like:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${QUAD.map(c => `<button class="link" data-ch="${c}" ${room(c) < count ? 'disabled' : ''} style="background:${LH_CHAINS[c].color};color:#fff;border-radius:12px;padding:12px 8px;font-size:16px;text-align:left;line-height:1.2">${LH_CHAINS[c].icon} ${LH_CHAINS[c].name}<br><small style="font-weight:600;opacity:.9">${room() < count ? 'board too full' : need(c) ? `the ${hall.name} wants ${need(c)} kind${need(c) > 1 ? 's' : ''}` : `${room()} free cells`}</small></button>`).join('')}</div><button class="link" id="chestNo">Not now</button>`;
     setTimeout(() => { card.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { $('ov').hidden = true; openChest(kind2, b.dataset.ch); }); $('chestNo').onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'hbHelp') {
     html = `<h2>The Harbor</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">A tap-to-earn game. Silver is the money. Tap the barrel to earn some, build the harbor so it earns on its own, and spend it on help for your raids.</p><ul>
@@ -1509,15 +1509,14 @@ function openChest(kind, ch) {
   const [count] = CHEST_SPILL[kind];
   if (!ch) { showCard('chest', { kind }); return; } // the raider chooses the corner the chest is for
   SAGA.chests[kind]--; STATS.chestsOpened++;
-  // the pieces wait in a queue; the raider places each one by tapping an empty cell in that corner
+  // the pieces wait in a queue; the raider places each one on any empty cell, wherever they like
   for (let k = 0; k < count; k++) LH.pending.push({ ch, t: 1 });
   sfx('crack'); lhSel = -1; persist(); lhRender();
-  toast(`${count} ${LH_CHAINS[ch].name.toLowerCase()} piece${count > 1 ? 's' : ''} waiting. Tap an empty ${LH_CHAINS[ch].name.toLowerCase()} cell to place ${count > 1 ? 'each one' : 'it'}.`);
+  toast(`${count} ${LH_CHAINS[ch].name.toLowerCase()} piece${count > 1 ? 's' : ''} waiting. Tap any empty cell to place ${count > 1 ? 'each one' : 'it'}.`);
 }
 // place the next waiting piece on an empty cell of its own corner
 function placePending(i) {
   const pc = LH.pending[0]; if (!pc) return false;
-  if (quadOf(i) !== pc.ch) { toast(`This piece goes in the ${LH_CHAINS[pc.ch].name.toLowerCase()} corner.`); buzz(); return true; }
   LH.board[i] = { ch: pc.ch, t: pc.t }; LH.pending.shift(); lhAnim[i] = { k: 'pop', d: 0 };
   sfx('pop'); persist(); lhRender();
   if (LH.pending.length) toast(`${LH.pending.length} still waiting.`); else toast('All pieces placed.');
@@ -1528,7 +1527,6 @@ const lhNeighbors = i => [i - LH_COLS, i + LH_COLS, i % LH_COLS ? i - 1 : -1, (i
 function lhDrop(a, b) {
   const p = LH.board[a]; if (!p || a === b || b < 0) return false;
   const q = LH.board[b];
-  if (quadOf(b) !== p.ch || (q && quadOf(a) !== q.ch)) { toast(`${LH_CHAINS[p.ch].name} stays in the ${LH_CHAINS[p.ch].name.toLowerCase()} corner.`); buzz(); return false; }
   if (!q) { LH.board[b] = p; LH.board[a] = null; return true; }
   if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); if (q.ch === p.ch && q.t === p.t) toast(`${pieceName(p.ch, p.t)} is the best of its kind: deliver or sell it.`); return true; } // different pieces swap places
   // two alike pieces become one of the next tier (the user's rule, 2026-10-13)
@@ -1587,13 +1585,13 @@ function lhRender() {
   if (grid.children.length !== LH.board.length) { grid.innerHTML = ''; LH.board.forEach((_, i) => { const c = document.createElement('div'); c.className = 'lhcell q' + quadOf(i); c.dataset.i = i; const r = Math.floor(i / LH_COLS), col = i % LH_COLS; if ((r === 0 || r === LH_ROWS / 2) && (col === 0 || col === LH_COLS / 2)) c.dataset.q = LH_CHAINS[quadOf(i)].icon; grid.appendChild(c); }); }
   const wanted = p => hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
   const dropCh = LH.pending.length ? LH.pending[0].ch : null;
-  LH.board.forEach((p, i) => { const c = grid.children[i]; c.classList.toggle('drop', !p && dropCh !== null && quadOf(i) === dropCh); c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); if (wanted(p)) el.classList.add('want'); else if (p.t >= 6) el.classList.add('top'); const an = lhAnim[i]; if (an) { el.classList.add(an.k); el.style.animationDelay = an.d + 'ms'; } c.appendChild(el); } }); lhAnim = {};
+  LH.board.forEach((p, i) => { const c = grid.children[i]; c.classList.toggle('drop', !p && dropCh !== null); c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); if (wanted(p)) el.classList.add('want'); else if (p.t >= 6) el.classList.add('top'); const an = lhAnim[i]; if (an) { el.classList.add(an.k); el.style.animationDelay = an.d + 'ms'; } c.appendChild(el); } }); lhAnim = {};
   // chests on the shelf
   $('lhShelf').innerHTML = Object.keys(CHEST_NAME).map(k => `<button class="boost" data-chest="${k}" ${SAGA.chests[k] ? '' : 'disabled'}>${CHEST_NAME[k].split(' ')[0][0].toUpperCase() + CHEST_NAME[k].split(' ')[0].slice(1)} <b>${SAGA.chests[k] || 0}</b><small>${CHEST_SPILL[k][0]} pieces</small></button>`).join('');
   $('lhShelf').querySelectorAll('[data-chest]').forEach(b => b.onclick = () => openChest(b.dataset.chest));
   // the action bar
   const p = lhSel >= 0 ? LH.board[lhSel] : null, bar = $('lhBar');
-  if (!p && LH.pending.length) bar.innerHTML = `<div class="hint"><b>${LH.pending.length} waiting:</b> tap an empty ${LH_CHAINS[LH.pending[0].ch].name.toLowerCase()} cell (dashed) to place the next ${pieceName(LH.pending[0].ch, LH.pending[0].t)}.</div>`;
+  if (!p && LH.pending.length) bar.innerHTML = `<div class="hint"><b>${LH.pending.length} waiting:</b> tap any empty dashed cell to place the next ${pieceName(LH.pending[0].ch, LH.pending[0].t)}.</div>`;
   else if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest. 2. Drag a piece onto its twin. 3. Tap a piece, then Deliver.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
   else {
     const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n), later = !can && p.t < 6 && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === p.ch && t === p.t));
