@@ -39,7 +39,7 @@ body {
   overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
 }
-#app { height: 100%; max-width: 560px; margin: 0 auto; padding-inline: 10px; padding-block: 6px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; position: relative; }
+#app { height: var(--vh, 100%); max-width: 560px; margin: 0 auto; padding-inline: 10px; padding-block: 6px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; position: relative; }
 .hud { display: flex; align-items: center; gap: 10px; }
 .lvl { font-family: var(--display); font-size: 19px; letter-spacing: .02em; white-space: nowrap; color: var(--lemon); }
 .bar { flex: 1; min-width: 0; height: 12px; background: #b9cbd6; border-radius: 99px; overflow: hidden; box-shadow: inset 0 2px 0 rgba(0,0,0,.15); }
@@ -439,6 +439,7 @@ function startLevel(n) {
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), stage = document.getElementById('stage');
 let W = 0, H = 0, DPR = 1, G = {};
 function resize() {
+  document.documentElement.style.setProperty('--vh', innerHeight + 'px'); // the phone's real height, even as a home-screen app
   const r = stage.getBoundingClientRect(); W = r.width; H = r.height; DPR = Math.min(window.devicePixelRatio || 1, 3);
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (S) layout();
@@ -460,7 +461,7 @@ function layout() {
   lanes.sort((a, b) => a.s - b.s);
   const trayY = B0 + cell * .4 + 8;
   const nT = S.tray.length;
-  const slot = Math.min(52, cell * 1.5, (W - 8) / (nT + 1.2) - 6);
+  const slot = Math.min(64, (W - 8) / (nT + 1.2) - 6, (H - B0 - 8) * .26); // docks sized by the room below the wall, not by the shield size
   const trayW = nT * (slot + 6) - 6, cw = slot * 1.15;
   const trayX = Math.max(cw + 10, (W - trayW) / 2);
   const qTop = trayY + slot + 12;
