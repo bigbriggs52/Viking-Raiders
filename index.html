@@ -76,10 +76,10 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 .boost[disabled] { opacity: .4; }
 button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(40, 60, 80, .55); padding-inline: 16px; z-index: 7; }
-.card { width: 100%; max-width: 360px; background: var(--syrup); border: 3px solid var(--wood-hi); border-radius: 18px; padding: 24px 22px; text-align: center; box-shadow: 0 10px 0 #4a3220; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
+.card { width: 100%; max-width: 360px; max-height: calc(100vh - 24px); max-height: calc(var(--vh, 100vh) - 24px); background: var(--syrup); border: 3px solid var(--wood-hi); border-radius: 18px; padding: 24px 22px; text-align: center; box-shadow: 0 10px 0 #4a3220; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
 .card h2 { font-family: var(--display); font-weight: 400; font-size: 28px; margin: 0; line-height: 1.05; text-wrap: balance; color: var(--lemon); }
 .card p { margin: 0; color: var(--mute); font-size: 16px; line-height: 1.45; }
-.card ul { margin: 0; padding: 0; list-style: none; text-align: left; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.4; }
+.card ul { margin: 0; padding: 0; list-style: none; overflow: auto; min-height: 0; touch-action: pan-y; text-align: left; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.4; }
 .card li { display: flex; gap: 10px; }
 .card li span { flex: none; width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; background: var(--wood); font-weight: 800; font-size: 12px; color: #ffd37a; }
 .cta { border: 0; border-radius: 14px; padding: 14px; font: 400 19px var(--display); letter-spacing: .02em; background: var(--lemon); color: #2b2118; cursor: pointer; box-shadow: 0 5px 0 #8c6a20; }
@@ -168,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2042",date:"2026-10-13 20:42 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2047",date:"2026-10-13 20:47 UTC"};</script>
 
 
 <div id="app">
@@ -522,7 +522,7 @@ function buildLevel(n, fails, tight) {
     if (col[i].link || col[i + 1].link || col[i].color !== col[i + 1].color || col[i].hidden || col[i + 1].hidden) continue;
     col[i].link = col[i + 1].link = linkId++;
   }
-  if (linkId > 1) { const n2 = solvable(grid, ice, cols, docks); if (!n2) cols.forEach(c => c.forEach(j => { j.link = null; })); else need = n2; }
+  if (linkId > 1) { const n2 = solvable(grid, ice, cols, docks); if (!n2) cols.forEach(c => c.forEach(j => { j.link = null; j.cross = false; })); else need = n2; }
   const notes = [];
   if (ease && n >= 6) notes.push(obsScale ? 'fewer obstacles' : 'no obstacles');
   if (ease) notes.push(ease >= 4 ? 'ships lined up in the best order' : 'a friendlier ship order');
@@ -532,7 +532,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.021';
+const BUILD = 'VR1.022';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -640,7 +640,7 @@ function resize() {
 function layout() {
   const { R, C } = S;
   const boardH = Math.min(H * .62, H - 270); // the harbor always keeps room for three readable rows
-  const cell = Math.max(8, Math.min(56, (W - 30) / C, boardH / (R + 2.4))); // the wall takes the width; the fjord keeps a 15px ring each side
+  const cell = Math.max(8, Math.min(56, (W - 76) / C, boardH / (R + 2.4))); // the wall takes the width, but the fjord keeps room for a whole ship on each side
   const gap = Math.max(14, cell * .7);
   const bw = C * cell, bh = R * cell;
   // ships on the fjord stay readable on wide walls: never smaller than about 42px, and the wall sits low enough for their sails
@@ -1242,9 +1242,9 @@ function rewardHtml(R) {
 }
 let toastT = 0;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; el.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => { el.style.opacity = 0; setTimeout(() => el.hidden = true, 400); }, 3200); }
-$('bBomb').onclick = () => { unlockAudio(); if (!S || !S.bombs || (S.mode !== 'play' && S.mode !== 'bomb' && S.mode !== 'catapult')) return; S.mode = S.mode === 'bomb' ? 'play' : 'bomb'; if (S.mode === 'bomb') toast('Tap the shield wall to smash a 3×3 area'); hud(); };
+$('bBomb').onclick = () => { unlockAudio(); if (!S || !S.bombs || (S.mode !== 'play' && S.mode !== 'bomb' && S.mode !== 'catapult')) return; S.mode = S.mode === 'bomb' ? 'play' : 'bomb'; if (S.mode === 'bomb') toast('Hammer: tap anywhere on the wall to smash a 3-by-3 square of shields'); hud(); };
 $('bSlot').onclick = () => { unlockAudio(); if (!S || !S.slotBoosts || S.mode !== 'play') return; if (S.tray.length >= 6 || !LH.tokens) { toast('One extra dock per raid is the most a token can buy.'); return; } S.slotBoosts--; LH.tokens--; STATS.tokensUsed++; persist(); S.tray.push(null); layout(); hud(); sfx('launch'); toast('A sixth dock, for this raid only.'); };
-$('bCata').onclick = () => { unlockAudio(); if (!S || !S.catapults || (S.mode !== 'play' && S.mode !== 'catapult' && S.mode !== 'bomb')) return; S.mode = S.mode === 'catapult' ? 'play' : 'catapult'; if (S.mode === 'catapult') toast('Tap a ship in the harbor or a dock to catapult it away, shields and all'); hud(); };
+$('bCata').onclick = () => { unlockAudio(); if (!S || !S.catapults || (S.mode !== 'play' && S.mode !== 'catapult' && S.mode !== 'bomb')) return; S.mode = S.mode === 'catapult' ? 'play' : 'catapult'; if (S.mode === 'catapult') toast('Catapult: tap a boat below to fling it away for good, taking that many of its shields with it'); hud(); };
 $('menu').onclick = () => { unlockAudio(); if (!S) return; if (S.mode === 'won' || S.mode === 'lost') return; showCard('menu'); };
 
 function showCard(kind, extra) {
@@ -1252,18 +1252,19 @@ function showCard(kind, extra) {
   const prevMode = S && S.mode;
   if (S && (kind === 'restart' || kind === 'menu') && S.mode !== 'paused') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   let html = '';
-  if (kind === 'help') {
-    html = `<h2>Viking Raiders</h2>
+  if (kind === 'help' || kind === 'howto') {
+    html = `<h2>${kind === 'help' ? 'Viking Raiders' : 'How to play'}</h2>
       <ul>
-        <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
-        <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
-        <li><span>3</span>The axes add up exactly to the shields, nothing spare. A ship that comes home with axes left waits in a dock until you send it again. Never more than 5 in the docks: if a ship comes home and all 5 are taken, the raid fails. The order you send ships in is everything.</li>
-        <li><span>4</span>A docked ship can set out again whenever you tap it. Send it when shields of its color face the water, or it comes straight back to the dock.</li>
-        <li><span>5</span>Once per raid you get a hammer (smash a 3×3 patch of wall) and a catapult (fling one ship away together with its share of shields). The menu at the top right has sound, music, vibration and retreat.</li>
-        <li><span>6</span>Every failed raid makes that raid a little easier next time.</li>
+        <li><span>1</span><div><b>The goal:</b> the picture is a wall of shields. Knock every shield down and you win the raid.</div></li>
+        <li><span>2</span><div><b>The boats</b> wait in lines at the bottom. Tap the front boat of a line and it sails once around the wall, throwing axes. The number on its sail is how many axes it has.</div></li>
+        <li><span>3</span><div><b>What it hits:</b> only shields of its own color and symbol, and only ones on the outside edge, facing the water.</div></li>
+        <li><span>4</span><div><b>The docks</b> are the five empty spaces above the boats. A boat that comes back with axes left over parks there. Tap it to send it out again. If a boat comes back and all five docks are full, the raid is lost, so send boats in a smart order.</div></li>
+        <li><span>5</span><div><b>Hammer button:</b> tap it, then tap the wall, and a 3-by-3 square of shields is smashed. One per raid.</div></li>
+        <li><span>6</span><div><b>Catapult button:</b> tap it, then tap a boat, and that boat is flung away for good, taking that many of its shields with it. One per raid.</div></li>
+        <li><span>7</span><div><b>The menu</b> (top right) has two side games you unlock by winning: the Longhouse, a merge puzzle, and the Harbor, a tap-to-earn silver game. Lose a raid and it gets a little easier next time.</div></li>
       </ul>
-      <button class="cta" id="go">Begin raid ${n}</button>`;
-    save.seenHelp = true;
+      ${kind === 'help' ? `<button class="cta" id="go">Begin raid ${n}</button>` : `<button class="cta" id="cancel">Back to the raid</button>`}`;
+    if (kind === 'help') save.seenHelp = true;
   } else if (kind === 'win') {
     html = n >= MAX_LEVEL
       ? `<h2>Valhalla!</h2><p>All ${MAX_LEVEL} raids won. The skalds will sing of this for a thousand years.</p><button class="cta" id="again">Replay raid ${n}</button>`
@@ -1281,10 +1282,11 @@ function showCard(kind, extra) {
     const sw = (on) => `<b style="float:right;font-family:var(--display);color:${on ? '#ffd37a' : '#b9a98f'}">${on ? 'On' : 'Off'}</b>`;
     const row = (id, label, on) => `<button class="link" id="${id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">${label}${sw(on)}</button>`;
     html = `<h2>Viking Raiders</h2>${row('tMusic', 'Music', save.music)}${row('tSound', 'Sound effects', !save.muted)}${row('tVibe', 'Vibration', save.vibe)}${row('tClock', 'Hourglass (from raid 11)', save.clock !== false)}
-      <button class="link" id="tLH" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Longhouse: merge and build<b style="float:right;font-family:var(--display);color:#ffd37a">${chestCount()} chest${chestCount() === 1 ? '' : 's'}</b></button>
-      <button class="link" id="tHB" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Harbor: fish, forge and trade<b style="float:right;font-family:var(--display);color:#ffd37a">${fmtN(hbRate())}/min</b></button>
-      <button class="link" id="tSaga" style="display:block;width:100%;text-align:left;background:var(--lemon);color:#2b2118;border-radius:12px;padding:10px 14px;font-size:16px">Saga: achievements and stats<b style="float:right;font-family:var(--display)">${SAGA.silver} silver</b></button>
+      <button class="link" id="tLH" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Longhouse: a merge puzzle<b style="float:right;font-family:var(--display);color:#ffd37a">${chestCount()} chest${chestCount() === 1 ? '' : 's'}</b></button>
+      <button class="link" id="tHB" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Harbor: tap to earn silver<b style="float:right;font-family:var(--display);color:#ffd37a">${fmtN(hbRate())}/min</b></button>
+      <button class="link" id="tSaga" style="display:block;width:100%;text-align:left;background:var(--lemon);color:#2b2118;border-radius:12px;padding:10px 14px;font-size:16px">Saga: your achievements and stats<b style="float:right;font-family:var(--display)">${SAGA.silver} silver</b></button>
       <button class="link" id="retreat" style="color:#f3e9d2;background:#8d4f1c;border-radius:12px;padding:10px 14px;font-size:16px">Retreat from raid ${n}</button>
+      <button class="link" id="tHow" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">How to play</button>
       <button class="link" id="tWipe" style="color:#f3e9d2;background:#8e2a1e;border-radius:12px;padding:8px 14px;font-size:14px">Erase all progress and start over</button>
       <p style="margin:4px 0 0;font-size:12px;opacity:.65;line-height:1.5">Version ${BUILD}${window.VR_UPDATE ? ` · Update ${window.VR_UPDATE.id}` : ' · Claude page'}<br>${matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'Installed app' : 'In the browser'}<span id="upd"></span></p><button class="cta" id="cancel">Back to the raid</button>`;
     setTimeout(() => {
@@ -1297,12 +1299,13 @@ function showCard(kind, extra) {
       $('tHB').onclick = () => openHB();
       $('retreat').onclick = () => showCard('restart');
       $('tWipe').onclick = () => showCard('wipe');
+      $('tHow').onclick = () => showCard('howto');
       // the installed app asks the web host which version is current
       if (window.VR_UPDATE) fetch('version.json', { cache: 'no-store' }).then(r => r.json()).then(v => { const el = $('upd'); if (!el) return;
         el.textContent = v.build === BUILD ? ' · up to date' : ` · ${v.build} is out: close the app fully and open it again`; }).catch(() => {});
     });
   } else if (kind === 'lhHelp') {
-    html = `<h2>The Longhouse</h2><ul>
+    html = `<h2>The Longhouse</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">A merge puzzle. Winning raids gives you chests of pieces. Merge pieces to make better ones, deliver them to build halls, and each hall gives your raids a bonus.</p><ul>
       <li><span>1</span><div><b>Tap a chest and choose what it holds.</b> Pieces live in their own corner only: timber top left, iron top right, food bottom left, wool bottom right.</div></li>
       <li><span>2</span><div><b>Drag a piece onto one just like it.</b> The two become one better piece. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
@@ -1332,7 +1335,7 @@ function showCard(kind, extra) {
     html = `<h2>Open the ${CHEST_NAME[kind2]}</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">${count} pieces. Choose what they are:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${QUAD.map(c => `<button class="link" data-ch="${c}" ${room(c) < count ? 'disabled' : ''} style="background:${LH_CHAINS[c].color};color:#fff;border-radius:12px;padding:12px 8px;font-size:16px;text-align:left;line-height:1.2">${LH_CHAINS[c].icon} ${LH_CHAINS[c].name}<br><small style="font-weight:600;opacity:.9">${room(c) < count ? 'corner too full' : need(c) ? `the ${hall.name} wants ${need(c)} kind${need(c) > 1 ? 's' : ''}` : `${room(c)} free cells`}</small></button>`).join('')}</div><button class="link" id="chestNo">Not now</button>`;
     setTimeout(() => { card.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { $('ov').hidden = true; openChest(kind2, b.dataset.ch); }); $('chestNo').onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'hbHelp') {
-    html = `<h2>The Harbor</h2><ul>
+    html = `<h2>The Harbor</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">A tap-to-earn game. Silver is the money. Tap the barrel to earn some, build the harbor so it earns on its own, and spend it on help for your raids.</p><ul>
       <li><span>1</span><div><b>Tap the barrel</b> at the bottom for silver. Quick taps build a catch streak: taps pay up to triple and the buildings work double while it lasts.</div></li>
       <li><span>2</span><div><b>Build the harbor.</b> Each building earns silver every minute, and half as much while the app is closed. Prices rise as the harbor grows.</div></li>
       <li><span>3</span><div><b>Spend silver on raids:</b> extra hammers and catapults, dock tokens, Mead Horns, and chests for the Longhouse.</div></li>
