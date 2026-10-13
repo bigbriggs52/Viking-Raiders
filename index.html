@@ -908,7 +908,7 @@ function showCard(kind, extra) {
   if (S && kind === 'restart') S.mode = 'paused';
   let html = '';
   if (kind === 'help') {
-    html = `<h2>Viking Raiders</h2>
+    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 38298a8e</small></h2>
       <ul>
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
@@ -995,6 +995,13 @@ window.JB = { get S() { return S; }, update, tapQueue, tapTray, queueItemPos, st
 })();
 </script>
 
-<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));}</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(reg=>{ reg.update(); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) reg.update(); }); });
+    let reloaded=false; navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(reloaded) return; reloaded=true; location.reload(); });
+  });
+}
+</script>
 </body>
 </html>
