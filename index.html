@@ -39,7 +39,7 @@ body {
   overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
 }
-#app { height: var(--vh, 100%); max-width: 560px; margin: 0 auto; padding-inline: 10px; padding-block: 6px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; position: relative; }
+#app { position: fixed; inset: 0; max-width: 560px; margin: 0 auto; padding-inline: 10px; padding-block: 6px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; }
 .hud { display: flex; align-items: center; gap: 10px; }
 .lvl { font-family: var(--display); font-size: 19px; letter-spacing: .02em; white-space: nowrap; color: var(--lemon); }
 .bar { flex: 1; min-width: 0; height: 12px; background: #b9cbd6; border-radius: 99px; overflow: hidden; box-shadow: inset 0 2px 0 rgba(0,0,0,.15); }
@@ -446,7 +446,7 @@ function resize() {
 }
 function layout() {
   const { R, C } = S;
-  const boardH = H * .64;
+  const boardH = Math.min(H * .64, H - 240); // the harbor always keeps room for three readable rows
   const cell = Math.max(8, Math.min(56, W / (C + 3.4), boardH / (R + 2.6))); // room for the fjord's full width on both sides
   const gap = cell * .9;
   const bw = C * cell, bh = R * cell;
@@ -856,9 +856,11 @@ function draw() {
       const [x, y, s] = queueItemPos(k, i + sl), [x2, y2, s2] = queueItemPos(k, i + 1 + sl);
       ctx.strokeStyle = '#c27a2c'; ctx.lineWidth = Math.max(3, s * .09); ctx.lineCap = 'round'; ctx.beginPath();
       ctx.moveTo(x - s * .3, y + s * .3); ctx.lineTo(x2 - s2 * .3, y2 - s2 * .35); ctx.moveTo(x + s * .3, y + s * .3); ctx.lineTo(x2 + s2 * .3, y2 - s2 * .35); ctx.stroke();
-      const my = (y + s * .3 + y2 - s2 * .35) / 2, tw = s * .9, th = Math.max(14, s * .3);
-      rr(x - tw / 2, my - th / 2, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
-      ctx.fillStyle = '#f3e9d2'; ctx.font = `800 ${Math.round(th * .62)}px ${BODY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LASHED', x, my + 1);
+      // the tag sits on the ropes, to the right of the sails so it never covers a number
+      const my = (y + s * .3 + y2 - s2 * .35) / 2, th = Math.max(13, s * .26), fs = Math.round(th * .6);
+      ctx.font = `800 ${fs}px ${BODY_FONT}`; const tw = ctx.measureText('LASHED').width + th * .9, tx = x + s * .62;
+      rr(tx - tw / 2, my - th / 2, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+      ctx.fillStyle = '#f3e9d2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LASHED', tx, my + 1);
     }
     if (col.length > 3) { const [x, y] = queueItemPos(k, 2); ctx.fillStyle = 'rgba(43,33,24,.7)'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('+' + (col.length - 3), x, y + G.js * .36); }
   });
@@ -913,7 +915,7 @@ function showCard(kind, extra) {
   if (S && kind === 'restart') S.mode = 'paused';
   let html = '';
   if (kind === 'help') {
-    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build af49778c</small></h2>
+    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 24f4c497</small></h2>
       <ul>
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
@@ -946,7 +948,7 @@ function showCard(kind, extra) {
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
     let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
-    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build af49778c</div>`;
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build 24f4c497</div>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
   card.innerHTML = html; $('ov').hidden = false;
