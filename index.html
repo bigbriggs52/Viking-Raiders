@@ -137,7 +137,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1859",date:"2026-10-13 18:59 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1900",date:"2026-10-13 19:00 UTC"};</script>
 
 
 <div id="app">
@@ -487,7 +487,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.009';
+const BUILD = 'VR1.010';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -520,8 +520,8 @@ const ACH = [
   { id: 'fullhold', name: 'Full Hold', sym: '\u2b22', desc: 'Raids with 5 full-load dock sailings', tiers: [1, 10], key: 'fullHold', chest: ['iron', 'silver'] },
   { id: 'straight', name: 'Straight Line', sym: '\u2665', desc: 'Wins without using a dock', tiers: [1, 10], key: 'straight', chest: ['iron', 'silver'] },
   { id: 'lashed', name: 'Lashed Luck', sym: '\u2715', desc: 'Wins on raids with 3 or more lashed pairs', tiers: [1, 10], key: 'lashedWins', chest: ['iron', 'silver'] },
-  { id: 'three', name: 'Three in a Row', sym: '\u2234', desc: 'Three-piece merges in the Longhouse', tiers: [10, 100, 1000], key: 'merges3', silver: [25, 150, 1000] },
-  { id: 'five', name: 'Five in a Row', sym: '\u2726', desc: 'Five-piece merges in the Longhouse', tiers: [5, 25, 250], key: 'merges5', chest: ['iron', 'silver', 'gold'] },
+  { id: 'merge', name: 'Mergewright', sym: '\u2234', desc: 'Merges in the Longhouse', tiers: [10, 100, 1000], key: 'merges3', silver: [25, 150, 1000] },
+  { id: 'top', name: 'Finest Work', sym: '\u2726', desc: 'Top-tier pieces made', tiers: [1, 10, 50], key: 'merges5', chest: ['iron', 'silver', 'gold'] },
   { id: 'builder', name: 'Master Builder', sym: '\u2302', desc: 'Halls of the longhouse finished', tiers: [1, 2, 3, 4, 5, 6], key: 'halls', silver: [100, 200, 400, 800, 1600, 5000] },
   { id: 'fisher', name: 'Barrel Thumper', sym: '\u25cb', desc: 'Barrel taps in the Harbor', tiers: [100, 1000, 10000], key: 'taps', silver: [50, 500, 5000] },
   { id: 'harbor', name: 'Harbor Master', sym: '\u2393', desc: 'Harbor upgrades bought', tiers: [10, 50, 150], key: 'harbor', chest: ['iron', 'silver', 'gold'] },
@@ -1203,7 +1203,7 @@ function showCard(kind, extra) {
   } else if (kind === 'lhHelp') {
     html = `<h2>The Longhouse</h2><ul>
       <li><span>1</span><div><b>Tap a chest.</b> Its pieces land on the board.</div></li>
-      <li><span>2</span><div><b>Drag a piece onto one just like it.</b> When three of a kind touch, they become one better piece. Five become two. Dragging onto a different piece swaps them.</div></li>
+      <li><span>2</span><div><b>Drag a piece onto one just like it.</b> The two become one better piece. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
       <li><span>4</span><div><b>Board full?</b> Tap a piece and Sell it for silver.</div></li></ul>
       <button class="cta" id="lhOk">Let's build</button>`;
@@ -1222,7 +1222,7 @@ function showCard(kind, extra) {
         <h3>Time</h3>${r('Raids beaten under par', st.swift)}${r('Own bests beaten', st.ownBest)}${r('Time raiding', fmtT(st.time))}
         <h3>Fighting</h3>${r('Axes thrown', st.axes)}${r('Shields broken', st.shields)}${r('Ships sailed', st.sailed)}${r('Lashed pairs sailed', Math.floor(st.lashed / 2))}${r('Full-load dock sailings', st.fullLoad)}${r('Hammers used', st.hammers)}${r('Catapults used', st.catapults)}
         <h3>Treasure</h3>${r('Silver in the purse', SAGA.silver)}${r('Silver earned all time', st.silverAll)}${r('Chests', Object.keys(CHEST_NAME).map(k => `${SAGA.chests[k] || 0} ${k}`).join(', '))}
-        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Three-merges / five-merges', st.merges3 + ' / ' + st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}
+        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}
         ${rec ? `<h3>Raid ${S.n}</h3>${r('Tries', rec.t)}${r('Wins', rec.w)}${r('Best time', rec.b ? fmtT(rec.b) : '\u2014')}${r('Par', fmtT(S.par))}${r('Under par', rec.s ? 'Yes \u2605' : 'Not yet')}${r('Hammers / catapults used', rec.h + ' / ' + rec.c)}` : ''}
         <p style="font-size:12px;margin-top:6px">Counting since ${SAGA.since}. Raids won before then count as wins, not as first tries.</p>`;
     }
@@ -1367,20 +1367,11 @@ function lhDrop(a, b) {
   const p = LH.board[a]; if (!p || a === b || b < 0) return false;
   const q = LH.board[b];
   if (!q) { LH.board[b] = p; LH.board[a] = null; return true; }
-  if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); return true; } // different pieces swap places
-  LH.board[a] = null;
-  // the group: every alike piece touching the target or touching the dragged piece's old spot, nearest the target first
-  const same = i => { const o = LH.board[i]; return o && o.ch === p.ch && o.t === p.t; };
-  const seen = new Set([b]), queue = [b, ...lhNeighbors(a).filter(j => same(j) && !seen.has(j) && seen.add(j))], group = [];
-  while (queue.length) { const i = queue.shift(); group.push(i); for (const j of lhNeighbors(i)) if (!seen.has(j) && same(j)) { seen.add(j); queue.push(j); } }
-  const size = group.length + 1; // plus the dragged piece
-  if (size < 3) { LH.board[a] = p; buzz(); toast(`Two ${pieceName(p.ch, p.t).toLowerCase()}s is not enough. Bring a third one next to them.`); return false; }
-  const take = size >= 5 ? 5 : 3, eat = group.slice(0, take - 1);
-  eat.forEach(i => { LH.board[i] = null; });
-  LH.board[b] = { ch: p.ch, t: p.t + 1 };
-  if (take === 5) { const spot = !LH.board[a] ? a : eat.find(i => !LH.board[i]); LH.board[spot] = { ch: p.ch, t: p.t + 1 }; STATS.merges5++; } else STATS.merges3++;
-  sfx('pop'); if (take === 5) sfx('win');
-  toast(`${take} ${pieceName(p.ch, p.t).toLowerCase()}s became ${take === 5 ? 'two' : 'a'} ${pieceName(p.ch, p.t + 1).toLowerCase()}${take === 5 ? 's' : ''}.`);
+  if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); if (q.ch === p.ch && q.t === p.t) toast(`${pieceName(p.ch, p.t)} is the best of its kind: deliver or sell it.`); return true; } // different pieces swap places
+  // two alike pieces become one of the next tier (the user's rule, 2026-10-13)
+  LH.board[a] = null; LH.board[b] = { ch: p.ch, t: p.t + 1 }; STATS.merges3++;
+  sfx('pop'); if (p.t + 1 >= 6) { STATS.merges5++; sfx('win'); }
+  toast(`Two ${pieceName(p.ch, p.t).toLowerCase()}s became a ${pieceName(p.ch, p.t + 1).toLowerCase()}.`);
   const fresh = checkAch(); fresh.forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}: ${x.chest ? CHEST_NAME[x.chest] : x.silver + ' silver'}`));
   return true;
 }
@@ -1417,7 +1408,7 @@ function lhRender() {
   $('lhShelf').querySelectorAll('[data-chest]').forEach(b => b.onclick = () => openChest(b.dataset.chest));
   // the action bar
   const p = lhSel >= 0 ? LH.board[lhSel] : null, bar = $('lhBar');
-  if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest. 2. Drag matching pieces together. 3. Tap a piece, then Deliver.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag matching pieces together. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
+  if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest. 2. Drag a piece onto its twin. 3. Tap a piece, then Deliver.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
   else {
     const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
     bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : ''}<button class="boost" id="lhSell">Sell <b>${SELL[p.t - 1]}</b></button>`;
