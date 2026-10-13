@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>html,body{margin:0;background:#d6e4ec}[hidden]{display:none!important}</style>
+<title>Viking Raiders</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Viking Raiders">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#d6e4ec">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metamorphous&family=Alegreya+Sans:wght@500;700;800&display=swap">
+<style>
+/* Layout: one-screen raid. Rune strip on top, shield wall ringed by a fjord, docks, the harbor queue, a wooden button bar. */
+:root {
+  --ink: #d6e4ec;        /* morning sky over the fjord */
+  --syrup: #f3e9d2;      /* parchment panels */
+  --syrup-hi: #e3d3b0;   /* raised panels */
+  --wood: #6b4a2e;       /* timber */
+  --wood-hi: #8d6540;
+  --cream: #2b2118;      /* ink-brown text */
+  --mute: #6b5a48;       /* secondary text */
+  --lemon: #c9922a;      /* gold accent */
+  --danger: #c0392b;
+  --display: 'Metamorphous', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --body: 'Alegreya Sans', 'Trebuchet MS', system-ui, sans-serif;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  background: var(--ink); color: var(--cream); font-family: var(--body);
+  overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
+}
+#app { height: 100%; max-width: 560px; margin: 0 auto; padding-inline: 10px; padding-block: 6px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; position: relative; }
+.hud { display: flex; align-items: center; gap: 10px; }
+.lvl { font-family: var(--display); font-size: 19px; letter-spacing: .02em; white-space: nowrap; color: var(--lemon); }
+.bar { flex: 1; min-width: 0; height: 12px; background: #b9cbd6; border-radius: 99px; overflow: hidden; box-shadow: inset 0 2px 0 rgba(0,0,0,.15); }
+.bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #8d6540, var(--lemon)); border-radius: 99px; transition: width .25s; }
+.chip { font-size: 13px; font-weight: 800; padding: 4px 9px; border-radius: 99px; background: var(--wood); color: #f3e9d2; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chip.easy { background: #2f7a4a; color: #e9ffe9; }
+.iconbtn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--wood); color: #f3e9d2; font: 800 15px var(--body); cursor: pointer; flex: none; }
+.stage { flex: 1; min-height: 0; position: relative; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.boosters { display: flex; gap: 8px; }
+.boost { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; border-radius: 14px; border: 0; cursor: pointer;
+  background: linear-gradient(var(--wood-hi), var(--wood)); color: #f3e9d2; font: 800 15px var(--body); box-shadow: 0 4px 0 #3d2a18; }
+.boost:active { transform: translateY(2px); box-shadow: 0 2px 0 #3d2a18; }
+.boost b { font-family: var(--display); font-weight: 400; font-size: 16px; color: #ffd37a; font-variant-numeric: tabular-nums; }
+.boost.on { background: var(--lemon); color: #2b2118; }
+.boost.on b { color: #2b2118; }
+.boost[disabled] { opacity: .4; }
+button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
+.overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(40, 60, 80, .55); padding-inline: 16px; z-index: 5; }
+.card { width: 100%; max-width: 360px; background: var(--syrup); border: 3px solid var(--wood-hi); border-radius: 18px; padding: 24px 22px; text-align: center; box-shadow: 0 10px 0 #4a3220; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
+.card h2 { font-family: var(--display); font-weight: 400; font-size: 28px; margin: 0; line-height: 1.05; text-wrap: balance; color: var(--lemon); }
+.card p { margin: 0; color: var(--mute); font-size: 16px; line-height: 1.45; }
+.card ul { margin: 0; padding: 0; list-style: none; text-align: left; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.4; }
+.card li { display: flex; gap: 10px; }
+.card li span { flex: none; width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; background: var(--wood); font-weight: 800; font-size: 12px; color: #ffd37a; }
+.cta { border: 0; border-radius: 14px; padding: 14px; font: 400 19px var(--display); letter-spacing: .02em; background: var(--lemon); color: #2b2118; cursor: pointer; box-shadow: 0 5px 0 #8c6a20; }
+.cta:active { transform: translateY(3px); box-shadow: 0 2px 0 #8c6a20; }
+.link { background: none; border: 0; color: var(--mute); font: 800 14px var(--body); cursor: pointer; padding: 4px; }
+.toast { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); background: #2f7a4a; color: #f1fff3; font-weight: 800; font-size: 13px; padding: 8px 14px; border-radius: 12px; max-width: calc(100% - 20px); text-align: center; z-index: 4; transition: opacity .4s; pointer-events: none; box-sizing: border-box; }
+@media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+</head>
+<body>
+
+
+<div id="app">
+  <div class="hud">
+    <div class="lvl" id="lvl">Raid 1</div>
+    <div class="bar" aria-label="Shields smashed"><i id="prog"></i></div>
+    <div class="chip" id="try">Try 1</div>
+    <button class="iconbtn" id="mute" aria-label="Sound on or off">♪</button>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+  <div class="boosters">
+    <button class="boost" id="bBomb">Hammer <b id="nBomb">1</b></button>
+    <button class="boost" id="bSlot" hidden>+1 Dock <b id="nSlot">1</b></button>
+    <button class="boost" id="bRestart">Retreat</button>
+  </div>
+  <div class="overlay" id="ov">
+    <div class="card" id="card"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+// ---------- palette ----------
+const PAL = { R:'#d9342f', O:'#f08a2a', Y:'#f2d24b', G:'#5cc96a', B:'#2f6fe0', C:'#63d8e6', P:'#f094c4', V:'#8b56e0', W:'#efe4cf', K:'#6b4a36' };
+// every color also has its own shape, so the game works without telling colors apart
+const SYM = { R:'circle', O:'tri', Y:'star', G:'diamond', B:'square', C:'plus', P:'heart', V:'ring', W:'hex', K:'x' };
+const PROC_COLORS = ['R','O','Y','G','B','C','P','V'];
+
+// ---------- hand-drawn levels ----------
+const MOTIFS = {"main":[{"name":"Axe","rows":["....bb....","...bbbb...","..bbbbbb..","..bbbbbb..","...bbaa...",".....aa...",".....aa...",".....aa...",".....aa...",".....aa...",".....aa...",".....aa..."]},{"name":"Longship","rows":[".........c","........cc",".......ccc","...bbbbcc.","..bbbbbcc.","..bbbbbcc.","...bbbbcc.",".....a.cc.","aaaaaaaaaa",".aaaaaaaa.","..aaaaaa..","...aaaa..."]},{"name":"Helmet","rows":[".c......c.","cc......cc","cc.bbbb.cc","cc.bbbb.cc",".cbbbbbbc.","..bbbbbb..","..bbbbbb..","..aaaaaa..","..abbbba..","..ab.bba..","..ab..ba..","..bb..bb.."]},{"name":"Shield","rows":["...aaaa...","..abbbba..",".abbbbbba.","abbbccbbba","abbccccbba","abbccccbba","abbbccbbba",".abbbbbba.","..abbbba..","...aaaa..."]},{"name":"Hammer","rows":[".bbbbbbbb.",".bbbbbbbb.",".bbbbbbbb.",".bbbbbbbb.",".bbbbbbbb.","....aa....","....aa....","....aa....","....aa....","....aa....","...ccaa...","...cccc..."]},{"name":"Drinking Horn","rows":[".......bb.","......bccb",".....bcccb","....bccccb","...bccccb.","..bccccb..",".bccccb...",".bcccb....",".bccb.....","..bb......","..aa......","..aa......",".aa......."]},{"name":"Raven","rows":[".....aaa..","....aaaab.","...aaaaab.","..aaaaaa..",".aaaaaaa..","aaaaaaaaa.",".aaaaaaaa.","..aaaaaa..","...aaaa...","....aa.a..","....a..a..","...cc..cc."]},{"name":"Rune Stone","rows":["..bbbbbb..",".bbbbbbbb.",".bbacabbb.",".bbacabbb.",".bbbaabbb.",".bbbaabbb.",".bbaabbbb.",".bbaababb.",".bbaaabbb.",".bbaaabbb.",".bbbbbbbb.",".bbbbbbbb.","cccccccccc"]},{"name":"Dragon Prow","rows":[".....dd...","....dddd..","...ddbbdd.","...dbbbbd.","...dbcbbd.","...dbbbbd.","..dddbbbd.",".dddd.dd..",".ddd......",".ddd......","aaddaaaaaa","aaaaaaaaaa",".aaaaaaaa."]},{"name":"Sword","rows":["....bb....","....bb....","....bb....","....bb....","....bb....","....bb....","....bb....","....bb....","cccccccccc","cccccccccc","....aa....","....aa....","....aa....","...dddd..."]},{"name":"Wolf","rows":["..b....b..",".bbb..bbb.",".aaaaaaaa.",".aaaaaaaa.","aacaaaacaa","aaaaaaaaaa",".aaaaaaaa.","..aaaaaa..","..aadaaa..","...aaaa...","....dd...."]},{"name":"Tree","rows":["....aa....","...aaaa...","..aaaaaa..",".aaaaaaaa.","aaaaaaaaaa","..aaaaaa..","...aaaa...","....bb....","....bb....","....bb....","....bb....","...bbbb...","..cccccc..","cccccccccc"]},{"name":"Watchtower","rows":[".d.d.d.d.d","dddddddddd","dbbbbbbbbd",".bbbccbbb.",".bbbccbbb.",".bbbbbbbb.",".bbbbbbbb.",".bbbccbbb.",".bbbccbbb.",".bbbbbbbb.",".bbbbbbbb.","aaaaaaaaaa","aaaaaaaaaa"]},{"name":"Fish","rows":[".....aaa..","...aaaaaa.",".aaaaaaaab","aacaaaaabb",".aaaaaaaab","...aaaaaa.",".....aaa.."]},{"name":"Sun","rows":["....bb....",".b..bb..b.","..b.bb.b..","...bbbb...","bbbbaabbbb","bbbbaabbbb","...bbbb...","..b.bb.b..",".b..bb..b.","....bb...."]},{"name":"Valknut","rows":["....aa....","...aaaa...","..aa..aa..",".aa....aa.","aaaaaaaaaa",".bb....cc.","bbbb..cccc","b..bbcc..c","bbbbbbcccc"]},{"name":"Bear","rows":[".aa....aa.","aaaaaaaaaa","aacaaaacaa","aaaaaaaaaa",".aaabbaaa.",".aabbbbaa.","..aadaaa..","...aaaa...","..aaaaaa..","..aaaaaa..","..aa..aa..","..dd..dd.."]},{"name":"Fjord","rows":["....a.....","...aaa....","..aaaaa.b.",".aaaaaa.bb","aaaaaaabbb","aaaaaabbbb","cccccccccc","cccccccccc","cdcdcdcdcd","dddddddddd","dddddddddd"]},{"name":"Warrior","rows":["..bbbbbb..",".bbbbbbbb.","bbbbbbbbbb","bbaaaaaabb","bbacaacabb",".baaaaaab.",".baaddaab.","..aadaaa..","..aaaaaa..","..dddddd..",".dddddddd.",".ddeeeedd."]},{"name":"Castle Gate","rows":["a.a.a..a.a","aaaa.aaaaa","aaaaaaaaaa","aabbbbbbaa","aab.cc.baa","aabcccbbaa","aabcccbbaa","aabcccbbaa","aabcccbbaa","aabcccbbaa","aaaaaaaaaa","dddddddddd"]},{"name":"Anchor","rows":["...aa....","..a..a...","...aa....","....a....",".b..a..b.","b...a...b",".b..a..b.","..baaab..","...bbb..."]},{"name":"Mug","rows":[".aaaaaa..",".abbbba..",".abbbbac.",".abbbbacc",".abbbbac.",".aaaaaa.."]},{"name":"Key","rows":[".aaa....","a...a...","a...a...",".aaa.bbb","..a.....","..a.b...","..aab..."]},{"name":"Crown","rows":["a.a.a.a.a","aaaaaaaaa","abababab.","aaaaaaaaa"]},{"name":"Goat","rows":["..a.....a..",".aa.....aa.","..bbbbbbb..",".bbcbbbcbb.",".bbbbbbbbb.","..bbbbbbb..","...bb.bb...","...bb.bb..."]},{"name":"Boar","rows":["........aa","..bbbbbbba",".bbbbbbbbb","bbcbbbbbbb","bbbbbbbbb.",".bb.bb.bb."]},{"name":"Serpent","rows":["..aaaaa...",".aa...aa..","aa.....aa.","........aa",".........a","aa.....aa.",".aa...aa..","..aaaaa...",".....b...."]},{"name":"Longship","rows":["..........","aa......aa",".a......a.",".abbbbbba.",".abbbbbba.",".abbbbbba.",".aaaaaaaa.","..cccccc.."]},{"name":"Tower","rows":["..aaaa..","..abba..","..abba..","..aaaa..","..abba..","..aaaa..",".aaaaaa."]},{"name":"Hall","rows":["....aa....","...aaaa...","..aaaaaa..",".aaaaaaaa.","aaaaaaaaaa",".bbbbbbbb.",".bbccbbcb.",".bbccbbcb.",".bbbbbbbb."]},{"name":"Gate","rows":["aa......aa","aa......aa","aaaaaaaaaa","aabbbbbbaa","aab....baa","aab....baa","aab....baa","aab....baa"]},{"name":"Bridge","rows":["aaaaaaaaaa","a..a..a..a","a..a..a..a",".bbbbbbbb.",".b..bb..b.",".b..bb..b."]},{"name":"Chest","rows":[".aaaaaaaa.","abbbbbbbba","abbbbbbbba","aaaaccaaaa","abbbbbbbba","abbbbbbbba",".aaaaaaaa."]},{"name":"Ring","rows":["...aaaa...","..aa..aa..",".aa....aa.","aa......aa","aa......aa",".aa....aa.","..aa..aa..","...aaaa..."]},{"name":"Spear","rows":["....a.....","...aaa....","....a.....","....b.....","....b.....","....b.....","....b.....","....b.....","....b.....","....b....."]},{"name":"Bow","rows":["..a.....",".a.b....","a..b....","a..b....","a..b....","a..b....",".a.b....","..a....."]},{"name":"Arrow","rows":["..a..",".aaa.","..b..","..b..","..b..","..b..","..b..",".ccc."]},{"name":"Cauldron","rows":[".a....a.","aaaaaaaa",".bbbbbb.",".bbbbbb.","..bbbb..",".c....c."]},{"name":"Skull","rows":[".aaaaaa.","aaaaaaaa","aabaabaa","aaaaaaaa",".aaaaaa.",".a.aa.a."]},{"name":"Eye","rows":["...aaaa...",".aabbbbaa.","abbccccbba","abbcddccba",".aabbbbaa.","...aaaa..."]},{"name":"Snowflake","rows":["..a...a..",".a.a.a.a.","..aaaaa..","a..aaa..a","aaaaaaaaa","a..aaa..a","..aaaaa..",".a.a.a.a.","..a...a.."]},{"name":"Whale","rows":[".......aa.","....aaaaa.",".aaaaaaaa.","aabaaaaaa.","aaaaaaaa..",".aaaaaa...","...aaaa..."]},{"name":"Bear","rows":[".aa..aa.","aaaaaaaa","abaaaaba","aaaaaaaa",".aaccaa.","..aaaa.."]},{"name":"Wolf","rows":["a......a","aa....aa","aaaaaaaa","aabaabaa",".aaaaaa.","..aacaa."]},{"name":"Horse","rows":["......aa..",".....aaaa.","aaaaaaaaa.","aaaaaaaa..",".aaaaaaa..",".aa..aa...",".aa..aa..."]},{"name":"Deer","rows":["a.a....a.a",".aa....aa.","..bbbbbb..","..bcbbcb..","..bbbbbb..","..bb..bb..","..bb..bb.."]},{"name":"Torch","rows":[".a..","aaa.",".a..",".b..",".b..",".b.."]},{"name":"Scroll","rows":["aaaaaaaa","abbbbbba","abcbcbba","abbbbbba","abcbbcba","abbbbbba","aaaaaaaa"]},{"name":"Cup","rows":["aaaaaaaa",".aaaaaa.","..aaaa..","...bb...","..bbbb.."]},{"name":"Wave","rows":["a.......a.","aa.....aa.",".aa...aa..","..aaaaa..."]},{"name":"Compass","rows":["....a....","...aba...","..abbba..",".abbbbba.","aaaaaaaaa",".abbbbba.","..abbba..","...aba...","....a...."]},{"name":"Heart","rows":[".aa..aa.","aaaaaaaa","aaaaaaaa",".aaaaaa.","..aaaa..","...aa..."]},{"name":"Hammer","rows":[".aaaaaa.",".aaaaaa.","...bb...","...bb...","...bb...","..cccc.."]}],"sky":[{"name":"Sun","rows":[".aa.","aaaa","aaaa",".aa."]},{"name":"Moon","rows":[".aa.","aa..","aa..",".aa."]},{"name":"Star","rows":[".a.","aaa",".a."]},{"name":"Bird","rows":["a..a",".aa."]},{"name":"Cloud","rows":[".aaa.","aaaaa"]},{"name":"Raven","rows":["..aa","aaaa",".aa."]}],"obj":[{"name":"Tree","rows":[".aa.","aaaa","aaaa",".bb."]},{"name":"Rock","rows":[".aaa.","aaaaa"]},{"name":"Tent","rows":["..a..",".aaa.","aaaaa"]},{"name":"Barrel","rows":[".aa.","abba","abba",".aa."]},{"name":"Shield Post","rows":[".aa.","abba",".aa.",".c.."]},{"name":"Fire","rows":[".a.","bab","bbb"]}],"strip":[{"name":"Sea","rows":["a.a.a.a.a.","aaaaaaaaaa"]},{"name":"Grass","rows":[".a..a..a..","aaaaaaaaaa"]},{"name":"Mountains","rows":["..a....a..",".aaa..aaa.","aaaaaaaaaa"]},{"name":"Snow","rows":["aaaaaaaaaa"]},{"name":"Stones","rows":["a.aa.a.aa.","aaaaaaaaaa"]}]};
+
+// ---------- seeded rng ----------
+function rngFrom(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const ri = (rng, a, b) => a + Math.floor(rng() * (b - a + 1));
+
+function proceduralGrid(n, rng) {
+  // portrait boards: phones are taller than wide, so the wall grows downward more than sideways
+  const C = Math.min(10, 7 + Math.floor(n / 4)), R = Math.min(14, C + 2 + ri(rng, 0, 2));
+  const k = Math.min(2 + Math.floor((n + 1) / 4), 6);
+  const pool = PROC_COLORS.slice().sort(() => rng() - .5).slice(0, k);
+  const type = (n < 12 ? [0, 2, 5] : n < 20 ? [0, 2, 5, 1] : [0, 0, 2, 2, 5, 5, 1, 3, 4])[ri(rng, 0, n < 12 ? 2 : n < 20 ? 3 : 8)], cx = (C - 1) / 2, cy = (R - 1) / 2;
+  const seeds = Array.from({ length: k * 2 }, () => [rng() * C, rng() * R]);
+  const sw = ri(rng, 1, 2), mask = ri(rng, 0, 2), noise = Math.max(0, Math.min(.02 + (n - 10) * .006, .12));
+  const g = [];
+  for (let r = 0; r < R; r++) { const row = []; for (let c = 0; c < C; c++) {
+    const dx = c - cx, dy = r - cy; let idx;
+    if (type === 0) idx = Math.floor(Math.max(Math.abs(dx), Math.abs(dy)) / sw);
+    else if (type === 1) idx = Math.floor((c + r) / (sw + 1));
+    else if (type === 2) idx = Math.floor((Math.abs(dx) + Math.abs(dy)) / (sw + .5));
+    else if (type === 3) { let best = 1e9; seeds.forEach((s, i) => { const d = (s[0] - c) ** 2 + (s[1] - r) ** 2; if (d < best) { best = d; idx = i; } }); }
+    else if (type === 4) idx = (Math.floor(c / (sw + 1)) + Math.floor(r / (sw + 1)) * 2);
+    else idx = Math.floor(Math.hypot(dx, dy) / (sw + .4));
+    let ch = rng() < noise ? pool[ri(rng, 0, k - 1)] : pool[idx % k];
+    if (mask === 1 && dx * dx / (cx + .6) ** 2 + dy * dy / (cy + .6) ** 2 > 1) ch = '.';
+    if (mask === 2 && Math.abs(dx) + Math.abs(dy) > Math.max(cx, cy) + 1.5) ch = '.';
+    row.push(ch);
+  } g.push(row.join('')); }
+  return g;
+}
+
+function parseGrid(rows) {
+  const C = Math.max(...rows.map(r => r.length));
+  let g = rows.map(r => r.padEnd(C, '.').split('').map(ch => ch === '.' ? null : ch));
+  g = g.filter(r => r.some(Boolean));
+  const used = c => g.some(r => r[c]);
+  let c0 = 0, c1 = C - 1; while (c0 < c1 && !used(c0)) c0++; while (c1 > c0 && !used(c1)) c1--;
+  return g.map(r => r.slice(c0, c1 + 1));
+}
+
+// cells reachable by a shot from any side
+function exposed(g) {
+  const R = g.length, C = g[0].length, out = new Set();
+  for (let c = 0; c < C; c++) {
+    for (let r = R - 1; r >= 0; r--) if (g[r][c]) { out.add(r * C + c); break; }
+    for (let r = 0; r < R; r++) if (g[r][c]) { out.add(r * C + c); break; }
+  }
+  for (let r = 0; r < R; r++) {
+    for (let c = 0; c < C; c++) if (g[r][c]) { out.add(r * C + c); break; }
+    for (let c = C - 1; c >= 0; c--) if (g[r][c]) { out.add(r * C + c); break; }
+  }
+  return out;
+}
+
+// Plan the ship order: peel the picture wave by wave. Each ship only carries axes for shields
+// that show at the same time, so a ship sent at the right moment always spends everything.
+// One lap of the fjord, exactly as the game plays it: the ship passes every lane once, in belt order,
+// and throws at the first shield in each lane when it carries its color. Returns the hits in order.
+function lapHits(g0, ice0, color, ammo, apply) {
+  // a corner shield is first in two lanes, so even a dry run must remove what it hits: work on copies
+  const g = apply ? g0 : g0.map(r => r.slice()), ice = apply ? ice0 : new Set(ice0);
+  const R = g.length, C = g[0].length, lanes = [];
+  for (let c = 0; c < C; c++) lanes.push(['b', c]);
+  for (let r = R - 1; r >= 0; r--) lanes.push(['r', r]);
+  for (let c = C - 1; c >= 0; c--) lanes.push(['t', c]);
+  for (let r = 0; r < R; r++) lanes.push(['l', r]);
+  const first = ([side, i]) => {
+    if (side === 'b') { for (let r = R - 1; r >= 0; r--) if (g[r][i]) return r * C + i; }
+    else if (side === 't') { for (let r = 0; r < R; r++) if (g[r][i]) return r * C + i; }
+    else if (side === 'l') { for (let c = 0; c < C; c++) if (g[i][c]) return i * C + c; }
+    else { for (let c = C - 1; c >= 0; c--) if (g[i][c]) return i * C + c; }
+    return -1;
+  };
+  const hits = []; let axes = ammo;
+  for (const lane of lanes) {
+    if (axes <= 0) break;
+    const idx = first(lane); if (idx < 0 || g[Math.floor(idx / C)][idx % C] !== color) continue;
+    if (ice.has(idx)) { axes--; hits.push({ idx, crack: true }); ice.delete(idx); if (axes <= 0) break; }
+    axes--; hits.push({ idx }); g[Math.floor(idx / C)][idx % C] = null;
+  }
+  return hits;
+}
+// Plan the harbor: ships are cut so that, sent in the planned order, each one spends everything in a single
+// lap. When no color can fill a whole ship, the planned ship comes home once and sails again later (a dock use).
+function planShips(grid, ice0, minAmmo, rng, docks) {
+  const g = grid.map(r => r.slice()), ice = new Set(ice0), C = g[0].length, list = [], waiting = [];
+  const count = () => { let k = 0; g.forEach(r => r.forEach(v => { if (v) k++; })); return k; };
+  const totalOf = ch => { let k = 0; g.forEach((row, r) => row.forEach((v, c) => { if (v === ch) k += ice.has(r * C + c) ? 2 : 1; })); return k; };
+  const send = (color, ammo) => { const hits = lapHits(g, ice, color, ammo, true); return hits.length; };
+  for (let guard = 0; count() > 0; guard++) {
+    if (guard > 500) return null;
+    const owed = {}; waiting.forEach(j => { owed[j.color] = (owed[j.color] || 0) + j.ammo; });
+    // a docked ship sails again as soon as it can spend everything
+    const wi = waiting.findIndex(j => lapHits(g, ice, j.color, j.ammo).length >= j.ammo);
+    if (wi >= 0) { const j = waiting.splice(wi, 1)[0]; send(j.color, j.ammo); continue; }
+    const colors = [...new Set(g.flat().filter(Boolean))];
+    const opts = colors.map(color => ({ color, hits: lapHits(g, ice, color, 99).length, avail: totalOf(color) - (owed[color] || 0) })).filter(o => o.avail >= minAmmo);
+    const cut = o => { let ammo = Math.min(o.avail, minAmmo + ri(rng, 0, 4)); if (o.avail - ammo < minAmmo) ammo = o.avail; return ammo; };
+    const full = opts.filter(o => o.hits >= minAmmo);
+    if (full.length) {
+      const o = full[Math.floor(rng() * full.length)]; let ammo = cut(o);
+      if (ammo > o.hits) { ammo = Math.min(o.hits, ammo); if (o.avail - ammo < minAmmo) ammo = o.avail; } // avoid a stub smaller than a ship
+      list.push({ color: o.color, ammo }); const hit = send(o.color, ammo);
+      if (hit < ammo) { waiting.push({ color: o.color, ammo: ammo - hit }); if (waiting.length > docks) return null; }
+      continue;
+    }
+    // nothing can sail full: a docked ship with some targets goes round once more, else a new ship takes what it can
+    const partial = waiting.map((j, i) => ({ i, hits: lapHits(g, ice, j.color, j.ammo).length })).filter(x => x.hits > 0).sort((a, b) => b.hits - a.hits)[0];
+    if (partial) { const j = waiting[partial.i]; j.ammo -= send(j.color, j.ammo); if (j.ammo <= 0) waiting.splice(partial.i, 1); continue; }
+    const o = opts.filter(x => x.hits > 0).sort((a, b) => b.hits - a.hits)[0];
+    if (!o) return null;
+    const ammo = cut(o); list.push({ color: o.color, ammo }); const hit = send(o.color, ammo);
+    if (hit < ammo) { waiting.push({ color: o.color, ammo: ammo - hit }); if (waiting.length > docks) return null; }
+  }
+  return waiting.length ? null : list;
+}
+
+// ---------- scene composer: 1000 raids, each a different Viking picture ----------
+function stamp(canvas, rows, x0, y0, tag) {
+  rows.forEach((r, y) => r.split('').forEach((ch, x) => { if (ch !== '.' && canvas[y0 + y] && x0 + x >= 0 && x0 + x < canvas[0].length) canvas[y0 + y][x0 + x] = tag + ch; }));
+}
+const scaleRows = (rows, k) => k === 1 ? rows : rows.flatMap(r => Array(k).fill(r.split('').map(ch => ch.repeat(k)).join('')));
+function fits(canvas, rows, x0, y0) {
+  if (y0 < 0 || x0 < 0 || x0 + rows[0].length > canvas[0].length || y0 + rows.length > canvas.length) return false;
+  for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[0].length; x++) if (rows[y][x] !== '.' && canvas[y0 + y][x0 + x] !== '.') return false;
+  return true;
+}
+function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
+  const pick = arr => arr[ri(rng, 0, arr.length - 1)];
+  const SCENE_W = W, canvas = Array.from({ length: H }, () => new Array(W).fill('.'));
+  const main = MOTIFS.main[(n * 7 + Math.floor(n / 53)) % MOTIFS.main.length];
+  let mrows = scaleRows(main.rows, scale); if (rng() < .4) mrows = mrows.map(r => r.split('').reverse().join(''));
+  const withSky = n >= 3, strip = withSky && rng() < .75 ? pick(MOTIFS.strip) : null;
+  const groundTop = strip ? H - strip.rows.length : H;
+  if (strip) stamp(canvas, strip.rows.map(r => r.repeat(3).slice(0, SCENE_W)), 0, groundTop, 'G');
+  const mh = mrows.length, mw = mrows[0].length;
+  const my = Math.max(0, Math.min(groundTop - mh, strip ? groundTop - mh : Math.floor((H - mh) / 2) + ri(rng, -1, 1)));
+  const mx = ri(rng, 0, SCENE_W - mw);
+  stamp(canvas, mrows, mx, my, 'M');
+  let name = main.name;
+  // a second picture beside the first on wide boards
+  if (W >= 14 && rng() < .7) {
+    const other = MOTIFS.main[(n * 13 + 5) % MOTIFS.main.length], orows = other.rows, oh = orows.length, ow = orows[0].length;
+    const oy = strip ? groundTop - oh : Math.max(0, Math.min(H - oh, my + ri(rng, -2, 2)));
+    const spots = []; for (let x = 0; x + ow <= SCENE_W; x++) if (fits(canvas, orows, x, oy) && (x + ow < mx || x > mx + mw)) spots.push(x);
+    if (spots.length && other !== main) { stamp(canvas, orows, pick(spots), oy, 'N'); name = `${main.name} and ${other.name}`; }
+  }
+  // something in the sky, if there is room above or beside the picture; wide boards get more
+  const skyN = withSky ? 1 + Math.floor((W - 8) / 6) : 0;
+  for (let k = 0; k < skyN; k++) {
+    if (rng() > .85) continue;
+    const sky = pick(MOTIFS.sky);
+    for (let t = 0; t < 12; t++) { const x = ri(rng, 0, SCENE_W - sky.rows[0].length), y = ri(rng, 0, Math.max(0, my - 1)); if (fits(canvas, sky.rows, x, y)) { stamp(canvas, sky.rows, x, y, 'S' + k); break; } }
+  }
+  // things standing on the ground beside the picture
+  const objN = strip ? 1 + Math.floor((W - 8) / 6) : 0;
+  for (let k = 0; k < objN; k++) {
+    if (rng() > .75) continue;
+    const obj = pick(MOTIFS.obj), ow = obj.rows[0].length, oy = groundTop - obj.rows.length;
+    const spots = []; for (let x = 0; x + ow <= SCENE_W; x++) if (fits(canvas, obj.rows, x, oy)) spots.push(x);
+    if (spots.length) { stamp(canvas, obj.rows, pick(spots), oy, 'O' + k); if (!name.includes(' and ')) name = `${main.name} and ${obj.name}`; }
+  }
+  const band = n >= 20 ? Math.floor(my * (.4 + rng() * .3)) : -1; // high sky and low sky in two colors
+  if (withSky) canvas.forEach((row, y) => row.forEach((v, x) => { if (v === '.') row[x] = y < groundTop ? (y < band ? 'K2' : 'K.') : 'G.'; }));
+  // a detail too small for a whole ship melts into its own picture's main color; a picture too small melts into the sky
+  for (let pass = 0; pass < 6; pass++) {
+    const cnt = {}; canvas.forEach(row => row.forEach(v => { if (v !== '.') cnt[v] = (cnt[v] || 0) + 1; }));
+    const thin = Object.keys(cnt).filter(v => cnt[v] < minAmmo); if (!thin.length) break;
+    const into = v => { const main = v.slice(0, -1) + 'a'; if (v !== main && cnt[main]) return main; return withSky ? (cnt['G.'] && v[0] === 'O' ? 'G.' : 'K.') : Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0]; };
+    canvas.forEach(row => row.forEach((v, x) => { if (thin.includes(v)) row[x] = into(v); }));
+  }
+  // colors: sky, ground, then each motif's letters, sharing palette slots when the raid wants fewer colors
+  const slots = []; canvas.forEach(row => row.forEach(v => { if (v !== '.' && !slots.includes(v)) slots.push(v); }));
+  const rank = v => v === 'K.' ? 0 : v === 'K2' ? 1 : v === 'G.' ? 2 : v[0] === 'M' ? 3 : v[0] === 'N' ? 4 : 5;
+  slots.sort((a, b) => rank(a) - rank(b));
+  const pal = PROC_COLORS.slice().sort(() => rng() - .5), k = Math.max(2, Math.min(colorsWanted, pal.length));
+  const colorOf = {}; slots.forEach((v, i) => { colorOf[v] = pal[i < k ? i : 2 + ((i - 2) % Math.max(1, k - 2))]; });
+  // a lone sky object must not vanish into the sky
+  slots.forEach(v => { if ((v[0] === 'S' || v === 'K2') && colorOf[v] === colorOf['K.']) colorOf[v] = pal[(pal.indexOf(colorOf[v]) + 1) % k]; });
+  return { rows: canvas.map(row => row.map(v => v === '.' ? '.' : colorOf[v]).join('')), name };
+}
+
+// Can a careful raider finish? Sends any front ship whose color shows at least as many hits as it has axes.
+function solvable(grid, ice, cols, docks) {
+  // a careful raider: sends a ship (from the harbor or a dock) only when every axe it carries can land,
+  // and otherwise the one that lands the most, docking what is left. Fails if the docks overflow.
+  const g = grid.map(r => r.slice()), C = g[0].length, q = cols.map(c => c.slice()), iceLeft = new Set(ice), tray = [];
+  let left = 0; g.forEach(r => r.forEach(ch => { if (ch) left++; }));
+  const fire = ships => { for (const j of ships) {
+    const hits = lapHits(g, iceLeft, j.color, j.ammo, true); left -= hits.filter(h => !h.crack).length;
+    j.ammo -= hits.length; if (j.ammo > 0) tray.push(j); } };
+  while (left > 0) {
+    const hits = {}; [...new Set(g.flat().filter(Boolean))].forEach(ch => { hits[ch] = lapHits(g, iceLeft, ch, 99).length; });
+    const opts = [];
+    tray.forEach((j, t) => opts.push({ ships: [j], t, ammo: j.ammo, color: j.color }));
+    q.forEach(col => { if (!col.length) return; const j = col[0], pair = j.link && col[1] && col[1].link === j.link;
+      opts.push({ ships: pair ? [j, col[1]] : [j], col, ammo: j.ammo + (pair ? col[1].ammo : 0), color: j.color }); });
+    if (!opts.length) return false;
+    opts.forEach(o => { o.land = Math.min(hits[o.color] || 0, o.ammo); o.full = o.land === o.ammo; });
+    opts.sort((a, b) => (b.full - a.full) || (b.land - a.land) || ((a.t === undefined) - (b.t === undefined)));
+    const o = opts[0];
+    if (!o.full && o.land === 0) return false;
+    if (o.t !== undefined) tray.splice(o.t, 1); else o.ships.forEach(() => o.col.shift());
+    fire([{ color: o.color, ammo: o.ammo, pair: o.ships.length > 1 }]);
+    if (tray.reduce((a, j) => a + (j.pair ? 2 : 1), 0) > docks) return false;
+  }
+  return true;
+}
+
+// ---------- difficulty curve over 1000 raids: a steady climb with a breather every 7th raid and a hard one every 25th ----------
+const MAX_LEVEL = 1000;
+function difficulty(n) {
+  const t = Math.min(1, n / 400), breather = n > 15 && n % 7 === 0, boss = n % 25 === 0;
+  const m = boss ? 1.3 : breather ? .5 : 1;
+  return {
+    colors: n < 3 ? 2 : Math.min(8, 3 + Math.floor(Math.sqrt(n) / 2.2)),
+    width: n < 50 ? 10 : n < 150 ? 12 : n < 300 ? 14 : n < 600 ? 16 : 20,
+    height: Math.min(24, Math.round((n < 50 ? 10 : n < 150 ? 12 : n < 300 ? 14 : n < 600 ? 16 : 20) * (n < 25 ? 1 + n / 100 : 1.25)) + (boss ? 1 : 0)),
+    scale: n < 600 ? 1 : 2,
+    minAmmo: n > 10 ? 10 : 5,
+    lines: Math.min(6, 4 + Math.floor(n / 20)),
+    ice: Math.min(.35, (.04 + t * .3) * m),
+    mystery: Math.min(.7, (.12 + t * .5) * m),
+    links: Math.min(8, (1 + n * .05) * m),
+    tide: Math.max(4, Math.round(9 - t * 4 - (boss ? 1 : 0))),
+    scramble: Math.min(4, 1.5 + n * .15),
+    breather, boss
+  };
+}
+// ---------- level builder: same level number always gives the same puzzle, eased by past failures ----------
+function buildLevel(n, fails) {
+  const rng = rngFrom(n * 9973 + 17), D = difficulty(n);
+  const art = composeScene(n, rng, D.width, D.height, D.colors, D.minAmmo, D.scale);
+  let grid = parseGrid(art.rows);
+  // every color needs enough shields for at least one full ship; thin colors melt into the picture's main color
+  for (let pass = 0; pass < 8; pass++) {
+    const cnt = {}; grid.forEach(r => r.forEach(ch => { if (ch) cnt[ch] = (cnt[ch] || 0) + 1; }));
+    const thin = Object.keys(cnt).filter(ch => cnt[ch] < D.minAmmo); if (!thin.length) break;
+    const big = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]).find(ch => !thin.includes(ch)) || Object.keys(cnt)[0];
+    grid = grid.map(r => r.map(ch => thin.includes(ch) ? big : ch));
+  }
+  const ease = Math.min(fails, 6);
+  const obsScale = Math.max(0, 1 - ease / 3);
+  // frozen cubes: from level 6, need an extra hit
+  const C = grid[0].length, cells = [];
+  grid.forEach((row, r) => row.forEach((ch, c) => { if (ch) cells.push(r * C + c); }));
+  const orng = rngFrom(n * 77 + 3);
+  cells.sort(() => orng() - .5);
+  const K = D.lines + ri(rng, -1, 0);
+  const reinf = n >= 15 && obsScale > 0 ? { every: D.tide + ease * 2 } : null;
+  const docks = 5; // never more than 5 ships in the docks
+  // Scramble the helpful order; each failure scrambles it less. A scramble is only kept if a careful
+  // raider can still finish. If no scramble works, relief steps thin the ice and finally shrink the ships.
+  let ice, order, cols, attempts = 0, solved = false;
+  for (let relief = 0; relief < 4 && !solved; relief++) {
+    const iceN = n >= 6 ? Math.round(cells.length * D.ice * obsScale * [1, .5, 0, 0][relief]) : 0;
+    ice = new Set(cells.slice(0, iceN));
+    order = null;
+    for (let seed = 0; seed < 6 && !order; seed++) order = planShips(grid, ice, relief === 3 ? 5 : D.minAmmo, rngFrom(n * 9973 + 17 + relief * 11 + seed), relief === 3 ? 99 : docks);
+    if (!order) continue;
+    let frac = D.scramble * Math.max(0, 1 - ease / 4);
+    for (let attempt = 0; attempt < 12; attempt++, frac *= .6, attempts++) {
+      const o = order.slice(), swaps = Math.round(o.length * frac), srng = rngFrom(n * 31 + 5 + attempt);
+      for (let s = 0; s < swaps; s++) {
+        const i = Math.floor(srng() * o.length), j = Math.min(o.length - 1, i + 1 + Math.floor(srng() * (4 + n)));
+        [o[i], o[j]] = [o[j], o[i]];
+      }
+      cols = Array.from({ length: K }, () => []);
+      o.forEach((j, i) => cols[i % K].push(j));
+      if (solvable(grid, ice, cols, docks)) { solved = true; break; }
+    }
+  }
+  // mystery jellies: from level 9, color hidden until launched
+  const mysteryN = n >= 9 ? Math.round(Math.max(0, order.length - K) * D.mystery * obsScale) : 0;
+  const deep = order.slice(K).sort(() => orng() - .5);
+  deep.slice(0, mysteryN).forEach(j => { j.hidden = j.wasHidden = true; });
+  // linked jellies: from level 12, two in a row that must launch together
+  const linkN = n >= 12 ? Math.round(D.links * obsScale) : 0;
+  let linkId = 1;
+  for (let tries = 0; tries < 120 && linkId <= linkN; tries++) {
+    const col = cols[ri(orng, 0, K - 1)]; if (col.length < 2) continue;
+    const i = ri(orng, 0, col.length - 2);
+    if (col[i].link || col[i + 1].link || col[i].color !== col[i + 1].color || col[i].hidden || col[i + 1].hidden) continue;
+    col[i].link = col[i + 1].link = linkId++;
+  }
+  if (linkId > 1 && !solvable(grid, ice, cols, docks)) cols.forEach(c => c.forEach(j => { j.link = null; }));
+  const notes = [];
+  if (ease && n >= 6) notes.push(obsScale ? 'fewer obstacles' : 'no obstacles');
+  if (ease) notes.push(ease >= 4 ? 'ships lined up in the best order' : 'a friendlier ship order');
+  const bombs = 1 + Math.min(ease, 3), slotBoosts = 0;
+  if (ease) notes.push(`${bombs} free hammers`);
+  return { n, name: art.name, grid, ice, cols, reinf, attempts, traySlots: docks, bombs, slotBoosts, notes, ease };
+}
+
+// ---------- persistence ----------
+const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
+let save = { level: 1, fails: {}, muted: false, seenHelp: false, seen: {} };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
+
+// ---------- state ----------
+const BELT_CAP = 5, HOP = .32, PARK = .3, FAST = 3;
+const easeOut = t => 1 - (1 - t) * (1 - t);
+let S = null, uid = 1;
+function startLevel(n) {
+  const L = buildLevel(n, save.fails[n] || 0);
+  let total = 0; L.grid.forEach(r => r.forEach(c => { if (c) total++; }));
+  S = { n, name: L.name, grid: L.grid, ice: L.ice, reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
+    cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
+    tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
+    bombs: L.bombs, slotBoosts: L.slotBoosts, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1 };
+  layout(); hud();
+  toast(L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`);
+  const fresh = [];
+  if (L.ice.size && !save.seen.ice) fresh.push('ice');
+  if (L.cols.flat().some(j => j.hidden) && !save.seen.mystery) fresh.push('mystery');
+  if (L.cols.flat().some(j => j.link) && !save.seen.link) fresh.push('link');
+  if (L.reinf && !save.seen.reinf) fresh.push('reinf');
+  if (fresh.length && save.seenHelp) { S.mode = 'paused'; showCard('intro', fresh); }
+}
+
+// ---------- canvas & layout ----------
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d'), stage = document.getElementById('stage');
+let W = 0, H = 0, DPR = 1, G = {};
+function resize() {
+  const r = stage.getBoundingClientRect(); W = r.width; H = r.height; DPR = Math.min(window.devicePixelRatio || 1, 3);
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (S) layout();
+}
+function layout() {
+  const { R, C } = S;
+  const boardH = H * .64;
+  const cell = Math.max(8, Math.min(56, W / (C + 2.2), boardH / (R + 2.6)));
+  const gap = cell * .9;
+  const bw = C * cell, bh = R * cell;
+  const bx = (W - bw) / 2, by = gap + cell * 1.0;
+  const L0 = bx - gap, R0 = bx + bw + gap, T0 = by - gap, B0 = by + bh + gap;
+  const w = R0 - L0, h = B0 - T0, len = 2 * w + 2 * h;
+  const lanes = [];
+  for (let c = 0; c < C; c++) lanes.push({ s: bx + (c + .5) * cell - L0, side: 'b', i: c });
+  for (let r = 0; r < R; r++) lanes.push({ s: w + (B0 - (by + (r + .5) * cell)), side: 'r', i: r });
+  for (let c = 0; c < C; c++) lanes.push({ s: w + h + (R0 - (bx + (c + .5) * cell)), side: 't', i: c });
+  for (let r = 0; r < R; r++) lanes.push({ s: 2 * w + h + (by + (r + .5) * cell - T0), side: 'l', i: r });
+  lanes.sort((a, b) => a.s - b.s);
+  const trayY = B0 + cell * .4 + 8;
+  const nT = S.tray.length;
+  const slot = Math.min(52, cell * 1.5, (W - 8) / (nT + 1.2) - 6);
+  const trayW = nT * (slot + 6) - 6, cw = slot * 1.15;
+  const trayX = Math.max(cw + 10, (W - trayW) / 2);
+  const qTop = trayY + slot + 12;
+  const K = S.cols.length, colW = Math.min(124, (W - 8) / K);
+  const js = Math.max(26, Math.min(78, colW * .84, (H - qTop - 4) / 3.0));
+  G = { cell, gap, bx, by, bw, bh, L0, R0, T0, B0, w, h, len, lanes, speed: cell * 8.5, spacing: cell * 1.9,
+    trayY, slot, trayX, cw, qTop, colW, js, qX: (W - colW * K) / 2 };
+}
+function beltPos(s) {
+  const { L0, R0, T0, B0, w, h } = G;
+  if (s < 0) return [L0 + s * .35, B0];
+  if (s < w) return [L0 + s, B0];
+  if (s < w + h) return [R0, B0 - (s - w)];
+  if (s < 2 * w + h) return [R0 - (s - w - h), T0];
+  return [L0, T0 + Math.min(h, s - 2 * w - h)];
+}
+const cellCenter = (r, c) => [G.bx + (c + .5) * G.cell, G.by + (r + .5) * G.cell];
+const traySlotRect = i => [G.trayX + i * (G.slot + 6), G.trayY, G.slot, G.slot];
+function queueItemPos(k, i) {
+  const x = G.qX + G.colW * (k + .5);
+  const a = Math.min(Math.max(i, 0), 1), b = Math.max(0, i - 1);
+  const y = G.qTop + G.js * .55 + a * G.js * .98 + b * G.js * .8;
+  return [x, y, G.js * (1 - .2 * a - .1 * b)];
+}
+
+// ---------- gameplay ----------
+function firstInLane(lane) {
+  const { grid, R, C } = S;
+  if (lane.side === 'b') { for (let r = R - 1; r >= 0; r--) if (grid[r][lane.i]) return [r, lane.i]; }
+  else if (lane.side === 't') { for (let r = 0; r < R; r++) if (grid[r][lane.i]) return [r, lane.i]; }
+  else if (lane.side === 'l') { for (let c = 0; c < C; c++) if (grid[lane.i][c]) return [lane.i, c]; }
+  else { for (let c = C - 1; c >= 0; c--) if (grid[lane.i][c]) return [lane.i, c]; }
+  return null;
+}
+function activeBelt() { return S.belt.filter(j => !j.done).length; }
+function launch(j, from) {
+  if (activeBelt() >= BELT_CAP) { toast('The fjord is full. Wait for a ship to finish its run.'); buzz(); return false; }
+  const minS = S.belt.reduce((m, b) => Math.min(m, b.s), Infinity);
+  j.s = minS < G.spacing ? Math.min(0, minS - G.spacing) : 0;
+  j.hidden = false; j.park = null;
+  j.hop = { x0: from[0], y0: from[1], t: 0 }; j.lapHit = false;
+  S.belt.push(j); S.launched++; sfx('launch');
+  if (S.reinf && S.launched % S.reinf.every === 0) tide();
+  return true;
+}
+function tide() {
+  // the tide turns: one harbor line (with no lashed pairs) gets its ships reshuffled
+  const rng = rngFrom(S.n * 131 + S.launched);
+  const lines = S.cols.map((c, k) => k).filter(k => S.cols[k].length > 1 && !S.cols[k].some(j => j.link));
+  if (!lines.length) return;
+  const k = lines[ri(rng, 0, lines.length - 1)], col = S.cols[k];
+  for (let i = col.length - 1; i > 0; i--) { const j = ri(rng, 0, i); [col[i], col[j]] = [col[j], col[i]]; }
+  col.forEach((j, i) => { if (i > 0 && j.wasHidden) j.hidden = true; });
+  col.slide = 1; S.tideFx = { k, t: 0 };
+  toast('The tide turns! A harbor line is reshuffled'); sfx('crack'); buzz();
+}
+function tapQueue(k) {
+  const col = S.cols[k]; if (!col.length) return;
+  const j = col[0];
+  if (j.link && col[1] && col[1].link === j.link) {
+    if (activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
+    const p0 = queueItemPos(k, 0), p1 = queueItemPos(k, 1), a = col.shift(), b = col.shift();
+    launch(a, p0); launch(b, p1); col.slide = 2;
+  } else if (activeBelt() < BELT_CAP) { col.shift(); launch(j, queueItemPos(k, 0)); col.slide = 1; }
+  else launch(j, queueItemPos(k, 0)); // full fjord: launch() shows the warning
+}
+const SPENT = { spent: true }; // a dock that has been used once is wrecked for the rest of the raid
+const trayShips = () => S.tray.filter(j => j && !j.spent);
+function tapTray(i) {
+  const j = S.tray[i]; if (!j || j.spent || j.park) return;
+  const mi = j.link ? S.tray.findIndex((o, k) => k !== i && o && o.link === j.link) : -1;
+  if (mi >= 0 && activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
+  const [x, y, sz] = traySlotRect(i);
+  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } }
+}
+
+function hitCube(j, r, c) {
+  const color = S.grid[r][c], idx = r * S.C + c;
+  const [fx, fy] = beltPos(j.s), [tx, ty] = cellCenter(r, c);
+  S.shots.push({ fx, fy, tx, ty, t: 0, color });
+  j.ammo--; j.lapHit = true;
+  if (S.ice.has(idx)) {
+    // frozen shield: the first axe shatters the ice, and a second axe (if the ship has one) follows at once
+    S.ice.delete(idx); sfx('crack');
+    for (let i = 0; i < 8; i++) { const a = Math.random() * 6.28, v = 40 + Math.random() * 100; S.parts.push({ x: tx, y: ty, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, life: .45, color: '#d8f6ff', size: 2 + Math.random() * 3 }); }
+    if (j.ammo > 0) { S.shots.push({ fx, fy, tx, ty, t: -.08, color }); j.ammo--; S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: -.08 }); sfx('pop'); }
+  } else {
+    S.grid[r][c] = null; S.left--;
+    S.dying.push({ r, c, color, t: 0 });
+    sfx('pop');
+  }
+  if (j.ammo <= 0) {
+    // a lashed ship at 0 stays alongside its partner until the partner is empty too
+    const mate = partnerOf(j);
+    if (!mate || mate.ammo <= 0) { j.done = true; j.popT = 0; if (mate) { mate.done = true; mate.popT = 0; } }
+  }
+  hud();
+}
+function finale() { return !S.cols.some(c => c.length) && !trayShips().length && activeBelt() > 0; }
+const partnerOf = j => j.link ? S.belt.find(o => o !== j && !o.done && o.link === j.link) : null;
+function dock(j) {
+  const i = S.tray.indexOf(null);
+  if (i < 0) { lose('full'); return false; }
+  const [x0, y0] = beltPos(G.len - 1);
+  j.s = 0; j.park = { x0, y0, t: 0 }; j.atEnd = false; S.tray[i] = j; return true;
+}
+function finishLap(j) {
+  const mate = partnerOf(j);
+  // full sail: a ship that scored this lap goes straight round again instead of docking
+  if (finale() && (j.lapHit || (mate && mate.lapHit))) { j.lapHit = false; j.s -= G.len; if (mate) { mate.lapHit = false; mate.s = j.s - G.spacing; mate.atEnd = false; } return; }
+  // lashed ships wait for each other at the end of the fjord and come home together
+  if (mate && !mate.atEnd) { j.atEnd = true; j.s = G.len; return; }
+  S.belt.splice(S.belt.indexOf(j), 1); if (mate) S.belt.splice(S.belt.indexOf(mate), 1);
+  if (j.ammo <= 0 && (!mate || mate.ammo <= 0)) return;
+  if (S.tray.filter(x => !x).length < (mate ? 2 : 1)) { lose('full'); return; }
+  dock(j); if (mate) dock(mate);
+}
+function removeAmmo(color, n) {
+  const take = j => { const d = Math.min(n, j.ammo); j.ammo -= d; n -= d; };
+  S.tray.forEach((j, i) => { if (n && j && !j.spent && j.color === color) { take(j); if (j.ammo <= 0) S.tray[i] = null; } });
+  S.belt.forEach(j => { if (n && !j.done && j.color === color) { take(j); if (j.ammo <= 0) { const mate = partnerOf(j); if (!mate || mate.ammo <= 0) { j.done = true; j.popT = 0; if (mate) { mate.done = true; mate.popT = 0; } } } } });
+  for (const col of S.cols) for (let i = col.length - 1; i >= 0 && n; i--) if (col[i].color === color) {
+    take(col[i]);
+    if (col[i].ammo <= 0) { const lk = col[i].link; col.splice(i, 1); if (lk) col.forEach(o => { if (o.link === lk) o.link = null; }); }
+  }
+}
+function bomb(r0, c0) {
+  const hit = {};
+  for (let r = r0 - 1; r <= r0 + 1; r++) for (let c = c0 - 1; c <= c0 + 1; c++) {
+    if (r < 0 || c < 0 || r >= S.R || c >= S.C || !S.grid[r][c]) continue;
+    const color = S.grid[r][c], idx = r * S.C + c; hit[color] = (hit[color] || 0) + (S.ice.has(idx) ? 2 : 1);
+    S.ice.delete(idx); S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: 0 });
+  }
+  if (!Object.keys(hit).length) return false;
+  for (const k in hit) removeAmmo(k, hit[k]);
+  const [x, y] = cellCenter(r0, c0);
+  for (let i = 0; i < 26; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 220; S.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: .7, color: i % 3 ? '#c9922a' : '#6b4a2e', size: 3 + Math.random() * 4 }); }
+  S.bombs--; sfx('boom'); hud(); return true;
+}
+function lose(why) {
+  if (S.mode === 'lost' || S.mode === 'won') return;
+  S.mode = 'lost'; S.lossWhy = why; save.fails[S.n] = (save.fails[S.n] || 0) + 1; persist(); sfx('lose');
+  setTimeout(() => showCard('lose'), 500);
+}
+// no ships left to send while shields remain
+function checkStuck() {
+  if (S.mode !== 'play' || S.left === 0 || S.cols.some(c => c.length) || activeBelt() > 0 || S.shots.length) return;
+  const docked = trayShips();
+  if (!docked.length) { lose('ships'); return; }
+  // docked ships whose color no longer shows anywhere can never fire again
+  const ex = [...exposed(S.grid)].map(i => S.grid[Math.floor(i / S.C)][i % S.C]);
+  if (!docked.some(j => ex.includes(j.color))) lose('ships');
+}
+function win() {
+  S.mode = 'won'; save.level = Math.max(save.level, Math.min(MAX_LEVEL, S.n + 1)); persist(); sfx('win');
+  for (let i = 0; i < 60; i++) { const x = Math.random() * W; S.parts.push({ x, y: -10, vx: (Math.random() - .5) * 80, vy: 80 + Math.random() * 220, life: 1.6, color: PAL[PROC_COLORS[i % 8]], size: 3 + Math.random() * 4 }); }
+  setTimeout(() => showCard('win'), 900);
+}
+
+function update(dt) {
+  if (!S) return;
+  const playing = S.mode === 'play' || S.mode === 'bomb';
+  // nothing left to launch: the last jellies are all on the belt, so fast-forward the ending
+  S.fast += ((playing && finale() ? FAST : 1) - S.fast) * Math.min(1, dt * 4);
+  if (playing) {
+    for (const j of S.belt.slice()) {
+      if (j.done) { j.popT += dt; if (j.popT > .25) S.belt.splice(S.belt.indexOf(j), 1); continue; }
+      if (j.hop) { j.hop.t += dt; if (j.hop.t < HOP) continue; j.hop = null; }
+      if (j.atEnd) continue; // waiting at the end of the fjord for its lashed partner
+      const prev = j.s; j.s += G.speed * S.fast * dt;
+      for (const lane of G.lanes) {
+        if (lane.s <= prev || lane.s > j.s) continue;
+        const hit = firstInLane(lane);
+        if (hit && j.ammo > 0 && S.grid[hit[0]][hit[1]] === j.color) { hitCube(j, hit[0], hit[1]); if (j.done) break; }
+      }
+      if (!j.done && j.s >= G.len) finishLap(j);
+      if (S.mode === 'lost') break;
+    }
+  }
+  S.tray.forEach(j => { if (j && j.park && (j.park.t += dt) >= PARK) j.park = null; });
+  S.cols.forEach(col => { if (col.slide) col.slide = Math.max(0, col.slide - dt / .16); });
+  S.shots = S.shots.filter(s => (s.t += dt) < .14);
+  S.dying = S.dying.filter(d => {
+    d.t += dt;
+    if (!d.burst && d.t > .12) { d.burst = true; const [x, y] = cellCenter(d.r, d.c);
+      for (let i = 0; i < 7; i++) { const a = Math.random() * 6.28, v = 40 + Math.random() * 120; S.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: .5, color: PAL[d.color], size: 2 + Math.random() * 3 }); } }
+    return d.t < .3;
+  });
+  S.parts = S.parts.filter(p => { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt; return p.life > 0; });
+  if (playing && S.left === 0 && !S.shots.length) win();
+  else if (S.mode === 'play') checkStuck();
+}
+
+// ---------- drawing ----------
+function rr(x, y, w, h, r) {
+  const [a, b, c, d] = Array.isArray(r) ? r : [r, r, r, r];
+  ctx.beginPath(); ctx.moveTo(x + a, y); ctx.lineTo(x + w - b, y); ctx.quadraticCurveTo(x + w, y, x + w, y + b);
+  ctx.lineTo(x + w, y + h - c); ctx.quadraticCurveTo(x + w, y + h, x + w - c, y + h); ctx.lineTo(x + d, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - d); ctx.lineTo(x, y + a); ctx.quadraticCurveTo(x, y, x + a, y); ctx.closePath();
+}
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  const t = amt < 0 ? 0 : 255, p = Math.abs(amt);
+  r = Math.round(r + (t - r) * p); g = Math.round(g + (t - g) * p); b = Math.round(b + (t - b) * p);
+  return `rgb(${r},${g},${b})`;
+}
+function symPath(x, y, r, kind) {
+  ctx.beginPath();
+  if (kind === 'circle') ctx.arc(x, y, r, 0, 6.3);
+  else if (kind === 'tri') { ctx.moveTo(x, y - r); ctx.lineTo(x + r * .95, y + r * .7); ctx.lineTo(x - r * .95, y + r * .7); ctx.closePath(); }
+  else if (kind === 'star') { for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r * .45 : r * 1.1; ctx.lineTo(x + Math.cos(a) * d, y + Math.sin(a) * d); } ctx.closePath(); }
+  else if (kind === 'diamond') { ctx.moveTo(x, y - r * 1.1); ctx.lineTo(x + r * .8, y); ctx.lineTo(x, y + r * 1.1); ctx.lineTo(x - r * .8, y); ctx.closePath(); }
+  else if (kind === 'square') ctx.rect(x - r * .8, y - r * .8, r * 1.6, r * 1.6);
+  else if (kind === 'plus') { const t = r * .36; ctx.rect(x - t, y - r, t * 2, r * 2); ctx.rect(x - r, y - t, r * 2, t * 2); }
+  else if (kind === 'heart') { ctx.moveTo(x, y + r); ctx.bezierCurveTo(x - r * 1.6, y - r * .2, x - r * .7, y - r * 1.3, x, y - r * .4); ctx.bezierCurveTo(x + r * .7, y - r * 1.3, x + r * 1.6, y - r * .2, x, y + r); }
+  else if (kind === 'ring') { ctx.arc(x, y, r, 0, 6.3); ctx.moveTo(x + r * .5, y); ctx.arc(x, y, r * .5, 0, 6.3, true); }
+  else if (kind === 'hex') { for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; ctx.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } ctx.closePath(); }
+  else { const t = r * .3; ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.rect(-t, -r, t * 2, r * 2); ctx.rect(-r, -t, r * 2, t * 2); ctx.restore(); }
+}
+function drawSym(x, y, r, ch, fill, stroke) {
+  symPath(x, y, r, SYM[ch]); ctx.fillStyle = fill; ctx.fill('evenodd');
+  if (stroke) { ctx.lineWidth = Math.max(1, r * .18); ctx.strokeStyle = stroke; ctx.lineJoin = 'round'; ctx.stroke(); }
+}
+function drawShield(x, y, s, ch, scale = 1, frozen = false) {
+  const col = PAL[ch], r = s * .46 * scale, cx = x + s / 2, cy = y + s / 2;
+  ctx.beginPath(); ctx.arc(cx, cy + r * .12, r, 0, 6.3); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.3); ctx.fillStyle = shade(col, -.45); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, r * .84, 0, 6.3); ctx.fillStyle = col; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, r * .84, Math.PI * 1.1, Math.PI * 1.75); ctx.lineWidth = r * .18; ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.stroke();
+  if (r > 9) { ctx.fillStyle = 'rgba(255,240,200,.35)'; for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r * .92, cy + Math.sin(a) * r * .92, r * .07, 0, 6.3); ctx.fill(); } }
+  drawSym(cx, cy, r * .5, ch, 'rgba(20,10,5,.62)', 'rgba(255,240,200,.4)');
+  if (frozen) {
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.3); ctx.fillStyle = 'rgba(210,245,255,.5)'; ctx.fill();
+    ctx.lineWidth = Math.max(1.5, r * .16); ctx.strokeStyle = '#eafbff'; ctx.stroke();
+    ctx.lineWidth = Math.max(1, r * .09); ctx.beginPath(); ctx.moveTo(cx - r * .5, cy - r * .5); ctx.lineTo(cx + r * .05, cy + r * .1); ctx.lineTo(cx - r * .15, cy + r * .6); ctx.stroke();
+  }
+}
+// A longship: hull with shields along the rail, mast and a square sail in its color carrying the emblem and axe count.
+function drawShip(x, y, size, ch, ammo, opt = {}) {
+  const hidden = !ch, col = hidden ? '#7d8694' : PAL[ch], t = performance.now() / 1000;
+  const bob = opt.still ? 0 : Math.sin(t * 2.6 + (opt.seed || 0)) * size * .03;
+  const tilt = opt.still ? 0 : Math.sin(t * 2.6 + (opt.seed || 0) + 1) * .03;
+  ctx.save(); ctx.globalAlpha = opt.alpha ?? 1;
+  ctx.translate(x, y + size * .28 + bob); ctx.rotate(tilt);
+  const S_ = size;
+  // hull
+  ctx.beginPath(); ctx.moveTo(-.64 * S_, -.24 * S_); ctx.quadraticCurveTo(-.6 * S_, .02 * S_, -.48 * S_, .08 * S_);
+  ctx.quadraticCurveTo(0, .5 * S_, .48 * S_, .08 * S_); ctx.quadraticCurveTo(.6 * S_, .02 * S_, .64 * S_, -.24 * S_);
+  ctx.quadraticCurveTo(0, .14 * S_, -.64 * S_, -.24 * S_); ctx.closePath();
+  const hg = ctx.createLinearGradient(0, -.2 * S_, 0, .4 * S_); hg.addColorStop(0, '#7a5435'); hg.addColorStop(1, '#3a2614');
+  ctx.fillStyle = hg; ctx.fill();
+  ctx.lineWidth = Math.max(1, S_ * .04); ctx.strokeStyle = '#2a1a0e'; ctx.stroke();
+  // planks
+  ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = Math.max(1, S_ * .025);
+  ctx.beginPath(); ctx.moveTo(-.5 * S_, .1 * S_); ctx.quadraticCurveTo(0, .32 * S_, .5 * S_, .1 * S_); ctx.stroke();
+  // shields on the rail
+  if (S_ > 30 && !hidden) { ctx.fillStyle = col; for (const sx of [-.26, 0, .26]) { ctx.beginPath(); ctx.arc(sx * S_, .02 * S_, S_ * .075, 0, 6.3); ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.stroke(); } }
+  // mast and yard
+  ctx.strokeStyle = '#3a2614'; ctx.lineWidth = Math.max(1.5, S_ * .05); ctx.beginPath(); ctx.moveTo(0, .06 * S_); ctx.lineTo(0, -.98 * S_); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-.44 * S_, -.92 * S_); ctx.lineTo(.44 * S_, -.92 * S_); ctx.stroke();
+  // sail
+  const sl = -.4 * S_, st = -.9 * S_, sw = .8 * S_, sh = .66 * S_;
+  ctx.beginPath(); ctx.moveTo(sl, st); ctx.lineTo(sl + sw, st); ctx.quadraticCurveTo(sl + sw + S_ * .04, st + sh * .5, sl + sw, st + sh);
+  ctx.quadraticCurveTo(sl + sw / 2, st + sh + S_ * .07, sl, st + sh); ctx.quadraticCurveTo(sl - S_ * .04, st + sh * .5, sl, st); ctx.closePath();
+  const sg = ctx.createLinearGradient(sl, 0, sl + sw, 0); sg.addColorStop(0, shade(col, -.2)); sg.addColorStop(.5, shade(col, .12)); sg.addColorStop(1, shade(col, -.15));
+  ctx.fillStyle = sg; ctx.fill();
+  ctx.lineWidth = Math.max(1.2, S_ * .04); ctx.strokeStyle = shade(col, -.5); ctx.stroke();
+  ctx.save(); ctx.clip();
+  ctx.fillStyle = 'rgba(255,255,255,.14)'; for (let i = 1; i < 4; i += 2) ctx.fillRect(sl + sw * i / 4 - sw * .06, st, sw * .12, sh);
+  ctx.restore();
+  const my = st + sh * .52;
+  if (hidden) {
+    ctx.font = `${Math.round(S_ * .4)}px ${DISPLAY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = Math.max(2, S_ * .08); ctx.strokeStyle = 'rgba(13,23,38,.8)'; ctx.lineJoin = 'round';
+    ctx.strokeText('?', 0, my); ctx.fillStyle = '#fff'; ctx.fillText('?', 0, my);
+    ctx.fillStyle = 'rgba(235,240,245,.6)';
+    for (const [fx, fy, fr] of [[-.45, -.1, .3], [.1, -.55, .36], [.45, .05, .28], [-.1, .1, .3]]) { ctx.beginPath(); ctx.ellipse(fx * S_, fy * S_ - .35 * S_, fr * S_ * 1.3, fr * S_ * .7, 0, 0, 6.3); ctx.fill(); }
+  } else if (ammo != null) {
+    ctx.font = `${Math.round(S_ * .34)}px ${DISPLAY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = Math.max(2, S_ * .08); ctx.strokeStyle = 'rgba(13,23,38,.8)'; ctx.lineJoin = 'round';
+    ctx.strokeText(ammo, -.15 * S_, my); ctx.fillStyle = '#fff'; ctx.fillText(ammo, -.15 * S_, my);
+    drawSym(.2 * S_, my, S_ * (opt.board ? .19 : .15), ch, '#fff', 'rgba(13,23,38,.8)');
+  } else if (!opt.plain) {
+    drawSym(0, my, S_ * .15, ch, '#fff', 'rgba(13,23,38,.8)');
+  }
+  if (opt.link) { // lashed: a thick rope wrapped round the sail with knots at the corners
+    ctx.lineWidth = Math.max(3, S_ * .09); ctx.strokeStyle = '#c27a2c'; ctx.strokeRect(sl - S_ * .07, st - S_ * .07, sw + S_ * .14, sh + S_ * .16);
+    ctx.fillStyle = '#8d4f1c'; [[sl - S_ * .07, st - S_ * .07], [sl + sw + S_ * .07, st - S_ * .07], [sl - S_ * .07, st + sh + S_ * .09], [sl + sw + S_ * .07, st + sh + S_ * .09]].forEach(([kx, ky]) => { ctx.beginPath(); ctx.arc(kx, ky, Math.max(2.5, S_ * .07), 0, 6.3); ctx.fill(); }); }
+  ctx.restore();
+}
+function drawAxe(x, y, r, spin) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
+  ctx.strokeStyle = '#6b4a2e'; ctx.lineWidth = Math.max(1.5, r * .3); ctx.beginPath(); ctx.moveTo(0, r); ctx.lineTo(0, -r * .6); ctx.stroke();
+  ctx.fillStyle = '#d7dde6'; ctx.beginPath(); ctx.moveTo(0, -r * .9); ctx.quadraticCurveTo(r * .9, -r * .9, r * .8, -r * .1); ctx.quadraticCurveTo(r * .4, -r * .4, 0, -r * .2); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+const DISPLAY_FONT = "'Metamorphous', 'Palatino Linotype', Georgia, serif", BODY_FONT = "'Alegreya Sans', 'Trebuchet MS', system-ui, sans-serif";
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  if (!S) return;
+  const { cell, bx, by, bw, bh, L0, R0, T0, B0 } = G, t = performance.now() / 1000;
+  // belt
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  rr(L0, T0, R0 - L0, B0 - T0, cell * .5);
+  ctx.lineWidth = cell * 1.08; ctx.strokeStyle = '#6b4a2e'; ctx.stroke();
+  ctx.lineWidth = cell * .86; ctx.strokeStyle = '#4aa3cf'; ctx.stroke();
+  const step = cell * 1.6, off = (fastClock * G.speed * .5) % step;
+  ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = Math.max(1.5, cell * .09);
+  for (let s = off; s < G.len; s += step) {
+    const [px, py] = beltPos(s), [qx, qy] = beltPos(Math.min(G.len, s + 1)), dx = qx - px, dy = qy - py, m = Math.hypot(dx, dy) || 1;
+    const ux = dx / m, uy = dy / m, a = cell * .18;
+    ctx.beginPath(); ctx.moveTo(px - ux * a - uy * a, py - uy * a + ux * a); ctx.lineTo(px, py); ctx.lineTo(px - ux * a + uy * a, py - uy * a - ux * a); ctx.stroke();
+  }
+  // start marker
+  ctx.fillStyle = '#c9922a'; ctx.beginPath(); ctx.moveTo(L0 - cell * .2, B0 - cell * .25); ctx.lineTo(L0 + cell * .25, B0); ctx.lineTo(L0 - cell * .2, B0 + cell * .25); ctx.fill();
+  // board
+  rr(bx - cell * .2, by - cell * .2, bw + cell * .4, bh + cell * .4, cell * .35); ctx.fillStyle = '#b7c6cf'; ctx.fill();
+  ctx.lineWidth = Math.max(2, cell * .08); ctx.strokeStyle = '#8d6540'; ctx.stroke();
+  for (let r = 0; r < S.R; r++) for (let c = 0; c < S.C; c++) {
+    const x = bx + c * cell, y = by + r * cell;
+    if (S.grid[r][c]) drawShield(x, y, cell, S.grid[r][c], 1, S.ice.has(r * S.C + c));
+    else { ctx.fillStyle = 'rgba(0,0,0,.08)'; ctx.beginPath(); ctx.arc(x + cell / 2, y + cell / 2, cell * .1, 0, 6.3); ctx.fill(); }
+  }
+  for (const d of S.dying) { const k = Math.max(0, 1 - Math.max(0, d.t) / .3); drawShield(bx + d.c * cell, by + d.r * cell, cell, d.color, .4 + k * .7); }
+  // bomb targeting hint
+  if (S.mode === 'bomb') { ctx.strokeStyle = 'rgba(201,146,42,' + (.6 + Math.sin(t * 8) * .3) + ')'; ctx.lineWidth = 3; rr(bx - cell * .2, by - cell * .2, bw + cell * .4, bh + cell * .4, cell * .35); ctx.stroke(); }
+  // shots
+  for (const s of S.shots) { const k = Math.max(0, s.t) / .14; drawAxe(s.fx + (s.tx - s.fx) * k, s.fy + (s.ty - s.fy) * k, cell * .28, k * 12); }
+  // belt jellies
+  const js = Math.min(cell * 1.8, G.js * .85);
+  for (const j of S.belt) {
+    let [x, y] = beltPos(j.s); const k = j.done ? Math.max(0, 1 - j.popT / .25) : 1;
+    let size = js;
+    if (j.hop) { const u = easeOut(Math.min(1, j.hop.t / HOP)); const sz0 = j.hop.y0 > G.trayY - 1 ? G.slot * .78 : G.js;
+      x = j.hop.x0 + (x - j.hop.x0) * u; y = j.hop.y0 + (y - j.hop.y0) * u - Math.sin(u * Math.PI) * cell * 1.6; size = sz0 + (js - sz0) * u; }
+    if (k > 0) drawShip(x, y - js * .3, size * (j.done ? 1 + (1 - k) * .4 : 1), j.color, j.done ? null : j.ammo, { board: !j.hop, alpha: k, seed: j.id, link: !!j.link });
+  }
+  // rope between lashed ships on the fjord
+  for (const j of S.belt) { const m = j.link && !j.done && !j.hop ? S.belt.find(o => o !== j && o.link === j.link && !o.done && !o.hop && o.s < j.s) : null; if (!m) continue;
+    const [x1, y1] = beltPos(j.s), [x2, y2] = beltPos(m.s); ctx.strokeStyle = '#c27a2c'; ctx.lineWidth = Math.max(3, js * .08); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x1, y1 - js * .3); ctx.lineTo(x2, y2 - js * .3); ctx.stroke(); }
+  // tray
+  ctx.font = `800 11px ${BODY_FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+  S.tray.forEach((j, i) => {
+    const [x, y, s] = traySlotRect(i);
+    rr(x, y, s, s, s * .18); ctx.fillStyle = '#9fcce3'; ctx.fill();
+    ctx.fillStyle = '#6b4a2e'; ctx.fillRect(x, y + s * .84, s, s * .16); ctx.fillRect(x + s * .1, y + s * .74, s * .08, s * .26); ctx.fillRect(x + s * .82, y + s * .74, s * .08, s * .26);
+    ctx.lineWidth = 2; ctx.strokeStyle = j ? 'rgba(107,74,46,.35)' : 'rgba(107,74,46,.6)'; ctx.setLineDash(j ? [] : [4, 4]); rr(x, y, s, s, s * .18); ctx.stroke(); ctx.setLineDash([]);
+    if (j && j.spent) {
+      // wrecked dock: splintered planks and a cross
+      ctx.fillStyle = 'rgba(107,74,46,.18)'; rr(x, y, s, s, s * .18); ctx.fill();
+      ctx.strokeStyle = '#8d6540'; ctx.lineWidth = Math.max(3, s * .09); ctx.lineCap = 'round'; ctx.beginPath();
+      ctx.moveTo(x + s * .22, y + s * .2); ctx.lineTo(x + s * .78, y + s * .72); ctx.moveTo(x + s * .78, y + s * .2); ctx.lineTo(x + s * .22, y + s * .72); ctx.stroke();
+    } else if (j) {
+      let jx = x + s / 2, jy = y + s / 2 + 1, sz = s * .78;
+      if (j.park) { const u = easeOut(Math.min(1, j.park.t / PARK)); jx = j.park.x0 + (jx - j.park.x0) * u; jy = j.park.y0 + (jy - j.park.y0) * u - Math.sin(u * Math.PI) * G.cell; const bs0 = Math.min(G.cell * 1.8, G.js * .85); sz = bs0 + (sz - bs0) * u; }
+      drawShip(jx, jy - sz * .12, sz, j.color, j.ammo, { seed: j.id, still: !j.park, link: !!j.link });
+    }
+  });
+  {
+    // fjord counter: a wave badge at the far left, away from the docks
+    const n = activeBelt(), full = n >= BELT_CAP, cx = 4 + G.cw / 2, cy = G.trayY, bs = G.slot;
+    rr(cx - G.cw / 2, cy, G.cw, bs, bs * .18); ctx.fillStyle = full ? '#f3d5cf' : '#dbe9f0'; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = full ? '#c0392b' : '#4aa3cf'; ctx.stroke();
+    ctx.beginPath(); ctx.lineWidth = Math.max(2, bs * .07); ctx.strokeStyle = full ? '#c0392b' : '#2d6f8f'; ctx.lineCap = 'round';
+    for (let i = -2; i <= 1; i++) { const wx = cx + i * bs * .2; ctx.moveTo(wx, cy + bs * .36); ctx.quadraticCurveTo(wx + bs * .1, cy + bs * .22, wx + bs * .2, cy + bs * .36); }
+    ctx.stroke();
+    ctx.font = `800 ${Math.round(bs * .34)}px ${BODY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = full ? '#c0392b' : '#2d6f8f'; ctx.fillText(n + '/' + BELT_CAP, cx, cy + bs * .84);
+  }
+  const free = S.tray.filter(x => !x).length;
+  if (S.fast > 1.5) { ctx.fillStyle = '#9a6b12'; ctx.textAlign = 'center'; ctx.fillText('Full sail', W / 2, G.trayY - 2); }
+  else if (free <= 1 && S.mode !== 'won') { ctx.fillStyle = free ? '#9a6b12' : '#c0392b'; ctx.textAlign = 'center'; ctx.fillText(free ? '1 dock left' : 'Docks full', W / 2, G.trayY - 2); }
+  // queues
+  S.cols.forEach((col, k) => {
+    const sl = col.slide || 0;
+    for (let i = Math.min(col.length, 3) - 1; i >= 0; i--) {
+      const [x, y, s] = queueItemPos(k, i + sl), j = col[i];
+      drawShip(x, y, s, j.hidden && i > 0 ? null : j.color, j.ammo, { alpha: i ? .6 : 1, still: i > 0, seed: j.id, link: !!j.link });
+    }
+    // lashed pairs: two taut ropes between the ships and a LASHED tag, drawn over both ships
+    for (let i = 0; i < Math.min(col.length, 3) - 1; i++) {
+      const j = col[i]; if (!(j.link && col[i + 1].link === j.link)) continue;
+      const [x, y, s] = queueItemPos(k, i + sl), [x2, y2, s2] = queueItemPos(k, i + 1 + sl);
+      ctx.strokeStyle = '#c27a2c'; ctx.lineWidth = Math.max(3, s * .09); ctx.lineCap = 'round'; ctx.beginPath();
+      ctx.moveTo(x - s * .3, y + s * .3); ctx.lineTo(x2 - s2 * .3, y2 - s2 * .35); ctx.moveTo(x + s * .3, y + s * .3); ctx.lineTo(x2 + s2 * .3, y2 - s2 * .35); ctx.stroke();
+      const my = (y + s * .3 + y2 - s2 * .35) / 2, tw = s * .9, th = Math.max(14, s * .3);
+      rr(x - tw / 2, my - th / 2, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+      ctx.fillStyle = '#f3e9d2'; ctx.font = `800 ${Math.round(th * .62)}px ${BODY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LASHED', x, my + 1);
+    }
+    if (col.length > 3) { const [x, y] = queueItemPos(k, 2); ctx.fillStyle = 'rgba(43,33,24,.7)'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('+' + (col.length - 3), x, y + G.js * .36); }
+  });
+  // particles
+  for (const p of S.parts) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); }
+  ctx.globalAlpha = 1;
+}
+
+let last = performance.now(), fastClock = 0;
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; update(dt); fastClock += dt * (S ? S.fast : 1); draw(); requestAnimationFrame(frame); }
+
+// ---------- input ----------
+cv.addEventListener('pointerdown', e => {
+  unlockAudio();
+  if (S && S.mode === 'paused' && $('ov').hidden) S.mode = 'play';
+  if (!S || (S.mode !== 'play' && S.mode !== 'bomb')) return;
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (S.mode === 'bomb') {
+    const c = Math.floor((x - G.bx) / G.cell), rr_ = Math.floor((y - G.by) / G.cell);
+    if (c >= 0 && rr_ >= 0 && c < S.C && rr_ < S.R && bomb(rr_, c)) { S.mode = 'play'; hud(); }
+    else if (!(c >= -1 && rr_ >= -1 && c <= S.C && rr_ <= S.R)) { S.mode = 'play'; hud(); }
+    return;
+  }
+  for (let i = 0; i < S.tray.length; i++) { const [tx, ty, s] = traySlotRect(i); if (x >= tx - 3 && x <= tx + s + 3 && y >= ty - 3 && y <= ty + s + 3) { tapTray(i); return; } }
+  for (let k = 0; k < S.cols.length; k++) { const [qx, qy, s] = queueItemPos(k, 0); if (Math.abs(x - qx) < G.colW / 2 && y > qy - s * .7 && y < qy + s * 1.6) { tapQueue(k); return; } }
+});
+
+// ---------- HUD & UI ----------
+const $ = id => document.getElementById(id);
+function hud() {
+  if (!S) return;
+  $('lvl').textContent = 'Raid ' + S.n;
+  $('prog').style.width = (100 * (S.total - S.left) / S.total) + '%';
+  const f = save.fails[S.n] || 0;
+  $('try').textContent = f ? `Try ${f + 1} · easier` : 'Try 1';
+  $('try').classList.toggle('easy', f > 0);
+  $('nBomb').textContent = S.bombs; $('nSlot').textContent = S.slotBoosts;
+  $('bBomb').disabled = !S.bombs; $('bSlot').disabled = !S.slotBoosts;
+  $('bBomb').classList.toggle('on', S.mode === 'bomb');
+  $('mute').textContent = save.muted ? '×' : '♪';
+}
+let toastT = 0;
+function toast(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; el.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => { el.style.opacity = 0; setTimeout(() => el.hidden = true, 400); }, 3200); }
+$('bBomb').onclick = () => { unlockAudio(); if (!S || !S.bombs || (S.mode !== 'play' && S.mode !== 'bomb')) return; S.mode = S.mode === 'bomb' ? 'play' : 'bomb'; if (S.mode === 'bomb') toast('Tap the shield wall to smash a 3×3 area'); hud(); };
+$('bSlot').onclick = () => { unlockAudio(); if (!S || !S.slotBoosts || S.mode !== 'play') return; if (S.tray.length >= 9) { toast('The docks are as big as they get'); return; } S.slotBoosts--; S.tray.push(null); layout(); hud(); sfx('launch'); };
+$('bRestart').onclick = () => { unlockAudio(); if (!S || S.mode === 'won' || S.mode === 'lost') return; showCard('restart'); };
+$('mute').onclick = () => { save.muted = !save.muted; persist(); hud(); };
+
+function showCard(kind, extra) {
+  const card = $('card'), n = S ? S.n : save.level;
+  const prevMode = S && S.mode;
+  if (S && kind === 'restart') S.mode = 'paused';
+  let html = '';
+  if (kind === 'help') {
+    html = `<h2>Viking Raiders</h2>
+      <ul>
+        <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
+        <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
+        <li><span>3</span>The axes add up exactly to the shields, nothing spare. A ship that comes home with axes left waits in a dock until you send it again. Never more than 5 in the docks: if a ship comes home and all 5 are taken, the raid fails. The order you send ships in is everything.</li>
+        <li><span>4</span>Every failed raid makes that raid a little easier next time.</li>
+      </ul>
+      <button class="cta" id="go">Begin raid ${n}</button>`;
+    save.seenHelp = true;
+  } else if (kind === 'win') {
+    html = n >= MAX_LEVEL
+      ? `<h2>Valhalla!</h2><p>All ${MAX_LEVEL} raids won. The skalds will sing of this for a thousand years.</p><button class="cta" id="again">Replay raid ${n}</button>`
+      : `<h2>Raid ${n} won!</h2><p>${(save.fails[n] || 0) ? `Took ${save.fails[n] + 1} tries.` : 'First try!'}${difficulty(n + 1).boss ? ' A great raid is next: a bigger wall and heavier defenses.' : ' The next shield wall awaits.'}</p>
+      <button class="cta" id="go">Raid ${n + 1}</button><button class="link" id="again">Replay raid ${n}</button>`;
+  } else if (kind === 'lose') {
+    html = S.lossWhy === 'ships'
+      ? `<h2>Out of ships</h2><p>No ship left can reach a shield that still stands. Raid ${n} just got a little easier for your next try.</p>`
+      : `<h2>Docks are full</h2><p>A ship came home and every dock was taken. Raid ${n} just got a little easier for your next try.</p>`;
+    html += `<button class="cta" id="go">Try again</button>`;
+  } else if (kind === 'restart') {
+    html = `<h2>Retreat and retry?</h2><p>${S.launched ? 'This counts as a try, so the raid will ease up a little.' : 'You have not launched a ship yet.'}</p>
+      <button class="cta" id="go">Retreat</button><button class="link" id="cancel">Keep raiding</button>`;
+  } else if (kind === 'intro') {
+    const txt = { ice: ['Frozen shields', 'A shield rimed with ice needs one extra axe from its color. The first axe cracks the ice, the next one smashes the shield.'],
+      mystery: ['Fogbound ships', 'A ship in fog hides its sail color until it reaches the front of its line, so you cannot plan far ahead around it.'],
+      link: ['Lashed ships', 'Two ships roped together always launch as a pair, so the fjord needs room for both.'],
+      reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'] };
+    html = `<h2>New on raid ${n}</h2><ul>${extra.map(k => `<li><span>!</span><div><b>${txt[k][0]}.</b> ${txt[k][1]}</div></li>`).join('')}</ul><button class="cta" id="go">Got it</button>`;
+    extra.forEach(k => { save.seen[k] = true; }); persist();
+  } else if (kind === 'levels') {
+    const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
+    let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button>`;
+    setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
+  }
+  card.innerHTML = html; $('ov').hidden = false;
+  const go = $('go'), again = $('again'), cancel = $('cancel');
+  if (go) go.onclick = () => {
+    unlockAudio(); $('ov').hidden = true; save.seenHelp = true; persist();
+    if (kind === 'intro') { S.mode = 'play'; return; }
+    if (kind === 'win') startLevel(n + 1);
+    else if (kind === 'restart') { if (S.launched) { save.fails[n] = (save.fails[n] || 0) + 1; persist(); } startLevel(n); }
+    else startLevel(kind === 'help' && S ? S.n : n);
+  };
+  if (again) again.onclick = () => { $('ov').hidden = true; startLevel(n); };
+  if (cancel) cancel.onclick = () => { $('ov').hidden = true; if (S && S.mode === 'paused') S.mode = prevMode === 'paused' ? 'play' : prevMode; };
+  card.querySelectorAll('[data-l]').forEach(btn => btn.onclick = () => { $('ov').hidden = true; startLevel(+btn.dataset.l); });
+  if (go) go.focus();
+}
+$('lvl').onclick = () => { if (S && (S.mode === 'play')) { S.mode = 'paused'; showCard('levels'); } };
+$('lvl').style.cursor = 'pointer';
+
+// ---------- sound ----------
+let AC = null;
+function unlockAudio() { if (AC) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+function sfx(kind) {
+  if (!AC || save.muted) return;
+  try {
+    const t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(); o.connect(g); g.connect(AC.destination);
+    const set = { pop: ['sine', 520 + Math.random() * 300, 180, .08, .12], launch: ['triangle', 260, 520, .1, .1], boom: ['sawtooth', 160, 40, .35, .15], crack: ['square', 900, 1400, .06, .06], win: ['triangle', 520, 1040, .5, .14], lose: ['sine', 300, 110, .5, .14] }[kind];
+    o.type = set[0]; o.frequency.setValueAtTime(set[1], t); o.frequency.exponentialRampToValueAtTime(set[2], t + set[3]);
+    g.gain.setValueAtTime(set[4], t); g.gain.exponentialRampToValueAtTime(.001, t + set[3]); o.start(t); o.stop(t + set[3] + .02);
+  } catch (e) {}
+}
+function buzz() { try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} }
+
+// ---------- boot ----------
+window.addEventListener('resize', resize);
+resize();
+$('ov').hidden = true;
+startLevel(save.level);
+if (!save.seenHelp) showCard('help');
+requestAnimationFrame(frame);
+window.JB = { get S() { return S; }, update, tapQueue, tapTray, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+})();
+</script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));}</script>
+</body>
+</html>
