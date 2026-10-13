@@ -74,6 +74,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
+<script>window.VR_UPDATE={id:"U20261013-1353",date:"2026-10-13 13:53 UTC"};</script>
 
 
 <div id="app">
@@ -409,7 +410,7 @@ function buildLevel(n, fails) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.001';
+const BUILD = 'VR1.002';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {} };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -969,12 +970,15 @@ function showCard(kind, extra) {
     const row = (id, label, on) => `<button class="link" id="${id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">${label}${sw(on)}</button>`;
     html = `<h2>Viking Raiders</h2>${row('tMusic', 'Music', save.music)}${row('tSound', 'Sound effects', !save.muted)}${row('tVibe', 'Vibration', save.vibe)}
       <button class="link" id="retreat" style="color:#f3e9d2;background:#8d4f1c;border-radius:12px;padding:10px 14px;font-size:16px">Retreat from raid ${n}</button>
-      <p style="margin:4px 0 0;font-size:12px;opacity:.65">Build ${BUILD}</p><button class="cta" id="cancel">Back to the raid</button>`;
+      <p style="margin:4px 0 0;font-size:12px;opacity:.65;line-height:1.5">Version ${BUILD}${window.VR_UPDATE ? ` · Update ${window.VR_UPDATE.id}` : ' · Claude page'}<br>${matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'Installed app' : 'In the browser'}<span id="upd"></span></p><button class="cta" id="cancel">Back to the raid</button>`;
     setTimeout(() => {
       $('tMusic').onclick = () => { save.music = !save.music; persist(); music(); showCard('menu'); };
       $('tSound').onclick = () => { save.muted = !save.muted; persist(); showCard('menu'); };
       $('tVibe').onclick = () => { save.vibe = !save.vibe; persist(); if (save.vibe) buzz(); showCard('menu'); };
       $('retreat').onclick = () => showCard('restart');
+      // the installed app asks the web host which version is current
+      if (window.VR_UPDATE) fetch('version.json', { cache: 'no-store' }).then(r => r.json()).then(v => { const el = $('upd'); if (!el) return;
+        el.textContent = v.build === BUILD ? ' · up to date' : ` · ${v.build} is out: close the app fully and open it again`; }).catch(() => {});
     });
   } else if (kind === 'restart') {
     html = `<h2>Retreat and retry?</h2><p>${S.launched ? 'This counts as a try, so the raid will ease up a little.' : 'You have not launched a ship yet.'}</p>
