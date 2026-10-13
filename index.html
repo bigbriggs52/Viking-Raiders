@@ -119,7 +119,8 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .lhshelf { display: flex; gap: 6px; }
 .lhshelf .boost { font-size: 13px; padding: 7px 4px; flex-direction: column; gap: 2px; }
 .lhshelf .boost small { font-weight: 500; font-size: 11px; opacity: .85; }
-.lhbar { display: flex; gap: 8px; min-height: 44px; align-items: stretch; }
+.lhbar { display: flex; gap: 8px; height: 62px; align-items: stretch; }
+.lhbar .hint { overflow: hidden; }
 .lhbar .boost { font-size: 14px; }
 .lhbar .hint { flex: 1; display: grid; place-items: center; font-size: 13px; color: var(--mute); text-align: center; }
 /* the Harbor: an idle clicker */
@@ -167,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2020",date:"2026-10-13 20:20 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2028",date:"2026-10-13 20:28 UTC"};</script>
 
 
 <div id="app">
@@ -525,7 +526,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.018';
+const BUILD = 'VR1.019';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1307,7 +1308,7 @@ function showCard(kind, extra) {
   } else if (kind === 'hbHelp') {
     html = `<h2>The Harbor</h2><ul>
       <li><span>1</span><div><b>Tap the barrel</b> at the bottom for silver. Quick taps build a catch streak: taps pay up to triple and the buildings work double while it lasts.</div></li>
-      <li><span>2</span><div><b>Build the harbor.</b> Each building earns silver every minute, even while the app is closed.</div></li>
+      <li><span>2</span><div><b>Build the harbor.</b> Each building earns silver every minute, and half as much while the app is closed. Prices rise as the harbor grows.</div></li>
       <li><span>3</span><div><b>Spend silver on raids:</b> extra hammers and catapults, dock tokens, Mead Horns, and chests for the Longhouse.</div></li>
       <li><span>4</span><div><b>Reach level ${RUNE_HB}</b> with every hall built and you can raise a runestone: start over, earning a quarter more silver from everything for good.</div></li></ul>
       <button class="cta" id="hbOk">To the harbor</button>`;
@@ -1445,8 +1446,14 @@ const chestCount = () => Object.values(SAGA.chests).reduce((a, b) => a + b, 0);
 const pieceName = (ch, t) => LH_CHAINS[ch].tiers[t - 1];
 let lhFrom = null, lhSel = -1, lhDrag = null, lhAnim = {}; // lhAnim: cell index -> { k: 'pop' | 'merge', d: delay ms } for the next render
 const lhEmpties = () => LH.board.map((p, i) => p ? -1 : i).filter(i => i >= 0);
+// cells sized so all six columns and eight rows fit, whatever the phone; measured with the bar at its fixed height
+function lhFit() {
+  const grid = $('lhGrid'), gr = grid.getBoundingClientRect();
+  if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(28, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
+}
+window.addEventListener('resize', () => { if (!$('lh').hidden) { lhFit(); } });
 function openLH(from) {
-  lhFrom = from; lhSel = -1; $('ov').hidden = true;
+  lhFrom = from; lhSel = -1; $('ov').hidden = true; $('lhGrid').style.removeProperty('--c');
   if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   $('lh').hidden = false; lhRender();
   if (!save.seen.lh) { save.seen.lh = true; persist(); showCard('lhHelp'); }
@@ -1528,7 +1535,7 @@ function raiseRune() {
   if (!runeReady()) return;
   SAGA.runes++; STATS.runes++;
   LH.board.fill(null); LH.hall = 0; LH.done = {};
-  HB.b = HB.b.map(() => 0); HB.tap = 0; HB.ms = 0; HB.last = Date.now(); hbAcc = 0; combo = 0; tapLog = [];
+  HB.b = HB.b.map(() => 0); HB.tap = 0; HB.ms = 0; SAGA.bought = {}; HB.last = Date.now(); hbAcc = 0; combo = 0; tapLog = [];
   SAGA.silver = 0; lhSel = -1;
   checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`));
   sfx('win'); buzz(); persist(); $('ov').hidden = true; lhRender(); if (hbLive()) hbRender();
@@ -1547,9 +1554,8 @@ function lhRender() {
     : `<b class="h">The longhouse is complete!</b><div class="perk">Every hall is built and every reward stays on.</div>${runeRow()}`;
   const rb = $('runeBtn'); if (rb) rb.onclick = () => showCard('rune');
   runeChip($('lhRunes'));
-  // the board: cells sized so all six columns and seven rows fit, whatever the phone
-  const grid = $('lhGrid'), gr = grid.getBoundingClientRect();
-  if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(28, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
+  // the board: cells sized once per visit (lhFit), never per tap, so the board never seems to zoom when the bar below it changes
+  const grid = $('lhGrid'); if (!grid.style.getPropertyValue('--c')) lhFit();
   if (grid.children.length !== LH.board.length) { grid.innerHTML = ''; LH.board.forEach((_, i) => { const c = document.createElement('div'); c.className = 'lhcell q' + quadOf(i); c.dataset.i = i; const r = Math.floor(i / LH_COLS), col = i % LH_COLS; if ((r === 0 || r === LH_ROWS / 2) && (col === 0 || col === LH_COLS / 2)) c.dataset.q = LH_CHAINS[quadOf(i)].icon; grid.appendChild(c); }); }
   const wanted = p => hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
   LH.board.forEach((p, i) => { const c = grid.children[i]; c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); if (wanted(p)) el.classList.add('want'); else if (p.t >= 6) el.classList.add('top'); const an = lhAnim[i]; if (an) { el.classList.add(an.k); el.style.animationDelay = an.d + 'ms'; } c.appendChild(el); } }); lhAnim = {};
@@ -1593,7 +1599,7 @@ function lhRender() {
 
 // ---------- the Harbor: an idle clicker that earns silver while the phone is in your pocket ----------
 if (!SAGA.hb) SAGA.hb = { b: [0, 0, 0, 0, 0], tap: 0, last: Date.now() };
-const HB = SAGA.hb, HB_MAX = 100, HB_OFFLINE_CAP = 8 * 3600e3; // every tenth level doubles a building's output, so the climb stays worth it
+const HB = SAGA.hb, HB_MAX = 100, HB_OFFLINE_CAP = 4 * 3600e3, HB_AWAY = .5; // every 25th level doubles a building's output; away time pays half for up to four hours
 const HB_B = [
   { name: 'Fish Rack', ic: '\u{1F41F}', base: 1, cost: 50, what: 'Dried cod for the market' },
   { name: 'Smithy', ic: '⚒', base: 5, cost: 400, what: 'Nails, hinges and axe heads' },
@@ -1602,16 +1608,16 @@ const HB_B = [
   { name: 'Toll Bridge', ic: '\u{1F309}', base: 600, cost: 150000, what: 'Every cart pays a coin' },
 ];
 const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(n < 1e7 ? 2 : 1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(n < 1e5 ? 1 : 0) + 'k' : String(Math.floor(n));
-const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 10)) * runeMult() : 0; }; // silver per minute; every tenth level doubles it
+const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 25)) * runeMult() : 0; }; // silver per minute; every 25th level doubles it
 const hbCost = i => Math.round(HB_B[i].cost * Math.pow(1.15, HB.b[i]));
 const hbRate = () => HB_B.reduce((a, _, i) => a + hbOut(i), 0);
-const tapGain = () => (1 + HB.tap * 2) * Math.pow(2, Math.floor(HB.tap / 10)) * runeMult();
-const tapCost = () => Math.round(20 * Math.pow(1.3, HB.tap));
+const tapGain = () => Math.round((1 + HB.tap) * Math.pow(2, Math.floor(HB.tap / 25)) * runeMult());
+const tapCost = () => Math.round(20 * Math.pow(1.18, HB.tap));
 let hbAcc = 0; // fractions of silver carried between settles
 // bank what the buildings earned since the last settle; away time counts up to eight hours
 function hbSettle() {
   const now = Date.now(), dt = Math.min(HB_OFFLINE_CAP, Math.max(0, now - (HB.last || now))); HB.last = now;
-  const rate = hbRate() * (hbLive() && comboMult() > 1 ? 2 : 1); if (!rate || !dt) return 0; // a catch streak sets the whole harbor rowing: buildings work double
+  const rate = hbRate() * (hbLive() ? (comboMult() > 1 ? 2 : 1) : HB_AWAY); if (!rate || !dt) return 0; // a catch streak sets the whole harbor rowing: buildings work double; away from the harbor they row at half
   hbAcc += rate * dt / 60000; const got = Math.floor(hbAcc); hbAcc -= got;
   if (got) giveSilver(got);
   return got;
@@ -1664,11 +1670,16 @@ $('hbBarrel').onpointerdown = e => {
 function hbBuy(i) { const c = hbCost(i); if (HB.b[i] >= HB_MAX || SAGA.silver < c) { buzz(); return; } hbSettle(); SAGA.silver -= c; HB.b[i]++; STATS.harbor++; sfx('launch'); hbMilestones(); persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); hbRender(); }
 function hbTapUp() { const c = tapCost(); if (HB.tap >= HB_MAX || SAGA.silver < c) { buzz(); return; } SAGA.silver -= c; HB.tap++; STATS.harbor++; sfx('launch'); hbMilestones(); persist(); hbRender(); }
 const KEY_PRICE = { wood: 500, iron: 2000, silver: 8000, gold: 30000 };
-function hbKey(k) { const c = KEY_PRICE[k]; if (SAGA.silver < c) { buzz(); return; } SAGA.silver -= c; giveChest(k); sfx('crack'); persist(); hbRender(); toast(`A ${CHEST_NAME[k]} for the Longhouse.`); }
+// prices climb with the harbor (bigger harbor, dearer market) and each boon bought costs a fifth more than the last; a runestone resets both
+if (!SAGA.bought) SAGA.bought = {};
+const priceMult = () => 1 + hbLevel() / 20;
+const boonCost = b => Math.round(b.cost * priceMult() * Math.pow(1.2, Math.min(15, SAGA.bought[b.id] || 0)));
+const keyCost = k => Math.round(KEY_PRICE[k] * priceMult());
+function hbKey(k) { const c = keyCost(k); if (SAGA.silver < c) { buzz(); return; } SAGA.silver -= c; giveChest(k); sfx('crack'); persist(); hbRender(); toast(`A ${CHEST_NAME[k]} for the Longhouse.`); }
 function hbBoon(id) {
-  const b = BOONS.find(x => x.id === id); if (SAGA.silver < b.cost) { buzz(); return; }
+  const b = BOONS.find(x => x.id === id), c = boonCost(b); if (SAGA.silver < c) { buzz(); return; }
   if (id === 'horn' && SAGA.horns >= HORN_MAX) { toast('You already hold all 3 Mead Horns.'); buzz(); return; }
-  SAGA.silver -= b.cost; STATS.boons++;
+  SAGA.silver -= c; STATS.boons++; SAGA.bought[id] = (SAGA.bought[id] || 0) + 1;
   if (id === 'horn') { SAGA.horns++; STATS.hornsEarned++; } else if (id === 'token') LH.tokens++; else SAGA.boons[id] = (SAGA.boons[id] || 0) + 1;
   sfx('launch'); persist(); hbRender(); toast(`${b.name}: ${b.what.toLowerCase()}.`);
 }
@@ -1682,19 +1693,19 @@ function hbRender(light) {
   if (light && $('hbList').children.length) {
     const rt = $('hbRates'); if (rt) rt.innerHTML = rates();
     $('hbList').querySelectorAll('[data-b]').forEach(b => { const i = +b.dataset.b; b.disabled = i < 0 ? HB.tap >= HB_MAX || SAGA.silver < tapCost() : HB.b[i] >= HB_MAX || SAGA.silver < hbCost(i); });
-    $('hbList').querySelectorAll('[data-k]').forEach(b => { b.disabled = SAGA.silver < KEY_PRICE[b.dataset.k]; });
-    $('hbList').querySelectorAll('[data-boon]').forEach(b => { b.disabled = SAGA.silver < BOONS.find(x => x.id === b.dataset.boon).cost; });
+    $('hbList').querySelectorAll('[data-k]').forEach(b => { b.disabled = SAGA.silver < keyCost(b.dataset.k); });
+    $('hbList').querySelectorAll('[data-boon]').forEach(b => { b.disabled = SAGA.silver < boonCost(BOONS.find(x => x.id === b.dataset.boon)); });
     return;
   }
   $('hbScene').innerHTML = `<div class="town">${HB_B.map((b, i) => `<div class="bld${HB.b[i] ? '' : ' off'}">${b.ic}<i>${HB.b[i] ? 'lv ' + HB.b[i] : '—'}</i></div>`).join('')}</div>
     <div class="rates" id="hbRates">${rates()}</div>
-    <div class="inc"><span>${r ? `${fmtN(r)} a minute while away, a catch streak doubles it` : 'Build a Fish Rack to start earning'}</span><span>Level ${lvl}</span></div>
+    <div class="inc"><span>${r ? `${fmtN(r)} a minute here, ${fmtN(r * HB_AWAY)} while away, a catch streak doubles it` : 'Build a Fish Rack to start earning'}</span><span>Level ${lvl}</span></div>
     ${next ? `<div class="ms"><i style="width:${Math.round(100 * (lvl - prev) / (next[0] - prev))}%"></i></div><div class="msl">Next reward at level ${next[0]}: ${next[2]}</div>` : '<div class="msl">Every harbor reward claimed</div>'}`;
   const row = (ic, name, what, lvl, out, i, cost, maxed) => `<div class="hbrow"><div class="ic">${ic}</div><div class="txt"><b>${name}${lvl ? ` <span style="color:var(--mute);font-weight:500">level ${lvl}</span>` : ''}</b><small>${what}${out}</small></div><button class="boost" data-b="${i}" ${maxed || SAGA.silver < cost ? 'disabled' : ''}>${maxed ? 'Finished' : lvl ? 'Upgrade' : 'Build'}<small>${maxed ? 'level ' + HB_MAX : fmtN(cost) + ' silver'}</small></button></div>`;
   $('hbList').innerHTML = `<h3>Buildings</h3>` + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtN(hbOut(i))} a minute` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('')
     + row('\u{1F6E2}', 'Bigger barrel', 'More silver for every tap', HB.tap, HB.tap ? ` · +${fmtN(tapGain())} a tap` : '', -1, tapCost(), HB.tap >= HB_MAX)
-    + `<h3>For the next raid</h3>` + BOONS.map(b => `<div class="hbrow"><div class="ic">${b.ic}</div><div class="txt"><b>${b.name}${b.id === 'hammer' && SAGA.boons.hammer ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.hammer} ready</span>` : b.id === 'cata' && SAGA.boons.cata ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.cata} ready</span>` : b.id === 'horn' ? ` <span style="color:var(--mute);font-weight:500">${SAGA.horns} of ${HORN_MAX}</span>` : b.id === 'token' ? ` <span style="color:var(--mute);font-weight:500">${LH.tokens} held</span>` : ''}</b><small>${b.what}</small></div><button class="boost" data-boon="${b.id}" ${SAGA.silver < b.cost ? 'disabled' : ''}>Buy<small>${fmtN(b.cost)} silver</small></button></div>`).join('')
-    + `<h3>Runestone</h3>` + runeRow() + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${CHEST_SPILL[k][0]} pieces</small></div><button class="boost" data-k="${k}" ${SAGA.silver < KEY_PRICE[k] ? 'disabled' : ''}>Buy<small>${fmtN(KEY_PRICE[k])} silver</small></button></div>`).join('');
+    + `<h3>For the next raid</h3>` + BOONS.map(b => `<div class="hbrow"><div class="ic">${b.ic}</div><div class="txt"><b>${b.name}${b.id === 'hammer' && SAGA.boons.hammer ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.hammer} ready</span>` : b.id === 'cata' && SAGA.boons.cata ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.cata} ready</span>` : b.id === 'horn' ? ` <span style="color:var(--mute);font-weight:500">${SAGA.horns} of ${HORN_MAX}</span>` : b.id === 'token' ? ` <span style="color:var(--mute);font-weight:500">${LH.tokens} held</span>` : ''}</b><small>${b.what}</small></div><button class="boost" data-boon="${b.id}" ${SAGA.silver < boonCost(b) ? 'disabled' : ''}>Buy<small>${fmtN(boonCost(b))} silver</small></button></div>`).join('')
+    + `<h3>Runestone</h3>` + runeRow() + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${CHEST_SPILL[k][0]} pieces</small></div><button class="boost" data-k="${k}" ${SAGA.silver < keyCost(k) ? 'disabled' : ''}>Buy<small>${fmtN(keyCost(k))} silver</small></button></div>`).join('');
   $('hbList').querySelectorAll('[data-b]').forEach(b => b.onclick = () => +b.dataset.b < 0 ? hbTapUp() : hbBuy(+b.dataset.b));
   $('hbList').querySelectorAll('[data-k]').forEach(b => b.onclick = () => hbKey(b.dataset.k));
   $('hbList').querySelectorAll('[data-boon]').forEach(b => b.onclick = () => hbBoon(b.dataset.boon));
