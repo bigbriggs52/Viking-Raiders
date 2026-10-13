@@ -98,6 +98,8 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .lhcell { position: relative; background: #c9b893; border-radius: 10px; box-shadow: inset 0 2px 0 rgba(0,0,0,.08); }
 .piece { position: absolute; inset: 4%; display: grid; place-items: center; font-size: 22px; line-height: 1; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.35); cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
 .piece.sel { outline: 3px solid var(--lemon); outline-offset: 2px; }
+.piece.want { box-shadow: 0 0 0 3px #ffd37a, 0 0 10px 3px rgba(255, 211, 122, .8); }
+.piece.top { box-shadow: 0 0 0 3px #2f7a4a; }
 .piece.t1 { border-radius: 50%; }
 .piece.t2 { border-radius: 22%; }
 .piece.t3 { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
@@ -153,7 +155,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1907",date:"2026-10-13 19:07 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1949",date:"2026-10-13 19:49 UTC"};</script>
 
 
 <div id="app">
@@ -503,7 +505,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.012';
+const BUILD = 'VR1.013';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1223,7 +1225,8 @@ function showCard(kind, extra) {
       <li><span>1</span><div><b>Tap a chest.</b> Its pieces land on the board.</div></li>
       <li><span>2</span><div><b>Drag a piece onto one just like it.</b> The two become one better piece. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
-      <li><span>4</span><div><b>Board full?</b> Tap a piece and Sell it for silver.</div></li></ul>
+      <li><span>4</span><div><b>Glowing pieces</b> are the ones the hall wants right now. A level VI piece is the top: tap it for a tribute (a dock token and silver).</div></li>
+      <li><span>5</span><div><b>Board full?</b> Tap a piece and Sell it for silver.</div></li></ul>
       <button class="cta" id="lhOk">Let's build</button>`;
     setTimeout(() => { $('lhOk').onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'hbHelp') {
@@ -1396,7 +1399,8 @@ function lhDrop(a, b) {
   // two alike pieces become one of the next tier (the user's rule, 2026-10-13)
   LH.board[a] = null; LH.board[b] = { ch: p.ch, t: p.t + 1 }; STATS.merges3++;
   sfx('pop'); if (p.t + 1 >= 6) { STATS.merges5++; sfx('win'); }
-  toast(`Two ${pieceName(p.ch, p.t).toLowerCase()}s became a ${pieceName(p.ch, p.t + 1).toLowerCase()}.`);
+  const np = LH.board[b], hall = HALLS[LH.hall], wantsNow = hall && hall.wants.some(([ch, t, n]) => ch === np.ch && t === np.t && (LH.done[ch + t] || 0) < n), later = !wantsNow && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === np.ch && t === np.t));
+  toast(`Two ${pieceName(p.ch, p.t).toLowerCase()}s became a ${pieceName(np.ch, np.t).toLowerCase()} (${TIER_NAME[np.t - 1]}).` + (wantsNow ? ` The ${hall.name} wants it: tap it, then Deliver.` : np.t >= 6 ? ' Top tier: tap it for a tribute.' : later ? ` The ${later.name} will want it later.` : ''));
   const fresh = checkAch(); fresh.forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}: ${x.chest ? CHEST_NAME[x.chest] : x.silver + ' silver'}`));
   return true;
 }
@@ -1413,6 +1417,8 @@ function deliver(i) {
   } else toast(`${pieceName(p.ch, p.t)} delivered to the ${hall.name}, +${p.t * 10} silver.`);
   persist(); lhRender();
 }
+// a top-tier piece is a tribute to the jarl: a dock token and silver, so merging all the way up always pays
+function tribute(i) { const p = LH.board[i]; if (!p || p.t < 6) return; LH.board[i] = null; LH.tokens++; giveSilver(200); STATS.delivered++; lhSel = -1; sfx('win'); buzz(); persist(); lhRender(); toast(`${pieceName(p.ch, p.t)} given as tribute: a dock token and 200 silver.`); }
 function sell(i) { const p = LH.board[i]; if (!p) return; const v = SELL[p.t - 1]; LH.board[i] = null; giveSilver(v); lhSel = -1; sfx('pop'); persist(); lhRender(); toast(`${pieceName(p.ch, p.t)} sold for ${v} silver.`); }
 function pieceEl(p) { const el = document.createElement('div'); el.className = `piece t${p.t}`; el.style.background = LH_CHAINS[p.ch].color; el.innerHTML = `${LH_CHAINS[p.ch].icon}<i>${TIER_NAME[p.t - 1]}</i>`; el.title = pieceName(p.ch, p.t); return el; }
 function lhRender() {
@@ -1421,13 +1427,14 @@ function lhRender() {
   // the order
   const hall = HALLS[LH.hall];
   $('lhOrder').innerHTML = hall
-    ? `<b class="h">Build the ${hall.name}</b> <span style="color:var(--mute)">${LH.hall + 1} of ${HALLS.length}</span><div class="wants">${hall.wants.map(([ch, t, n]) => `<span class="want${(LH.done[ch + t] || 0) >= n ? ' met' : ''}">${LH_CHAINS[ch].icon} ${pieceName(ch, t)} ${Math.min(n, LH.done[ch + t] || 0)}/${n}</span>`).join('')}</div><div class="perk">Reward: ${hall.perk.toLowerCase()}</div>`
+    ? `<b class="h">Build the ${hall.name}</b> <span style="color:var(--mute)">${LH.hall + 1} of ${HALLS.length}</span><div class="wants">${hall.wants.map(([ch, t, n]) => `<span class="want${(LH.done[ch + t] || 0) >= n ? ' met' : ''}">${LH_CHAINS[ch].icon} ${pieceName(ch, t)} ${TIER_NAME[t - 1]} \u00b7 ${Math.min(n, LH.done[ch + t] || 0)}/${n}</span>`).join('')}</div><div class="perk">Finish it for: ${hall.perk.toLowerCase()}, plus a dock token, a gold chest and ${250 * (LH.hall + 1)} silver. Each piece delivered pays silver too.</div>`
     : `<b class="h">The longhouse is complete!</b><div class="perk">Every hall is built and every reward stays on.</div>`;
   // the board: cells sized so all six columns and seven rows fit, whatever the phone
   const grid = $('lhGrid'), gr = grid.getBoundingClientRect();
   if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(28, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
   if (grid.children.length !== LH.board.length) { grid.innerHTML = ''; LH.board.forEach((_, i) => { const c = document.createElement('div'); c.className = 'lhcell'; c.dataset.i = i; grid.appendChild(c); }); }
-  LH.board.forEach((p, i) => { const c = grid.children[i]; c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); c.appendChild(el); } });
+  const wanted = p => hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
+  LH.board.forEach((p, i) => { const c = grid.children[i]; c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); if (wanted(p)) el.classList.add('want'); else if (p.t >= 6) el.classList.add('top'); c.appendChild(el); } });
   // chests on the shelf
   $('lhShelf').innerHTML = Object.keys(CHEST_NAME).map(k => `<button class="boost" data-chest="${k}" ${SAGA.chests[k] ? '' : 'disabled'}>${CHEST_NAME[k].split(' ')[0][0].toUpperCase() + CHEST_NAME[k].split(' ')[0].slice(1)} <b>${SAGA.chests[k] || 0}</b><small>${CHEST_SPILL[k][0]} pieces</small></button>`).join('');
   $('lhShelf').querySelectorAll('[data-chest]').forEach(b => b.onclick = () => openChest(b.dataset.chest));
@@ -1435,9 +1442,9 @@ function lhRender() {
   const p = lhSel >= 0 ? LH.board[lhSel] : null, bar = $('lhBar');
   if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest. 2. Drag a piece onto its twin. 3. Tap a piece, then Deliver.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
   else {
-    const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
-    bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : ''}<button class="boost" id="lhSell">Sell <b>${SELL[p.t - 1]}</b></button>`;
-    const d = $('lhDeliver'); if (d) d.onclick = () => deliver(lhSel); $('lhSell').onclick = () => sell(lhSel);
+    const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n), later = !can && p.t < 6 && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === p.ch && t === p.t));
+    bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})${can ? `<br>The ${hall.name} wants this: +${p.t * 10} silver` : p.t >= 6 ? '<br>Finest work: tribute pays a dock token + 200 silver' : later ? `<br>Not needed now; the ${later.name} will want it` : hall ? `<br>Merge two to make a ${pieceName(p.ch, p.t + 1)}` : ''}</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : p.t >= 6 ? `<button class="boost" id="lhTribute">Tribute</button>` : ''}<button class="boost" id="lhSell">Sell <b>${SELL[p.t - 1]}</b></button>`;
+    const d = $('lhDeliver'); if (d) d.onclick = () => deliver(lhSel); const tr = $('lhTribute'); if (tr) tr.onclick = () => tribute(lhSel); $('lhSell').onclick = () => sell(lhSel);
   }
 }
 // dragging: a piece follows the finger as a ghost; letting go over a cell drops it there
@@ -1569,7 +1576,7 @@ function hbRender(light) {
 }
 let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() }; // banked while the game was closed; the Harbor screen tells the tale
 
-window.JB = { get S() { return S; }, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+window.JB = { get S() { return S; }, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
 })();
 </script>
 
