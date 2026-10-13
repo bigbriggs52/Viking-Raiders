@@ -81,7 +81,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="lvl" id="lvl">Raid 1</div>
     <div class="bar" aria-label="Shields smashed"><i id="prog"></i></div>
     <div class="chip" id="try">Try 1</div>
-    <button class="iconbtn" id="mute" aria-label="Sound on or off">♪</button>
+    <button class="iconbtn" id="menu" aria-label="Menu">☰</button>
   </div>
   <div class="stage" id="stage">
     <canvas id="cv"></canvas>
@@ -90,7 +90,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
   <div class="boosters">
     <button class="boost" id="bBomb">Hammer <b id="nBomb">1</b></button>
     <button class="boost" id="bSlot" hidden>+1 Dock <b id="nSlot">1</b></button>
-    <button class="boost" id="bRestart">Retreat</button>
+    <button class="boost" id="bCata">Catapult <b id="nCata">1</b></button>
   </div>
   <div class="overlay" id="ov">
     <div class="card" id="card"></div>
@@ -409,8 +409,9 @@ function buildLevel(n, fails) {
 }
 
 // ---------- persistence ----------
+const BUILD = 'VR1.001';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
-let save = { level: 1, fails: {}, muted: false, seenHelp: false, seen: {} };
+let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {} };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
 
@@ -424,7 +425,7 @@ function startLevel(n) {
   S = { n, name: L.name, grid: L.grid, ice: L.ice, reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
     cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
     tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
-    bombs: L.bombs, slotBoosts: L.slotBoosts, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1 };
+    bombs: L.bombs, slotBoosts: L.slotBoosts, catapults: 1, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1 };
   layout(); hud();
   toast(L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`);
   const fresh = [];
@@ -607,6 +608,26 @@ function bomb(r0, c0) {
   for (let i = 0; i < 26; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 220; S.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: .7, color: i % 3 ? '#c9922a' : '#6b4a2e', size: 3 + Math.random() * 4 }); }
   S.bombs--; sfx('boom'); hud(); return true;
 }
+// catapult: one chosen ship (and its lashed partner) is flung away, together with as many shields of its color
+// from the wall, outermost first, so the axes still add up exactly to the shields
+function catapult(j) {
+  if (!S.catapults) return;
+  const ships = [j]; const lk = j.link;
+  const inTray = S.tray.indexOf(j), col = S.cols.find(c => c.includes(j));
+  if (lk) { if (inTray >= 0) { const m = S.tray.find(o => o && o !== j && o.link === lk); if (m) ships.push(m); } else if (col) { const m = col.find(o => o !== j && o.link === lk); if (m) ships.push(m); } }
+  let n = ships.reduce((a, o) => a + o.ammo, 0);
+  const hits = lapHits(S.grid, S.ice, j.color, n, true); // outermost shields of that color go first (ice counts two)
+  const gone = new Set();
+  hits.forEach(h => { if (!h.crack) { const r = Math.floor(h.idx / S.C), c = h.idx % S.C; gone.add(h.idx); S.dying.push({ r, c, color: j.color, t: 0 }); } });
+  n -= hits.length;
+  for (let r = 0; r < S.R && n > 0; r++) for (let c = 0; c < S.C && n > 0; c++) { const idx = r * S.C + c; if (S.grid[r][c] === j.color && !gone.has(idx)) { n -= S.ice.has(idx) ? 2 : 1; S.ice.delete(idx); S.grid[r][c] = null; gone.add(idx); S.dying.push({ r, c, color: j.color, t: 0 }); } }
+  S.left -= gone.size;
+  ships.forEach(o => { const ti = S.tray.indexOf(o); if (ti >= 0) S.tray[ti] = null; else if (col) col.splice(col.indexOf(o), 1); });
+  if (col) col.slide = ships.length;
+  for (let i = 0; i < 30; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 200; S.parts.push({ x: W / 2, y: G.B0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, life: .8, color: i % 2 ? PAL[j.color] : '#6b4a2e', size: 3 + Math.random() * 4 }); }
+  S.catapults--; S.mode = 'play'; sfx('boom'); buzz(); hud();
+  toast(`Catapulted! ${ships.length > 1 ? 'Both lashed ships' : 'The ship'} and ${gone.size} shields are gone.`);
+}
 function lose(why) {
   if (S.mode === 'lost' || S.mode === 'won') return;
   S.mode = 'lost'; S.lossWhy = why; save.fails[S.n] = (save.fails[S.n] || 0) + 1; persist(); sfx('lose');
@@ -629,7 +650,7 @@ function win() {
 
 function update(dt) {
   if (!S) return;
-  const playing = S.mode === 'play' || S.mode === 'bomb';
+  const playing = S.mode === 'play' || S.mode === 'bomb' || S.mode === 'catapult';
   // nothing left to launch: the last jellies are all on the belt, so fast-forward the ending
   S.fast += ((playing && finale() ? FAST : 1) - S.fast) * Math.min(1, dt * 4);
   if (playing) {
@@ -879,8 +900,13 @@ function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now;
 cv.addEventListener('pointerdown', e => {
   unlockAudio();
   if (S && S.mode === 'paused' && $('ov').hidden) S.mode = 'play';
-  if (!S || (S.mode !== 'play' && S.mode !== 'bomb')) return;
+  if (!S || (S.mode !== 'play' && S.mode !== 'bomb' && S.mode !== 'catapult')) return;
   const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  if (S.mode === 'catapult') {
+    for (let i = 0; i < S.tray.length; i++) { const [tx, ty, s] = traySlotRect(i); if (x >= tx - 3 && x <= tx + s + 3 && y >= ty - 3 && y <= ty + s + 3) { if (S.tray[i] && !S.tray[i].park) catapult(S.tray[i]); return; } }
+    for (let k = 0; k < S.cols.length; k++) { const [qx, qy, s] = queueItemPos(k, 0); if (Math.abs(x - qx) < G.colW / 2 && y > qy - s * .7 && y < qy + s * 1.6) { if (S.cols[k].length) catapult(S.cols[k][0]); return; } }
+    S.mode = 'play'; hud(); return; // tapped elsewhere: put the catapult down
+  }
   if (S.mode === 'bomb') {
     const c = Math.floor((x - G.bx) / G.cell), rr_ = Math.floor((y - G.by) / G.cell);
     if (c >= 0 && rr_ >= 0 && c < S.C && rr_ < S.R && bomb(rr_, c)) { S.mode = 'play'; hud(); }
@@ -900,31 +926,31 @@ function hud() {
   const f = save.fails[S.n] || 0;
   $('try').textContent = f ? `Try ${f + 1}: easier` : 'First try';
   $('try').classList.toggle('easy', f > 0);
-  $('nBomb').textContent = S.bombs; $('nSlot').textContent = S.slotBoosts;
-  $('bBomb').disabled = !S.bombs; $('bSlot').disabled = !S.slotBoosts;
-  $('bBomb').classList.toggle('on', S.mode === 'bomb');
-  $('mute').textContent = save.muted ? '×' : '♪';
+  $('nBomb').textContent = S.bombs; $('nSlot').textContent = S.slotBoosts; $('nCata').textContent = S.catapults;
+  $('bBomb').disabled = !S.bombs; $('bSlot').disabled = !S.slotBoosts; $('bCata').disabled = !S.catapults;
+  $('bBomb').classList.toggle('on', S.mode === 'bomb'); $('bCata').classList.toggle('on', S.mode === 'catapult');
 }
 let toastT = 0;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; el.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => { el.style.opacity = 0; setTimeout(() => el.hidden = true, 400); }, 3200); }
-$('bBomb').onclick = () => { unlockAudio(); if (!S || !S.bombs || (S.mode !== 'play' && S.mode !== 'bomb')) return; S.mode = S.mode === 'bomb' ? 'play' : 'bomb'; if (S.mode === 'bomb') toast('Tap the shield wall to smash a 3×3 area'); hud(); };
+$('bBomb').onclick = () => { unlockAudio(); if (!S || !S.bombs || (S.mode !== 'play' && S.mode !== 'bomb' && S.mode !== 'catapult')) return; S.mode = S.mode === 'bomb' ? 'play' : 'bomb'; if (S.mode === 'bomb') toast('Tap the shield wall to smash a 3×3 area'); hud(); };
 $('bSlot').onclick = () => { unlockAudio(); if (!S || !S.slotBoosts || S.mode !== 'play') return; if (S.tray.length >= 9) { toast('The docks are as big as they get'); return; } S.slotBoosts--; S.tray.push(null); layout(); hud(); sfx('launch'); };
-$('bRestart').onclick = () => { unlockAudio(); if (!S || S.mode === 'won' || S.mode === 'lost') return; showCard('restart'); };
-$('mute').onclick = () => { save.muted = !save.muted; persist(); hud(); };
+$('bCata').onclick = () => { unlockAudio(); if (!S || !S.catapults || (S.mode !== 'play' && S.mode !== 'catapult' && S.mode !== 'bomb')) return; S.mode = S.mode === 'catapult' ? 'play' : 'catapult'; if (S.mode === 'catapult') toast('Tap a ship in the harbor or a dock to catapult it away, shields and all'); hud(); };
+$('menu').onclick = () => { unlockAudio(); if (!S) return; if (S.mode === 'won' || S.mode === 'lost') return; showCard('menu'); };
 
 function showCard(kind, extra) {
   const card = $('card'), n = S ? S.n : save.level;
   const prevMode = S && S.mode;
-  if (S && kind === 'restart') S.mode = 'paused';
+  if (S && (kind === 'restart' || kind === 'menu') && S.mode !== 'paused') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   let html = '';
   if (kind === 'help') {
-    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 9857de93</small></h2>
+    html = `<h2>Viking Raiders</h2>
       <ul>
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
         <li><span>3</span>The axes add up exactly to the shields, nothing spare. A ship that comes home with axes left waits in a dock until you send it again. Never more than 5 in the docks: if a ship comes home and all 5 are taken, the raid fails. The order you send ships in is everything.</li>
         <li><span>4</span>A docked ship will only set out again when a shield of its color is showing on the wall, so a ship sent at the wrong time can sit in a dock for a long while.</li>
-        <li><span>5</span>Every failed raid makes that raid a little easier next time.</li>
+        <li><span>5</span>Once per raid you get a hammer (smash a 3×3 patch of wall) and a catapult (fling one ship away together with its share of shields). The menu at the top right has sound, music, vibration and retreat.</li>
+        <li><span>6</span>Every failed raid makes that raid a little easier next time.</li>
       </ul>
       <button class="cta" id="go">Begin raid ${n}</button>`;
     save.seenHelp = true;
@@ -938,6 +964,18 @@ function showCard(kind, extra) {
       ? `<h2>Stranded</h2><p>The harbor is empty and no docked ship has enough shields of its color showing to set out again. Raid ${n} just got a little easier for your next try.</p>`
       : `<h2>Docks are full</h2><p>A ship came home and every dock was taken. Raid ${n} just got a little easier for your next try.</p>`;
     html += `<button class="cta" id="go">Try again</button>`;
+  } else if (kind === 'menu') {
+    const sw = (on) => `<b style="float:right;font-family:var(--display);color:${on ? '#ffd37a' : '#b9a98f'}">${on ? 'On' : 'Off'}</b>`;
+    const row = (id, label, on) => `<button class="link" id="${id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">${label}${sw(on)}</button>`;
+    html = `<h2>Viking Raiders</h2>${row('tMusic', 'Music', save.music)}${row('tSound', 'Sound effects', !save.muted)}${row('tVibe', 'Vibration', save.vibe)}
+      <button class="link" id="retreat" style="color:#f3e9d2;background:#8d4f1c;border-radius:12px;padding:10px 14px;font-size:16px">Retreat from raid ${n}</button>
+      <p style="margin:4px 0 0;font-size:12px;opacity:.65">Build ${BUILD}</p><button class="cta" id="cancel">Back to the raid</button>`;
+    setTimeout(() => {
+      $('tMusic').onclick = () => { save.music = !save.music; persist(); music(); showCard('menu'); };
+      $('tSound').onclick = () => { save.muted = !save.muted; persist(); showCard('menu'); };
+      $('tVibe').onclick = () => { save.vibe = !save.vibe; persist(); if (save.vibe) buzz(); showCard('menu'); };
+      $('retreat').onclick = () => showCard('restart');
+    });
   } else if (kind === 'restart') {
     html = `<h2>Retreat and retry?</h2><p>${S.launched ? 'This counts as a try, so the raid will ease up a little.' : 'You have not launched a ship yet.'}</p>
       <button class="cta" id="go">Retreat</button><button class="link" id="cancel">Keep raiding</button>`;
@@ -951,7 +989,7 @@ function showCard(kind, extra) {
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
     let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
-    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build 9857de93</div>`;
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
   card.innerHTML = html; $('ov').hidden = false;
@@ -964,7 +1002,7 @@ function showCard(kind, extra) {
     else startLevel(kind === 'help' && S ? S.n : n);
   };
   if (again) again.onclick = () => { $('ov').hidden = true; startLevel(n); };
-  if (cancel) cancel.onclick = () => { $('ov').hidden = true; if (S && S.mode === 'paused') S.mode = prevMode === 'paused' ? 'play' : prevMode; };
+  if (cancel) cancel.onclick = () => { $('ov').hidden = true; if (S && S.mode === 'paused') S.mode = S.resumeMode || (prevMode === 'paused' ? 'play' : prevMode); S.resumeMode = null; };
   card.querySelectorAll('[data-l]').forEach(btn => btn.onclick = () => { $('ov').hidden = true; startLevel(+btn.dataset.l); });
   if (go) go.focus();
 }
@@ -973,7 +1011,27 @@ $('lvl').style.cursor = 'pointer';
 
 // ---------- sound ----------
 let AC = null;
-function unlockAudio() { if (AC) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+function unlockAudio() { if (AC) { if (AC.state === 'suspended') AC.resume(); music(); return; } try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} music(); }
+// music: a slow, soft pentatonic tune over a low drone, written by the game itself so the file stays small
+let MUS = null;
+function music() {
+  if (!AC) return;
+  if (!save.music) { if (MUS) { clearInterval(MUS.timer); MUS.gain.gain.setTargetAtTime(0, AC.currentTime, .3); setTimeout(() => { try { MUS.drone.stop(); MUS.drone2.stop(); } catch (e) {} }, 800); MUS = null; } return; }
+  if (MUS) return;
+  const gain = AC.createGain(); gain.gain.value = .07; gain.connect(AC.destination);
+  const drone = AC.createOscillator(), drone2 = AC.createOscillator(), dg = AC.createGain(); dg.gain.value = .5; drone.type = 'triangle'; drone2.type = 'sine';
+  drone.frequency.value = 98; drone2.frequency.value = 147; drone.connect(dg); drone2.connect(dg); dg.connect(gain); drone.start(); drone2.start();
+  const scale = [196, 220, 262, 294, 330, 392, 440, 523]; let step = 0, seed = 7;
+  const timer = setInterval(() => {
+    if (!AC || document.hidden) return;
+    seed = (seed * 1103515245 + 12345) % 2147483648; const r = seed / 2147483648;
+    if (r < .25) { step++; return; } // a rest now and then
+    const f = scale[Math.floor(r * 100) % scale.length], t = AC.currentTime, o = AC.createOscillator(), g = AC.createGain();
+    o.type = step % 4 === 0 ? 'triangle' : 'sine'; o.frequency.value = f * (step % 8 < 4 ? 1 : 2); o.connect(g); g.connect(gain);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.9, t + .05); g.gain.exponentialRampToValueAtTime(.001, t + 1.1); o.start(t); o.stop(t + 1.2); step++;
+  }, 560);
+  MUS = { gain, drone, drone2, timer };
+}
 function sfx(kind) {
   if (!AC || save.muted) return;
   try {
@@ -983,8 +1041,8 @@ function sfx(kind) {
     g.gain.setValueAtTime(set[4], t); g.gain.exponentialRampToValueAtTime(.001, t + set[3]); o.start(t); o.stop(t + set[3] + .02);
   } catch (e) {}
 }
-function buzz() { try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} }
-function tap() { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} } // a short tick per shield hit (phones that support it; iPhone web apps do not)
+function buzz() { if (!save.vibe) return; try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} }
+function tap() { if (!save.vibe) return; try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} } // a short tick per shield hit (phones that support it; iPhone web apps do not)
 
 // ---------- boot ----------
 // iPhone: no double-tap or pinch zoom inside the game
@@ -1002,7 +1060,7 @@ $('ov').hidden = true;
 startLevel(save.level);
 if (!save.seenHelp) showCard('help');
 requestAnimationFrame(frame);
-window.JB = { get S() { return S; }, update, tapQueue, tapTray, queueItemPos, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+window.JB = { get S() { return S; }, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
 })();
 </script>
 
