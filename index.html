@@ -748,8 +748,12 @@ function drawShip(x, y, size, ch, ammo, opt = {}) {
   } else if (ammo != null) {
     ctx.font = `${Math.round(S_ * .34)}px ${DISPLAY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.lineWidth = Math.max(2, S_ * .08); ctx.strokeStyle = 'rgba(13,23,38,.8)'; ctx.lineJoin = 'round';
-    ctx.strokeText(ammo, -.15 * S_, my); ctx.fillStyle = '#fff'; ctx.fillText(ammo, -.15 * S_, my);
-    drawSym(.2 * S_, my, S_ * (opt.board ? .19 : .15), ch, '#fff', 'rgba(13,23,38,.8)');
+    // the number sits alone on the sail; the emblem gets its own dark badge on the sail's corner, so 10 + ring never reads as 100
+    ctx.font = `${Math.round(S_ * .38)}px ${DISPLAY_FONT}`;
+    ctx.strokeText(ammo, -.06 * S_, my); ctx.fillStyle = '#fff'; ctx.fillText(ammo, -.06 * S_, my);
+    const bx_ = sl + sw - .02 * S_, by_ = st + sh - .02 * S_, br = S_ * (opt.board ? .2 : .17);
+    ctx.beginPath(); ctx.arc(bx_, by_, br, 0, 6.3); ctx.fillStyle = '#1d2a3a'; ctx.fill(); ctx.lineWidth = Math.max(1.2, S_ * .035); ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+    drawSym(bx_, by_, br * .62, ch, '#fff', null);
   } else if (!opt.plain) {
     drawSym(0, my, S_ * .15, ch, '#fff', 'rgba(13,23,38,.8)');
   }
@@ -914,7 +918,7 @@ function showCard(kind, extra) {
   if (S && kind === 'restart') S.mode = 'paused';
   let html = '';
   if (kind === 'help') {
-    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build b5480544</small></h2>
+    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 9857de93</small></h2>
       <ul>
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
@@ -947,7 +951,7 @@ function showCard(kind, extra) {
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
     let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
-    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build b5480544</div>`;
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build 9857de93</div>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
   card.innerHTML = html; $('ov').hidden = false;
