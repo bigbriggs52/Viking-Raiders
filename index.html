@@ -96,6 +96,12 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .want.met { background: #d9ecd9; text-decoration: line-through; }
 .lhgrid { flex: 1; min-height: 0; position: relative; display: grid; grid-template-columns: repeat(6, var(--c, 48px)); grid-auto-rows: var(--c, 48px); gap: 4px; align-content: center; justify-content: center; touch-action: none; }
 .lhcell { position: relative; background: #c9b893; border-radius: 10px; box-shadow: inset 0 2px 0 rgba(0,0,0,.08); }
+.lhcell.qT { background: #d9c3a3; } .lhcell.qI { background: #bfc6cc; } .lhcell.qF { background: #e6cf98; } .lhcell.qW { background: #cfc3dd; }
+.lhcell[data-q]::before { content: attr(data-q); position: absolute; inset: 0; display: grid; place-items: center; font-size: 26px; opacity: .22; }
+.piece.pop { animation: pop .42s cubic-bezier(.2, 1.4, .4, 1) both; }
+.piece.merge { animation: mergepop .5s ease-out both; }
+@keyframes pop { 0% { transform: scale(0) translateY(-40%); opacity: 0; } 60% { transform: scale(1.2) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes mergepop { 0% { transform: scale(.6); filter: brightness(2); } 50% { transform: scale(1.25); filter: brightness(1.6); } 100% { transform: scale(1); filter: brightness(1); } }
 .piece { position: absolute; inset: 4%; display: grid; place-items: center; font-size: 22px; line-height: 1; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.35); cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
 .piece.sel { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .piece.want { box-shadow: 0 0 0 3px #ffd37a, 0 0 10px 3px rgba(255, 211, 122, .8); }
@@ -155,7 +161,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1959",date:"2026-10-13 19:59 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2001",date:"2026-10-13 20:01 UTC"};</script>
 
 
 <div id="app">
@@ -505,7 +511,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.015';
+const BUILD = 'VR1.016';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -519,8 +525,12 @@ if (!save.saga) {
 STAT_KEYS.forEach(k => { if (save.saga.stats[k] == null) save.saga.stats[k] = 0; });
 const SAGA = save.saga, STATS = SAGA.stats;
 const HORN_MAX = 3;
-if (!SAGA.lh) SAGA.lh = { board: new Array(42).fill(null), hall: 0, done: {}, tokens: 0 };
-const LH = SAGA.lh, LH_COLS = 6, LH_ROWS = 7;
+if (!SAGA.lh) SAGA.lh = { board: new Array(48).fill(null), hall: 0, done: {}, tokens: 0 };
+const LH = SAGA.lh, LH_COLS = 6, LH_ROWS = 8;
+while (LH.board.length < LH_COLS * LH_ROWS) LH.board.push(null); // boards from before the four corners grow a row
+// four corners, one chain each: timber top left, iron top right, food bottom left, wool bottom right
+const QUAD = ['T', 'I', 'F', 'W'];
+const quadOf = i => QUAD[(Math.floor(i / LH_COLS) < LH_ROWS / 2 ? 0 : 2) + (i % LH_COLS < LH_COLS / 2 ? 0 : 1)];
 const hallsDone = () => LH.hall; // finished halls, in order: Hearth, Feast Hall, Armory, Loft, Lookout, Great Hall
 const hornEvery = () => hallsDone() >= 1 ? 5 : 10;
 const sixthSail = () => SAGA.streak >= 3; // three straight wins: six ships may sail the fjord at once
@@ -1222,7 +1232,7 @@ function showCard(kind, extra) {
     });
   } else if (kind === 'lhHelp') {
     html = `<h2>The Longhouse</h2><ul>
-      <li><span>1</span><div><b>Tap a chest.</b> Its pieces land on the board.</div></li>
+      <li><span>1</span><div><b>Tap a chest.</b> Its pieces land in their own corner: timber top left, iron top right, food bottom left, wool bottom right.</div></li>
       <li><span>2</span><div><b>Drag a piece onto one just like it.</b> The two become one better piece. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
       <li><span>4</span><div><b>Glowing pieces</b> are the ones the hall wants right now. A level VI piece is the top: tap it for a tribute (a dock token and silver).</div></li>
@@ -1364,7 +1374,7 @@ const SELL = [2, 6, 15, 40, 100, 250];
 const CHEST_SPILL = { wood: [3, 0, 0], iron: [4, 0, 1], silver: [5, 1, 2], gold: [6, 2, 2] }; // pieces, lowest and highest tier above the base
 const chestCount = () => Object.values(SAGA.chests).reduce((a, b) => a + b, 0);
 const pieceName = (ch, t) => LH_CHAINS[ch].tiers[t - 1];
-let lhFrom = null, lhSel = -1, lhDrag = null;
+let lhFrom = null, lhSel = -1, lhDrag = null, lhAnim = {}; // lhAnim: cell index -> { k: 'pop' | 'merge', d: delay ms } for the next render
 const lhEmpties = () => LH.board.map((p, i) => p ? -1 : i).filter(i => i >= 0);
 function openLH(from) {
   lhFrom = from; lhSel = -1; $('ov').hidden = true;
@@ -1382,12 +1392,16 @@ $('lhClose').onclick = closeLH;
 // a chest spills pieces of one chain, leaning toward what the current hall still needs
 function openChest(kind) {
   if (!SAGA.chests[kind]) return;
-  const [count, lo, hi] = CHEST_SPILL[kind], empties = lhEmpties();
-  if (empties.length < count) { toast(`The board needs ${count} free spaces for a ${CHEST_NAME[kind]}. Merge, deliver or sell first.`); buzz(); return; }
+  const [count, lo, hi] = CHEST_SPILL[kind];
   const hall = HALLS[Math.min(LH.hall, HALLS.length - 1)];
   const need = hall.wants.filter(([ch, t, n]) => (LH.done[ch + t] || 0) < n).map(w => w[0]);
-  const pool = need.length && Math.random() < .7 ? need : Object.keys(LH_CHAINS);
+  // the chest picks a chain whose corner has room, leaning toward what the hall still needs
+  const room = c => lhEmpties().filter(i => quadOf(i) === c).length;
+  let pool = (need.length && Math.random() < .7 ? need : Object.keys(LH_CHAINS)).filter(c => room(c) >= count);
+  if (!pool.length) pool = Object.keys(LH_CHAINS).filter(c => room(c) >= count);
+  if (!pool.length) { toast(`Every corner is too full for a ${CHEST_NAME[kind]} (${count} pieces). Merge, deliver or sell first.`); buzz(); return; }
   const ch = pool[Math.floor(Math.random() * pool.length)];
+  const empties = lhEmpties().filter(i => quadOf(i) === ch);
   const base = 1 + Math.min(2, Math.floor((save.level - 1) / 40)); // later raids spill better pieces
   SAGA.chests[kind]--; STATS.chestsOpened++;
   // the pieces land beside the pieces like them (same chain, same tier first), so twins sit together ready to merge
@@ -1400,14 +1414,14 @@ function openChest(kind) {
     for (const i of spots) {
       let sc = 0;
       if (kin.length) { let near = Infinity, twin = Infinity; kin.forEach(j => { const d = dist(i, j); near = Math.min(near, d); if (LH.board[j].t === t) twin = Math.min(twin, d); }); sc = Math.min(twin, near + .5); }
-      else sc = dist(i, 20) * .1; // an empty board: start near the middle
+      else sc = dist(i, QUAD.indexOf(ch) < 2 ? 9 + (QUAD.indexOf(ch) % 2) * 3 : 33 + (QUAD.indexOf(ch) % 2) * 3) * .1; // an empty corner: start at its heart
       sc += Math.random() * .3;
       if (sc < bestScore) { bestScore = sc; best = i; }
     }
-    LH.board[best] = { ch, t }; spots.splice(spots.indexOf(best), 1);
+    LH.board[best] = { ch, t }; spots.splice(spots.indexOf(best), 1); lhAnim[best] = { k: 'pop', d: k * 70 };
   }
   sfx('crack'); lhSel = -1; persist(); lhRender();
-  toast(`${count} ${LH_CHAINS[ch].name.toLowerCase()} pieces from the ${CHEST_NAME[kind]}.`);
+  toast(`${count} ${LH_CHAINS[ch].name.toLowerCase()} pieces land in the ${LH_CHAINS[ch].name.toLowerCase()} corner.`);
 }
 const lhNeighbors = i => [i - LH_COLS, i + LH_COLS, i % LH_COLS ? i - 1 : -1, (i + 1) % LH_COLS ? i + 1 : -1].filter(j => j >= 0 && j < LH.board.length);
 // drop piece from cell a onto cell b: move, merge, or bounce
@@ -1417,7 +1431,7 @@ function lhDrop(a, b) {
   if (!q) { LH.board[b] = p; LH.board[a] = null; return true; }
   if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); if (q.ch === p.ch && q.t === p.t) toast(`${pieceName(p.ch, p.t)} is the best of its kind: deliver or sell it.`); return true; } // different pieces swap places
   // two alike pieces become one of the next tier (the user's rule, 2026-10-13)
-  LH.board[a] = null; LH.board[b] = { ch: p.ch, t: p.t + 1 }; STATS.merges3++;
+  LH.board[a] = null; LH.board[b] = { ch: p.ch, t: p.t + 1 }; STATS.merges3++; lhAnim[b] = { k: 'merge', d: 0 };
   sfx('pop'); if (p.t + 1 >= 6) { STATS.merges5++; sfx('win'); }
   const np = LH.board[b], hall = HALLS[LH.hall], wantsNow = hall && hall.wants.some(([ch, t, n]) => ch === np.ch && t === np.t && (LH.done[ch + t] || 0) < n), later = !wantsNow && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === np.ch && t === np.t));
   toast(`Two ${pieceName(p.ch, p.t).toLowerCase()}s became a ${pieceName(np.ch, np.t).toLowerCase()} (${TIER_NAME[np.t - 1]}).` + (wantsNow ? ` The ${hall.name} wants it: tap it, then Deliver.` : np.t >= 6 ? ' Top tier: tap it for a tribute.' : later ? ` The ${later.name} will want it later.` : ''));
@@ -1452,9 +1466,9 @@ function lhRender() {
   // the board: cells sized so all six columns and seven rows fit, whatever the phone
   const grid = $('lhGrid'), gr = grid.getBoundingClientRect();
   if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(28, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
-  if (grid.children.length !== LH.board.length) { grid.innerHTML = ''; LH.board.forEach((_, i) => { const c = document.createElement('div'); c.className = 'lhcell'; c.dataset.i = i; grid.appendChild(c); }); }
+  if (grid.children.length !== LH.board.length) { grid.innerHTML = ''; LH.board.forEach((_, i) => { const c = document.createElement('div'); c.className = 'lhcell q' + quadOf(i); c.dataset.i = i; const r = Math.floor(i / LH_COLS), col = i % LH_COLS; if ((r === 0 || r === LH_ROWS / 2) && (col === 0 || col === LH_COLS / 2)) c.dataset.q = LH_CHAINS[quadOf(i)].icon; grid.appendChild(c); }); }
   const wanted = p => hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
-  LH.board.forEach((p, i) => { const c = grid.children[i]; c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); if (wanted(p)) el.classList.add('want'); else if (p.t >= 6) el.classList.add('top'); c.appendChild(el); } });
+  LH.board.forEach((p, i) => { const c = grid.children[i]; c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); if (wanted(p)) el.classList.add('want'); else if (p.t >= 6) el.classList.add('top'); const an = lhAnim[i]; if (an) { el.classList.add(an.k); el.style.animationDelay = an.d + 'ms'; } c.appendChild(el); } }); lhAnim = {};
   // chests on the shelf
   $('lhShelf').innerHTML = Object.keys(CHEST_NAME).map(k => `<button class="boost" data-chest="${k}" ${SAGA.chests[k] ? '' : 'disabled'}>${CHEST_NAME[k].split(' ')[0][0].toUpperCase() + CHEST_NAME[k].split(' ')[0].slice(1)} <b>${SAGA.chests[k] || 0}</b><small>${CHEST_SPILL[k][0]} pieces</small></button>`).join('');
   $('lhShelf').querySelectorAll('[data-chest]').forEach(b => b.onclick = () => openChest(b.dataset.chest));
