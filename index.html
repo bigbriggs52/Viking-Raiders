@@ -168,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2031",date:"2026-10-13 20:31 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2042",date:"2026-10-13 20:42 UTC"};</script>
 
 
 <div id="app">
@@ -347,7 +347,7 @@ function fits(canvas, rows, x0, y0) {
 function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
   const pick = arr => arr[ri(rng, 0, arr.length - 1)];
   const SCENE_W = W, canvas = Array.from({ length: H }, () => new Array(W).fill('.'));
-  const fitting = MOTIFS.main.filter(m => m.rows[0].length * scale <= W && m.rows.length * scale <= H - 3);
+  const fitting = MOTIFS.main.filter(m => m.rows[0].length * scale <= W && m.rows.length * scale <= H - (W > 12 ? 1 : 3));
   const main = fitting[Math.floor(((n * .6180339887) % 1) * fitting.length)]; // golden-ratio spread: neighbours differ, every picture gets its turn
   let mrows = scaleRows(main.rows, scale); if (rng() < .4) mrows = mrows.map(r => r.split('').reverse().join(''));
   const withSky = n >= 3, strip = withSky && rng() < .75 ? pick(MOTIFS.strip) : null;
@@ -358,13 +358,18 @@ function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
   const mx = ri(rng, 0, SCENE_W - mw);
   stamp(canvas, mrows, mx, my, 'M');
   let name = main.name;
-  // a second picture beside the first on wide boards
-  if (W >= 14 && rng() < .7) {
-    const other = MOTIFS.main[(n * 13 + 5) % MOTIFS.main.length], orows = scaleRows(other.rows, other.rows[0].length * scale + mw <= W ? scale : 1), oh = orows.length, ow = orows[0].length;
+  // more pictures beside the first on wide boards: a second from raid 11, a third when the wall is wide enough
+  const extraN = W >= 20 ? 2 : W >= 14 ? 1 : 0, others = [];
+  for (let e = 0; e < extraN; e++) {
+    if (e === 0 ? rng() >= .85 : rng() >= .7) continue;
+    const other = MOTIFS.main[(n * (e ? 7 : 13) + (e ? 11 : 5)) % MOTIFS.main.length]; if (other === main || others.includes(other)) continue;
+    const fitH = h => h <= groundTop, orows = scaleRows(other.rows, fitH(other.rows.length * scale) && other.rows[0].length * scale + mw + others.reduce((a, o) => a + o.w, 0) <= W ? scale : 1), oh = orows.length, ow = orows[0].length;
+    if (!fitH(oh)) continue;
     const oy = strip ? groundTop - oh : Math.max(0, Math.min(H - oh, my + ri(rng, -2, 2)));
-    const spots = []; for (let x = 0; x + ow <= SCENE_W; x++) if (fits(canvas, orows, x, oy) && (x + ow < mx || x > mx + mw)) spots.push(x);
-    if (spots.length && other !== main) { stamp(canvas, orows, pick(spots), oy, 'N'); name = `${main.name} and ${other.name}`; }
+    const spots = []; for (let x = 0; x + ow <= SCENE_W; x++) if (fits(canvas, orows, x, oy)) spots.push(x);
+    if (spots.length) { stamp(canvas, orows, pick(spots), oy, e ? 'P' : 'N'); others.push({ w: ow, name: other.name }); }
   }
+  if (others.length) name = `${main.name}, ${others.map(o => o.name).join(' and ')}`.replace(/, ([^,]*)$/, ' and $1');
   // something in the sky, if there is room above or beside the picture; wide boards get more
   const skyN = withSky ? 1 + Math.floor((W - 8) / 6) : 0;
   for (let k = 0; k < skyN; k++) {
@@ -440,8 +445,9 @@ function difficulty(n) {
   return {
     colors: n < 3 ? 2 : Math.min(8, 3 + Math.floor(Math.sqrt(n) / 1.4)),
     // raids 1-10: a small wall of big shields; from raid 11 the pictures are drawn at twice the detail on a wider wall
-    width: n < 11 ? 10 : n < 150 ? 16 : n < 300 ? 18 : 20,
-    height: Math.min(24, Math.round((n < 11 ? 10 : n < 150 ? 16 : n < 300 ? 18 : 20) * (n < 11 ? 1 + n / 50 : 1.25)) + (boss ? 1 : 0)),
+    // from raid 11 the wall is wider than tall, so it fills the phone from edge to edge and several pictures stand side by side
+    width: n < 11 ? 10 : n < 150 ? 24 : n < 300 ? 26 : 28,
+    height: (n < 11 ? Math.round(10 * (1 + n / 50)) : n < 150 ? 16 : n < 300 ? 17 : 18) + (boss ? 1 : 0),
     scale: n < 11 ? 1 : 2,
     minAmmo: n > 10 ? 10 : 5,
     maxAmmo: n > 10 ? Math.min(40, 14 + Math.round(n * .25)) : 9, // bigger ships on later raids: harder to send at the right moment
@@ -510,7 +516,7 @@ function buildLevel(n, fails, tight) {
       const k2 = (cols.indexOf(col) + ri(orng, 1, K - 1)) % K, col2 = cols[k2]; if (!col2.length) continue;
       const a = col[ri(orng, 0, col.length - 1)], d = Math.min(col2.length - 1, ri(orng, 0, 2)), b = col2[d];
       if (a.link || b.link || a.color !== b.color || a.hidden || b.hidden) continue;
-      a.link = b.link = linkId++; continue;
+      a.link = b.link = linkId++; a.cross = b.cross = true; continue;
     }
     const i = ri(orng, 0, col.length - 2);
     if (col[i].link || col[i + 1].link || col[i].color !== col[i + 1].color || col[i].hidden || col[i + 1].hidden) continue;
@@ -526,7 +532,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.020';
+const BUILD = 'VR1.021';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -764,7 +770,7 @@ function hitCube(j, r, c) {
     // frozen shield: the first axe shatters the ice, and a second axe (if the ship has one) follows at once
     S.ice.delete(idx); sfx('crack');
     for (let i = 0; i < 8; i++) { const a = Math.random() * 6.28, v = 40 + Math.random() * 100; S.parts.push({ x: tx, y: ty, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, life: .45, color: '#d8f6ff', size: 2 + Math.random() * 3 }); }
-    if (j.ammo > 0) { S.shots.push({ fx, fy, tx, ty, t: -.08, color }); j.ammo--; S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: -.08 }); sfx('pop'); STATS.axes++; STATS.shields++; }
+    if (j.ammo > 0) { S.shots.push({ fx, fy, tx, ty, t: -.3, color }); j.ammo--; S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: -.3 }); setTimeout(() => sfx('pop'), 300); STATS.axes++; STATS.shields++; }
   } else {
     S.grid[r][c] = null; S.left--; STATS.shields++;
     S.dying.push({ r, c, color, t: 0 });
@@ -988,9 +994,14 @@ function drawShip(x, y, size, ch, ammo, opt = {}) {
   ctx.beginPath(); ctx.moveTo(-.64 * S_, -.24 * S_); ctx.quadraticCurveTo(-.6 * S_, .02 * S_, -.48 * S_, .08 * S_);
   ctx.quadraticCurveTo(0, .5 * S_, .48 * S_, .08 * S_); ctx.quadraticCurveTo(.6 * S_, .02 * S_, .64 * S_, -.24 * S_);
   ctx.quadraticCurveTo(0, .14 * S_, -.64 * S_, -.24 * S_); ctx.closePath();
-  const hg = ctx.createLinearGradient(0, -.2 * S_, 0, .4 * S_); hg.addColorStop(0, '#7a5435'); hg.addColorStop(1, '#3a2614');
+  const hg = ctx.createLinearGradient(0, -.2 * S_, 0, .4 * S_);
+  if (opt.chain) { hg.addColorStop(0, '#7b8794'); hg.addColorStop(1, '#2e3540'); } else { hg.addColorStop(0, '#7a5435'); hg.addColorStop(1, '#3a2614'); }
   ctx.fillStyle = hg; ctx.fill();
-  ctx.lineWidth = Math.max(1, S_ * .04); ctx.strokeStyle = '#2a1a0e'; ctx.stroke();
+  ctx.lineWidth = Math.max(1, S_ * .04); ctx.strokeStyle = opt.chain ? '#161a20' : '#2a1a0e'; ctx.stroke();
+  if (opt.chain) { // an iron-bound hull: a chain runs along the rail, link by link
+    ctx.strokeStyle = '#d7dde5'; ctx.lineWidth = Math.max(1.2, S_ * .035);
+    for (let k = -5; k <= 5; k++) { const lx = k * S_ * .1, ly = -.16 * S_ + Math.abs(k) * S_ * .012; ctx.beginPath(); ctx.ellipse(lx, ly, S_ * .05, S_ * .03, 0, 0, 6.3); ctx.stroke(); }
+  }
   // planks
   ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = Math.max(1, S_ * .025);
   ctx.beginPath(); ctx.moveTo(-.5 * S_, .1 * S_); ctx.quadraticCurveTo(0, .32 * S_, .5 * S_, .1 * S_); ctx.stroke();
@@ -1028,7 +1039,10 @@ function drawShip(x, y, size, ch, ammo, opt = {}) {
   } else if (!opt.plain) {
     drawSym(0, my, S_ * .15, ch, '#fff', 'rgba(13,23,38,.8)');
   }
-  if (opt.link) { // lashed: a thick rope wrapped round the sail with knots at the corners
+  if (opt.chain) { // chained across two lines: a grey chain round the sail, link by link
+    ctx.lineWidth = Math.max(2.5, S_ * .075); ctx.strokeStyle = '#3a414b'; ctx.strokeRect(sl - S_ * .07, st - S_ * .07, sw + S_ * .14, sh + S_ * .16);
+    ctx.setLineDash([S_ * .09, S_ * .06]); ctx.lineWidth = Math.max(1.5, S_ * .04); ctx.strokeStyle = '#e3e8ee'; ctx.strokeRect(sl - S_ * .07, st - S_ * .07, sw + S_ * .14, sh + S_ * .16); ctx.setLineDash([]);
+  } else if (opt.link) { // lashed: a thick rope wrapped round the sail with knots at the corners
     ctx.lineWidth = Math.max(3, S_ * .09); ctx.strokeStyle = '#c27a2c'; ctx.strokeRect(sl - S_ * .07, st - S_ * .07, sw + S_ * .14, sh + S_ * .16);
     ctx.fillStyle = '#8d4f1c'; [[sl - S_ * .07, st - S_ * .07], [sl + sw + S_ * .07, st - S_ * .07], [sl - S_ * .07, st + sh + S_ * .09], [sl + sw + S_ * .07, st + sh + S_ * .09]].forEach(([kx, ky]) => { ctx.beginPath(); ctx.arc(kx, ky, Math.max(2.5, S_ * .07), 0, 6.3); ctx.fill(); }); }
   ctx.restore();
@@ -1080,7 +1094,7 @@ function draw() {
     let size = js;
     if (j.hop) { const u = easeOut(Math.min(1, j.hop.t / HOP)); const sz0 = j.hop.y0 > G.trayY - 1 ? G.slot * .78 : G.js;
       x = j.hop.x0 + (x - j.hop.x0) * u; y = j.hop.y0 + (y - j.hop.y0) * u - Math.sin(u * Math.PI) * cell * 1.6; size = sz0 + (js - sz0) * u; }
-    if (k > 0) drawShip(x, y - js * .3, size * (j.done ? 1 + (1 - k) * .4 : 1), j.color, j.done ? null : j.ammo, { board: !j.hop, alpha: k, seed: j.id, link: !!j.link });
+    if (k > 0) drawShip(x, y - js * .3, size * (j.done ? 1 + (1 - k) * .4 : 1), j.color, j.done ? null : j.ammo, { board: !j.hop, alpha: k, seed: j.id, link: !!j.link, chain: !!j.cross });
   }
   // rope between lashed ships on the fjord
   for (const j of S.belt) { const m = j.link && !j.done && !j.hop ? S.belt.find(o => o !== j && o.link === j.link && !o.done && !o.hop && o.s < j.s) : null; if (!m) continue;
@@ -1100,7 +1114,7 @@ function draw() {
     } else if (j) {
       let jx = x + s / 2, jy = y + s / 2 + 1, sz = s * .78;
       if (j.park) { const u = easeOut(Math.min(1, j.park.t / PARK)); jx = j.park.x0 + (jx - j.park.x0) * u; jy = j.park.y0 + (jy - j.park.y0) * u - (j.park.flat ? 0 : Math.sin(u * Math.PI) * G.cell); const bs0 = j.park.flat ? sz : G.bs; sz = bs0 + (sz - bs0) * u; }
-      drawShip(jx, jy - sz * .12, sz, j.color, j.ammo, { seed: j.id, still: !j.park, link: !!j.link });
+      drawShip(jx, jy - sz * .12, sz, j.color, j.ammo, { seed: j.id, still: !j.park, link: !!j.link, chain: !!j.cross });
       if (S.warn && S.warn.stuck.includes(j)) {
         // stranded-soon marker: a pulsing red dashed frame and a warning triangle in the corner (shape, not color alone)
         const ph = (Math.sin(performance.now() / 180) + 1) / 2;
@@ -1141,7 +1155,7 @@ function draw() {
     const sl = col.slide || 0;
     for (let i = Math.min(col.length, 3) - 1; i >= 0; i--) {
       const [x, y, s] = queueItemPos(k, i + sl), j = col[i];
-      drawShip(x, y, s, j.hidden && i > (hallsDone() >= 5 ? 1 : 0) ? null : j.color, j.ammo, { alpha: i ? .6 : 1, still: i > 0, seed: j.id, link: !!j.link });
+      drawShip(x, y, s, j.hidden && i > (hallsDone() >= 5 ? 1 : 0) ? null : j.color, j.ammo, { alpha: i ? .6 : 1, still: i > 0, seed: j.id, link: !!j.link, chain: !!j.cross });
     }
     if (col.length > 3) { const [x, y] = queueItemPos(k, 2); ctx.fillStyle = 'rgba(43,33,24,.7)'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('+' + (col.length - 3), x, y + G.js * .36); }
   });
@@ -1157,7 +1171,11 @@ function draw() {
     if (k2 < 0) return; seen.add(j.link);
     if (i2 > 2) { const [x, y, s] = queueItemPos(k, i + (col.slide || 0)); knotTag(x, y, s, j.link); return; } // partner hidden deeper in another line
     const [x, y, s] = queueItemPos(k, i + (col.slide || 0)), [x2, y2, s2] = queueItemPos(k2, i2 + (S.cols[k2].slide || 0));
-    if (k2 !== k) { // across two lines: the same knot letter on both ships, so the pair reads at a glance without ropes over other ships
+    if (k2 !== k) { // across two lines: a chain between the hulls, and the same knot letter on both ships
+      const ddx = x2 - x, ddy = y2 - y, L = Math.hypot(ddx, ddy) || 1, ux = ddx / L, uy = ddy / L;
+      const ax = x + ux * s * .4, ay = y + s * .3 + uy * s * .1, bx = x2 - ux * s2 * .4, by = y2 + s2 * .3 - uy * s2 * .1;
+      ctx.lineCap = 'round'; ctx.strokeStyle = '#2e3540'; ctx.lineWidth = Math.max(4, s * .11); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+      ctx.strokeStyle = '#e3e8ee'; ctx.lineWidth = Math.max(1.5, s * .045); ctx.setLineDash([s * .1, s * .07]); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
       knotTag(x, y, s, j.link); knotTag(x2, y2, s2, j.link); return;
     }
     const dx = x2 - x, dy = y2 - y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, px = -uy, py = ux;
@@ -1267,6 +1285,7 @@ function showCard(kind, extra) {
       <button class="link" id="tHB" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Harbor: fish, forge and trade<b style="float:right;font-family:var(--display);color:#ffd37a">${fmtN(hbRate())}/min</b></button>
       <button class="link" id="tSaga" style="display:block;width:100%;text-align:left;background:var(--lemon);color:#2b2118;border-radius:12px;padding:10px 14px;font-size:16px">Saga: achievements and stats<b style="float:right;font-family:var(--display)">${SAGA.silver} silver</b></button>
       <button class="link" id="retreat" style="color:#f3e9d2;background:#8d4f1c;border-radius:12px;padding:10px 14px;font-size:16px">Retreat from raid ${n}</button>
+      <button class="link" id="tWipe" style="color:#f3e9d2;background:#8e2a1e;border-radius:12px;padding:8px 14px;font-size:14px">Erase all progress and start over</button>
       <p style="margin:4px 0 0;font-size:12px;opacity:.65;line-height:1.5">Version ${BUILD}${window.VR_UPDATE ? ` · Update ${window.VR_UPDATE.id}` : ' · Claude page'}<br>${matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'Installed app' : 'In the browser'}<span id="upd"></span></p><button class="cta" id="cancel">Back to the raid</button>`;
     setTimeout(() => {
       $('tMusic').onclick = () => { save.music = !save.music; persist(); music(); showCard('menu'); };
@@ -1277,6 +1296,7 @@ function showCard(kind, extra) {
       $('tLH').onclick = () => openLH('menu');
       $('tHB').onclick = () => openHB();
       $('retreat').onclick = () => showCard('restart');
+      $('tWipe').onclick = () => showCard('wipe');
       // the installed app asks the web host which version is current
       if (window.VR_UPDATE) fetch('version.json', { cache: 'no-store' }).then(r => r.json()).then(v => { const el = $('upd'); if (!el) return;
         el.textContent = v.build === BUILD ? ' · up to date' : ` · ${v.build} is out: close the app fully and open it again`; }).catch(() => {});
@@ -1291,6 +1311,12 @@ function showCard(kind, extra) {
       <li><span>6</span><div><b>Every hall built?</b> Raise a runestone: start over with a quarter more silver from everything, forever.</div></li></ul>
       <button class="cta" id="lhOk">Let's build</button>`;
     setTimeout(() => { const b = $('lhOk'); if (b) b.onclick = () => { $('ov').hidden = true; }; });
+  } else if (kind === 'wipe') {
+    html = `<h2>Erase everything?</h2><ul>
+      <li><span>!</span><div><b>This cannot be undone.</b> Raid ${save.level}, every achievement and stat, ${fmtN(SAGA.silver)} silver, the Longhouse, the Harbor, chests, horns, tokens and runestones all go.</div></li>
+      <li><span>!</span><div>The game starts again from raid 1, as if just installed.</div></li></ul>
+      <button class="cta" id="wipeGo" style="background:#8e2a1e;color:#f3e9d2">Yes, erase everything</button><button class="link" id="cancel">Keep my saga</button>`;
+    setTimeout(() => { const b = $('wipeGo'); if (b) b.onclick = () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); }; });
   } else if (kind === 'rune') {
     html = `<h2>Raise a runestone</h2><ul>
       <li><span>+</span><div><b>Forever:</b> a quarter more silver from raids, the harbor, taps and deliveries. Now x${runeMult().toFixed(2)}, after this x${(runeMult() + .25).toFixed(2)}.</div></li>
