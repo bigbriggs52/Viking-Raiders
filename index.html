@@ -415,7 +415,7 @@ try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = 
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
 
 // ---------- state ----------
-const BELT_CAP = 5, HOP = .32, PARK = .3, FAST = 3;
+const BELT_CAP = 5, HOP = .32, PARK = .3, FAST = 3, SHOT = .22; // SHOT: seconds an axe is in the air
 const easeOut = t => 1 - (1 - t) * (1 - t);
 let S = null, uid = 1;
 function startLevel(n) {
@@ -450,7 +450,9 @@ function layout() {
   const cell = Math.max(8, Math.min(56, W / (C + 3.4), boardH / (R + 2.6))); // room for the fjord's full width on both sides
   const gap = cell * .9;
   const bw = C * cell, bh = R * cell;
-  const bx = (W - bw) / 2, by = gap + cell * 1.0;
+  // ships on the fjord stay readable on wide walls: never smaller than about 42px, and the wall sits low enough for their sails
+  const bs = Math.min(Math.max(cell * 1.8, 42), 60);
+  const bx = (W - bw) / 2, by = gap + Math.max(cell * 1.0, bs * 1.15);
   const L0 = bx - gap, R0 = bx + bw + gap, T0 = by - gap, B0 = by + bh + gap;
   const w = R0 - L0, h = B0 - T0, len = 2 * w + 2 * h;
   const lanes = [];
@@ -467,7 +469,8 @@ function layout() {
   const qTop = trayY + slot + 12;
   const K = S.cols.length, colW = Math.min(150, (W - 8) / K);
   const js = Math.max(26, Math.min(96, colW * .84, (H - qTop - 4) / 3.0));
-  G = { cell, gap, bx, by, bw, bh, L0, R0, T0, B0, w, h, len, lanes, speed: cell * 8.5, spacing: cell * 1.9,
+  // a lap of the fjord takes about the same time whatever the wall size
+  G = { cell, gap, bx, by, bw, bh, L0, R0, T0, B0, w, h, len, lanes, bs, speed: Math.max(cell * 8.5, len / 5), spacing: Math.max(cell * 1.9, bs * 1.1),
     trayY, slot, trayX, cw, qTop, colW, js, qX: (W - colW * K) / 2 };
 }
 function beltPos(s) {
@@ -546,7 +549,7 @@ function hitCube(j, r, c) {
   const color = S.grid[r][c], idx = r * S.C + c;
   const [fx, fy] = beltPos(j.s), [tx, ty] = cellCenter(r, c);
   S.shots.push({ fx, fy, tx, ty, t: 0, color });
-  j.ammo--; j.lapHit = true;
+  j.ammo--; j.lapHit = true; tap();
   if (S.ice.has(idx)) {
     // frozen shield: the first axe shatters the ice, and a second axe (if the ship has one) follows at once
     S.ice.delete(idx); sfx('crack');
@@ -647,7 +650,7 @@ function update(dt) {
   }
   S.tray.forEach(j => { if (j && j.park && (j.park.t += dt) >= PARK) j.park = null; });
   S.cols.forEach(col => { if (col.slide) col.slide = Math.max(0, col.slide - dt / .16); });
-  S.shots = S.shots.filter(s => (s.t += dt) < .14);
+  S.shots = S.shots.filter(s => (s.t += dt) < SHOT);
   S.dying = S.dying.filter(d => {
     d.t += dt;
     if (!d.burst && d.t > .12) { d.burst = true; const [x, y] = cellCenter(d.r, d.c);
@@ -758,8 +761,10 @@ function drawShip(x, y, size, ch, ammo, opt = {}) {
 }
 function drawAxe(x, y, r, spin) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
-  ctx.strokeStyle = '#6b4a2e'; ctx.lineWidth = Math.max(1.5, r * .3); ctx.beginPath(); ctx.moveTo(0, r); ctx.lineTo(0, -r * .6); ctx.stroke();
-  ctx.fillStyle = '#d7dde6'; ctx.beginPath(); ctx.moveTo(0, -r * .9); ctx.quadraticCurveTo(r * .9, -r * .9, r * .8, -r * .1); ctx.quadraticCurveTo(r * .4, -r * .4, 0, -r * .2); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#3a2614'; ctx.lineWidth = Math.max(2.5, r * .34); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, r); ctx.lineTo(0, -r * .6); ctx.stroke();
+  ctx.strokeStyle = '#8d6540'; ctx.lineWidth = Math.max(1.2, r * .18); ctx.beginPath(); ctx.moveTo(0, r * .95); ctx.lineTo(0, -r * .55); ctx.stroke();
+  ctx.fillStyle = '#e8edf3'; ctx.strokeStyle = '#2a1a0e'; ctx.lineWidth = Math.max(1.2, r * .12);
+  ctx.beginPath(); ctx.moveTo(0, -r * 1.0); ctx.quadraticCurveTo(r * 1.1, -r * 1.0, r * .95, -r * .05); ctx.quadraticCurveTo(r * .45, -r * .4, 0, -r * .15); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.restore();
 }
 const DISPLAY_FONT = "'Metamorphous', 'Palatino Linotype', Georgia, serif", BODY_FONT = "'Alegreya Sans', 'Trebuchet MS', system-ui, sans-serif";
@@ -793,9 +798,9 @@ function draw() {
   // bomb targeting hint
   if (S.mode === 'bomb') { ctx.strokeStyle = 'rgba(201,146,42,' + (.6 + Math.sin(t * 8) * .3) + ')'; ctx.lineWidth = 3; rr(bx - cell * .2, by - cell * .2, bw + cell * .4, bh + cell * .4, cell * .35); ctx.stroke(); }
   // shots
-  for (const s of S.shots) { const k = Math.max(0, s.t) / .14; drawAxe(s.fx + (s.tx - s.fx) * k, s.fy + (s.ty - s.fy) * k, cell * .28, k * 12); }
+  for (const s of S.shots) { const k = Math.max(0, s.t) / SHOT; drawAxe(s.fx + (s.tx - s.fx) * k, s.fy + (s.ty - s.fy) * k - Math.sin(k * Math.PI) * cell * .6, Math.max(cell * .28, 13), k * 10); }
   // belt jellies
-  const js = Math.min(cell * 1.8, G.js * .85);
+  const js = G.bs;
   for (const j of S.belt) {
     let [x, y] = beltPos(j.s); const k = j.done ? Math.max(0, 1 - j.popT / .25) : 1;
     let size = js;
@@ -820,7 +825,7 @@ function draw() {
       ctx.moveTo(x + s * .22, y + s * .2); ctx.lineTo(x + s * .78, y + s * .72); ctx.moveTo(x + s * .78, y + s * .2); ctx.lineTo(x + s * .22, y + s * .72); ctx.stroke();
     } else if (j) {
       let jx = x + s / 2, jy = y + s / 2 + 1, sz = s * .78;
-      if (j.park) { const u = easeOut(Math.min(1, j.park.t / PARK)); jx = j.park.x0 + (jx - j.park.x0) * u; jy = j.park.y0 + (jy - j.park.y0) * u - Math.sin(u * Math.PI) * G.cell; const bs0 = Math.min(G.cell * 1.8, G.js * .85); sz = bs0 + (sz - bs0) * u; }
+      if (j.park) { const u = easeOut(Math.min(1, j.park.t / PARK)); jx = j.park.x0 + (jx - j.park.x0) * u; jy = j.park.y0 + (jy - j.park.y0) * u - Math.sin(u * Math.PI) * G.cell; const bs0 = G.bs; sz = bs0 + (sz - bs0) * u; }
       drawShip(jx, jy - sz * .12, sz, j.color, j.ammo, { seed: j.id, still: !j.park, link: !!j.link });
     }
   });
@@ -908,7 +913,7 @@ function showCard(kind, extra) {
   if (S && kind === 'restart') S.mode = 'paused';
   let html = '';
   if (kind === 'help') {
-    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 4d6553f5</small></h2>
+    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build af49778c</small></h2>
       <ul>
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
@@ -941,7 +946,7 @@ function showCard(kind, extra) {
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
     let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
-    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build 4d6553f5</div>`;
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build af49778c</div>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
   card.innerHTML = html; $('ov').hidden = false;
@@ -974,6 +979,7 @@ function sfx(kind) {
   } catch (e) {}
 }
 function buzz() { try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} }
+function tap() { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} } // a short tick per shield hit (phones that support it; iPhone web apps do not)
 
 // ---------- boot ----------
 // iPhone: no double-tap or pinch zoom inside the game
