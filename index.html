@@ -868,7 +868,7 @@ function draw() {
 }
 
 let last = performance.now(), fastClock = 0;
-function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; update(dt); fastClock += dt * (S ? S.fast : 1); draw(); requestAnimationFrame(frame); }
+function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; if (Math.abs(stage.clientWidth - W) > 1 || Math.abs(stage.clientHeight - H) > 1) resize(); update(dt); fastClock += dt * (S ? S.fast : 1); draw(); requestAnimationFrame(frame); }
 
 // ---------- input ----------
 cv.addEventListener('pointerdown', e => {
@@ -987,12 +987,16 @@ function buzz() { try { navigator.vibrate && navigator.vibrate(30); } catch (e) 
 
 // ---------- boot ----------
 window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', () => setTimeout(resize, 50));
+if (window.visualViewport) visualViewport.addEventListener('resize', resize);
+if (window.ResizeObserver) new ResizeObserver(() => resize()).observe(stage); // the stage moves when fonts load or the phone's safe areas apply
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
 resize();
 $('ov').hidden = true;
 startLevel(save.level);
 if (!save.seenHelp) showCard('help');
 requestAnimationFrame(frame);
-window.JB = { get S() { return S; }, update, tapQueue, tapTray, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+window.JB = { get S() { return S; }, update, tapQueue, tapTray, queueItemPos, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
 })();
 </script>
 
