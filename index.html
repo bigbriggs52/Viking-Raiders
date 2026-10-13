@@ -86,7 +86,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .link { background: none; border: 0; color: var(--mute); font: 800 14px var(--body); cursor: pointer; padding: 4px; }
 .toast { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); background: #2f7a4a; color: #f1fff3; font-weight: 800; font-size: 13px; padding: 8px 14px; border-radius: 12px; max-width: calc(100% - 20px); text-align: center; z-index: 4; transition: opacity .4s; pointer-events: none; box-sizing: border-box; }
 /* the Longhouse: a merge board on its own screen */
-#lh { position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#lh { touch-action: manipulation; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #lh .hud .lvl { flex: 1; }
 .lhorder { background: var(--syrup); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 8px 10px; font-size: 13px; line-height: 1.35; }
 .lhorder b.h { font-family: var(--display); font-weight: 400; font-size: 17px; color: var(--wood); }
@@ -116,7 +116,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .lhbar .boost { font-size: 14px; }
 .lhbar .hint { flex: 1; display: grid; place-items: center; font-size: 13px; color: var(--mute); text-align: center; }
 /* the Harbor: an idle clicker */
-#hb { position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#hb { touch-action: manipulation; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #hb .hud .lvl { flex: 1; }
 .hbscene { background: linear-gradient(#bfe0ee 0, #bfe0ee 58%, #4aa3cf 58%, #2d6f8f 100%); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 6px 8px 4px; }
 .hbscene .town { display: flex; justify-content: space-around; align-items: flex-end; height: 54px; }
@@ -155,7 +155,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1949",date:"2026-10-13 19:49 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1956",date:"2026-10-13 19:56 UTC"};</script>
 
 
 <div id="app">
@@ -505,7 +505,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.013';
+const BUILD = 'VR1.014';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1327,7 +1327,12 @@ function tap() { if (!save.vibe) return; try { navigator.vibrate && navigator.vi
 // ---------- boot ----------
 // iPhone: no double-tap or pinch zoom inside the game
 let lastTap = 0;
-document.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTap < 350 && !e.target.closest('button')) e.preventDefault(); lastTap = now; }, { passive: false });
+document.addEventListener('touchend', e => {
+  // a quick second tap must never zoom the page; on the Longhouse and Harbor screens that covers buttons too, which then get their click by hand
+  const now = Date.now(), btn = e.target.closest('button'), side = e.target.closest('#lh, #hb');
+  if (now - lastTap < 350 && (side || !btn)) { e.preventDefault(); if (btn && !btn.disabled) btn.click(); }
+  lastTap = now;
+}, { passive: false });
 document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
 document.addEventListener('dblclick', e => e.preventDefault());
 window.addEventListener('resize', resize);
