@@ -74,7 +74,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1353",date:"2026-10-13 13:53 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1812",date:"2026-10-13 18:12 UTC"};</script>
 
 
 <div id="app">
@@ -410,7 +410,7 @@ function buildLevel(n, fails) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.002';
+const BUILD = 'VR1.003';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {} };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -532,6 +532,12 @@ function tapQueue(k) {
   } else if (activeBelt() < BELT_CAP) { col.shift(); launch(j, queueItemPos(k, 0)); col.slide = 1; }
   else launch(j, queueItemPos(k, 0)); // full fjord: launch() shows the warning
 }
+// docked ships always fill the docks from the left: when one leaves, the rest slide over
+function packTray() {
+  const ships = S.tray.map((j, i) => ({ j, i })).filter(x => x.j);
+  ships.forEach((x, k) => { if (x.i !== k) { const [x0, y0, s] = traySlotRect(x.i); x.j.park = { x0: x0 + s / 2, y0: y0 + s / 2, t: 0, flat: true }; } });
+  for (let i = 0; i < S.tray.length; i++) S.tray[i] = i < ships.length ? ships[i].j : null;
+}
 const SPENT = { spent: true }; // a dock that has been used once is wrecked for the rest of the raid
 const trayShips = () => S.tray.filter(j => j && !j.spent);
 const showing = (color, need) => lapHits(S.grid, S.ice, color, need).length >= need; // one lap, exactly as the ship would sail it
@@ -543,7 +549,7 @@ function tapTray(i) {
   const mi = j.link ? S.tray.findIndex((o, k) => k !== i && o && o.link === j.link) : -1;
   if (mi >= 0 && activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
   const [x, y, sz] = traySlotRect(i);
-  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } }
+  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } packTray(); }
 }
 
 function hitCube(j, r, c) {
@@ -589,7 +595,7 @@ function finishLap(j) {
 }
 function removeAmmo(color, n) {
   const take = j => { const d = Math.min(n, j.ammo); j.ammo -= d; n -= d; };
-  S.tray.forEach((j, i) => { if (n && j && !j.spent && j.color === color) { take(j); if (j.ammo <= 0) S.tray[i] = null; } });
+  S.tray.forEach((j, i) => { if (n && j && !j.spent && j.color === color) { take(j); if (j.ammo <= 0) S.tray[i] = null; } }); packTray();
   S.belt.forEach(j => { if (n && !j.done && j.color === color) { take(j); if (j.ammo <= 0) { const mate = partnerOf(j); if (!mate || mate.ammo <= 0) { j.done = true; j.popT = 0; if (mate) { mate.done = true; mate.popT = 0; } } } } });
   for (const col of S.cols) for (let i = col.length - 1; i >= 0 && n; i--) if (col[i].color === color) {
     take(col[i]);
@@ -624,7 +630,7 @@ function catapult(j) {
   for (let r = 0; r < S.R && n > 0; r++) for (let c = 0; c < S.C && n > 0; c++) { const idx = r * S.C + c; if (S.grid[r][c] === j.color && !gone.has(idx)) { n -= S.ice.has(idx) ? 2 : 1; S.ice.delete(idx); S.grid[r][c] = null; gone.add(idx); S.dying.push({ r, c, color: j.color, t: 0 }); } }
   S.left -= gone.size;
   ships.forEach(o => { const ti = S.tray.indexOf(o); if (ti >= 0) S.tray[ti] = null; else if (col) col.splice(col.indexOf(o), 1); });
-  if (col) col.slide = ships.length;
+  if (col) col.slide = ships.length; else packTray();
   for (let i = 0; i < 30; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 200; S.parts.push({ x: W / 2, y: G.B0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, life: .8, color: i % 2 ? PAL[j.color] : '#6b4a2e', size: 3 + Math.random() * 4 }); }
   S.catapults--; S.mode = 'play'; sfx('boom'); buzz(); hud();
   toast(`Catapulted! ${ships.length > 1 ? 'Both lashed ships' : 'The ship'} and ${gone.size} shields are gone.`);
@@ -850,7 +856,7 @@ function draw() {
       ctx.moveTo(x + s * .22, y + s * .2); ctx.lineTo(x + s * .78, y + s * .72); ctx.moveTo(x + s * .78, y + s * .2); ctx.lineTo(x + s * .22, y + s * .72); ctx.stroke();
     } else if (j) {
       let jx = x + s / 2, jy = y + s / 2 + 1, sz = s * .78;
-      if (j.park) { const u = easeOut(Math.min(1, j.park.t / PARK)); jx = j.park.x0 + (jx - j.park.x0) * u; jy = j.park.y0 + (jy - j.park.y0) * u - Math.sin(u * Math.PI) * G.cell; const bs0 = G.bs; sz = bs0 + (sz - bs0) * u; }
+      if (j.park) { const u = easeOut(Math.min(1, j.park.t / PARK)); jx = j.park.x0 + (jx - j.park.x0) * u; jy = j.park.y0 + (jy - j.park.y0) * u - (j.park.flat ? 0 : Math.sin(u * Math.PI) * G.cell); const bs0 = j.park.flat ? sz : G.bs; sz = bs0 + (sz - bs0) * u; }
       drawShip(jx, jy - sz * .12, sz, j.color, j.ammo, { seed: j.id, still: !j.park, link: !!j.link });
     }
   });
