@@ -74,7 +74,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1812",date:"2026-10-13 18:12 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1823",date:"2026-10-13 18:23 UTC"};</script>
 
 
 <div id="app">
@@ -84,14 +84,14 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="chip" id="try">Try 1</div>
     <button class="iconbtn" id="menu" aria-label="Menu">☰</button>
   </div>
-  <div class="stage" id="stage">
-    <canvas id="cv"></canvas>
-    <div class="toast" id="toast" hidden></div>
-  </div>
   <div class="boosters">
     <button class="boost" id="bBomb">Hammer <b id="nBomb">1</b></button>
     <button class="boost" id="bSlot" hidden>+1 Dock <b id="nSlot">1</b></button>
     <button class="boost" id="bCata">Catapult <b id="nCata">1</b></button>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="toast" id="toast" hidden></div>
   </div>
   <div class="overlay" id="ov">
     <div class="card" id="card"></div>
@@ -410,7 +410,7 @@ function buildLevel(n, fails) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.003';
+const BUILD = 'VR1.004';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {} };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -447,7 +447,7 @@ function resize() {
 }
 function layout() {
   const { R, C } = S;
-  const boardH = Math.min(H * .64, H - 240); // the harbor always keeps room for three readable rows
+  const boardH = Math.min(H * .62, H - 270); // the harbor always keeps room for three readable rows
   const cell = Math.max(8, Math.min(56, W / (C + 3.4), boardH / (R + 2.6))); // room for the fjord's full width on both sides
   const gap = cell * .9;
   const bw = C * cell, bh = R * cell;
@@ -469,7 +469,7 @@ function layout() {
   const trayX = Math.max(cw + 10, (W - trayW) / 2);
   const qTop = trayY + slot + 12;
   const K = S.cols.length, colW = Math.min(150, (W - 8) / K);
-  const js = Math.max(26, Math.min(96, colW * .84, (H - qTop - 4) / 3.0));
+  const js = Math.max(26, Math.min(112, colW * .72, (H - qTop - 4) / 3.2));
   // a lap of the fjord takes about the same time whatever the wall size
   G = { cell, gap, bx, by, bw, bh, L0, R0, T0, B0, w, h, len, lanes, bs, speed: Math.max(cell * 8.5, len / 5), spacing: Math.max(cell * 1.9, bs * 1.1),
     trayY, slot, trayX, cw, qTop, colW, js, qX: (W - colW * K) / 2 };
@@ -487,7 +487,7 @@ const traySlotRect = i => [G.trayX + i * (G.slot + 6), G.trayY, G.slot, G.slot];
 function queueItemPos(k, i) {
   const x = G.qX + G.colW * (k + .5);
   const a = Math.min(Math.max(i, 0), 1), b = Math.max(0, i - 1);
-  const y = G.qTop + G.js * .55 + a * G.js * .98 + b * G.js * .8;
+  const y = G.qTop + G.js * .72 + a * G.js * .98 + b * G.js * .8;
   return [x, y, G.js * (1 - .2 * a - .1 * b)];
 }
 
