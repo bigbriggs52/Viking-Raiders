@@ -74,7 +74,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1823",date:"2026-10-13 18:23 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1834",date:"2026-10-13 18:34 UTC"};</script>
 
 
 <div id="app">
@@ -410,7 +410,7 @@ function buildLevel(n, fails) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.004';
+const BUILD = 'VR1.005';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {} };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -649,6 +649,18 @@ function checkStuck() {
   // no docked ship can set out: none has enough shields of its color showing on the wall
   if (!docked.some(j => { const mate = j.link ? docked.find(o => o !== j && o.link === j.link) : null; return showing(j.color, j.ammo + (mate ? mate.ammo : 0)); })) lose('ships');
 }
+// early warning: the harbor is nearly empty and a docked ship still has no lap that could empty it
+const harborLeft = () => S.cols.reduce((a, c) => a + c.length, 0);
+function dockWarn() {
+  if (!S || S.mode !== 'play' && S.mode !== 'bomb' && S.mode !== 'catapult' || !S.left) return null;
+  const docked = trayShips(); if (!docked.length) return null;
+  const stuck = docked.filter(j => { const mate = j.link ? docked.find(o => o !== j && o.link === j.link) : null; return !showing(j.color, j.ammo + (mate ? mate.ammo : 0)); });
+  if (!stuck.length) return null;
+  const left = harborLeft();
+  if (left > 2) return null;
+  const pairs = new Set(stuck.map(j => j.link || j.id)).size;
+  return { stuck, left, n: pairs, dire: !left && stuck.length === docked.length };
+}
 function win() {
   S.mode = 'won'; save.level = Math.max(save.level, Math.min(MAX_LEVEL, S.n + 1)); persist(); sfx('win');
   for (let i = 0; i < 60; i++) { const x = Math.random() * W; S.parts.push({ x, y: -10, vx: (Math.random() - .5) * 80, vy: 80 + Math.random() * 220, life: 1.6, color: PAL[PROC_COLORS[i % 8]], size: 3 + Math.random() * 4 }); }
@@ -676,6 +688,8 @@ function update(dt) {
     }
   }
   S.tray.forEach(j => { if (j && j.park && (j.park.t += dt) >= PARK) j.park = null; });
+  if ((S.warnT = (S.warnT || 0) + dt) > .3) { S.warnT = 0; const w = dockWarn(); S.warn = w;
+    if (w && !S.warned) { S.warned = true; buzz(); toast(w.dire ? 'Careful! The harbor is empty and no docked ship can sail. Clear its color with the ships on the fjord, or use a power-up.' : `Careful! Only ${w.left || 'no'} harbor ship${w.left === 1 ? '' : 's'} left and ${w.n > 1 ? w.n + ' docked ships' : 'a docked ship'} can't sail yet. Clear ${w.n > 1 ? 'their colors' : 'its color'} or the raid is lost.`); } }
   S.cols.forEach(col => { if (col.slide) col.slide = Math.max(0, col.slide - dt / .16); });
   S.shots = S.shots.filter(s => (s.t += dt) < SHOT);
   S.dying = S.dying.filter(d => {
@@ -858,8 +872,26 @@ function draw() {
       let jx = x + s / 2, jy = y + s / 2 + 1, sz = s * .78;
       if (j.park) { const u = easeOut(Math.min(1, j.park.t / PARK)); jx = j.park.x0 + (jx - j.park.x0) * u; jy = j.park.y0 + (jy - j.park.y0) * u - (j.park.flat ? 0 : Math.sin(u * Math.PI) * G.cell); const bs0 = j.park.flat ? sz : G.bs; sz = bs0 + (sz - bs0) * u; }
       drawShip(jx, jy - sz * .12, sz, j.color, j.ammo, { seed: j.id, still: !j.park, link: !!j.link });
+      if (S.warn && S.warn.stuck.includes(j)) {
+        // stranded-soon marker: a pulsing red dashed frame and a warning triangle in the corner (shape, not color alone)
+        const ph = (Math.sin(performance.now() / 180) + 1) / 2;
+        ctx.lineWidth = 2 + ph * 2; ctx.strokeStyle = `rgba(192,57,43,${.5 + ph * .5})`; ctx.setLineDash([6, 4]); rr(x + 1, y + 1, s - 2, s - 2, s * .18); ctx.stroke(); ctx.setLineDash([]);
+        const ts = s * .3, tx = x + s - ts * .6, ty = y + ts * .6;
+        ctx.beginPath(); ctx.moveTo(tx, ty - ts * .5); ctx.lineTo(tx + ts * .5, ty + ts * .4); ctx.lineTo(tx - ts * .5, ty + ts * .4); ctx.closePath(); ctx.fillStyle = '#c0392b'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+        ctx.fillStyle = '#f3e9d2'; ctx.font = `900 ${Math.round(ts * .6)}px ${BODY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', tx, ty + ts * .1);
+        ctx.font = `800 11px ${BODY_FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      }
     }
   });
+  if (S.warn && S.mode !== 'won') {
+    // stranded-soon banner: a red pill over the dock row's top edge, on top of any ship passing the bottom of the fjord
+    const blink = Math.sin(performance.now() / 180) > -.3, fs = Math.max(11, Math.min(14, Math.round(W / 30)));
+    const msg = S.warn.dire ? '⚠ No ship can sail! Clear a docked color' : `⚠ ${S.warn.left || 'No'} harbor ship${S.warn.left === 1 ? '' : 's'} left, ${S.warn.n > 1 ? S.warn.n + ' docked ships' : 'a docked ship'} can't sail`;
+    ctx.font = `800 ${fs}px ${BODY_FONT}`; const tw = Math.min(W - 16, ctx.measureText(msg).width + fs * 1.4), bh = fs * 1.7, bx = W / 2 - tw / 2, by0 = G.trayY - bh - 3;
+    rr(bx, by0, tw, bh, bh / 2); ctx.fillStyle = blink ? '#c0392b' : '#8e2a1e'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+    ctx.fillStyle = '#f3e9d2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(msg, W / 2, by0 + bh / 2 + 1, tw - fs);
+    ctx.textBaseline = 'bottom';
+  }
   {
     // fjord counter: a wave badge at the far left, away from the docks
     const n = activeBelt(), full = n >= BELT_CAP, cx = 4 + G.cw / 2, cy = G.trayY, bs = G.slot;
@@ -872,7 +904,8 @@ function draw() {
     ctx.fillStyle = full ? '#c0392b' : '#2d6f8f'; ctx.fillText(n + '/' + BELT_CAP, cx, cy + bs * .84);
   }
   const free = S.tray.filter(x => !x).length;
-  if (S.fast > 1.5) { ctx.fillStyle = '#9a6b12'; ctx.textAlign = 'center'; ctx.fillText('Full sail', W / 2, G.trayY - 2); }
+  if (S.warn && S.mode !== 'won') { /* banner drawn after the docks */ }
+  else if (S.fast > 1.5) { ctx.fillStyle = '#9a6b12'; ctx.textAlign = 'center'; ctx.fillText('Full sail', W / 2, G.trayY - 2); }
   else if (free <= 1 && S.mode !== 'won') { ctx.fillStyle = free ? '#9a6b12' : '#c0392b'; ctx.textAlign = 'center'; ctx.fillText(free ? '1 dock left' : 'Docks full', W / 2, G.trayY - 2); }
   // queues
   S.cols.forEach((col, k) => {
