@@ -76,7 +76,7 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 .boost[disabled] { opacity: .4; }
 button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(40, 60, 80, .55); padding-inline: 16px; z-index: 7; }
-.card { width: 100%; max-width: 360px; max-height: calc(100vh - 24px); max-height: calc(var(--vh, 100vh) - 24px); background: var(--syrup); border: 3px solid var(--wood-hi); border-radius: 18px; padding: 24px 22px; text-align: center; box-shadow: 0 10px 0 #4a3220; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
+.card { width: 100%; max-width: 360px; max-height: calc(100vh - 24px); max-height: calc(var(--vh, 100vh) - 24px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; background: var(--syrup); border: 3px solid var(--wood-hi); border-radius: 18px; padding: 24px 22px; text-align: center; box-shadow: 0 10px 0 #4a3220; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; }
 .card h2 { font-family: var(--display); font-weight: 400; font-size: 28px; margin: 0; line-height: 1.05; text-wrap: balance; color: var(--lemon); }
 .card p { margin: 0; color: var(--mute); font-size: 16px; line-height: 1.45; }
 .card ul { margin: 0; padding: 0; list-style: none; overflow: auto; min-height: 0; touch-action: pan-y; text-align: left; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.4; }
@@ -168,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2047",date:"2026-10-13 20:47 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2050",date:"2026-10-13 20:50 UTC"};</script>
 
 
 <div id="app">
@@ -532,7 +532,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.022';
+const BUILD = 'VR1.023';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1286,7 +1286,7 @@ function showCard(kind, extra) {
       <button class="link" id="tHB" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Harbor: tap to earn silver<b style="float:right;font-family:var(--display);color:#ffd37a">${fmtN(hbRate())}/min</b></button>
       <button class="link" id="tSaga" style="display:block;width:100%;text-align:left;background:var(--lemon);color:#2b2118;border-radius:12px;padding:10px 14px;font-size:16px">Saga: your achievements and stats<b style="float:right;font-family:var(--display)">${SAGA.silver} silver</b></button>
       <button class="link" id="retreat" style="color:#f3e9d2;background:#8d4f1c;border-radius:12px;padding:10px 14px;font-size:16px">Retreat from raid ${n}</button>
-      <button class="link" id="tHow" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">How to play</button>
+      <button class="link" id="tHow" style="display:block;width:100%;text-align:center;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">How to play</button>
       <button class="link" id="tWipe" style="color:#f3e9d2;background:#8e2a1e;border-radius:12px;padding:8px 14px;font-size:14px">Erase all progress and start over</button>
       <p style="margin:4px 0 0;font-size:12px;opacity:.65;line-height:1.5">Version ${BUILD}${window.VR_UPDATE ? ` · Update ${window.VR_UPDATE.id}` : ' · Claude page'}<br>${matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'Installed app' : 'In the browser'}<span id="upd"></span></p><button class="cta" id="cancel">Back to the raid</button>`;
     setTimeout(() => {
