@@ -168,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2121",date:"2026-10-13 21:21 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2234",date:"2026-10-13 22:34 UTC"};</script>
 
 
 <div id="app">
@@ -532,7 +532,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.024';
+const BUILD = 'VR1.025';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1330,7 +1330,6 @@ function showCard(kind, extra) {
   } else if (kind === 'rune') {
     html = `<h2>Raise a runestone</h2><ul>
       <li><span>+</span><div><b>Forever:</b> a quarter more silver from raids, the harbor, taps and deliveries. Now x${runeMult().toFixed(2)}, after this x${(runeMult() + .25).toFixed(2)}.</div></li>
-      <li><span>+</span><div><b>Chests spill better pieces:</b> one tier higher for each runestone.</div></li>
       <li><span>!</span><div><b>Starts over:</b> the longhouse board and halls (and their perks), every harbor building, the barrel, and your silver.</div></li>
       <li><span>=</span><div><b>Stays:</b> chests, dock tokens, Mead Horns, boons, achievements, stats and your raids.</div></li></ul>
       <button class="cta" id="runeGo">Raise runestone ${SAGA.runes + 1}</button><button class="link" id="runeNo">Not yet</button>`;
@@ -1477,7 +1476,7 @@ const HALLS = [
   { name: 'Great Hall', wants: [['T', 5, 1], ['I', 5, 1], ['F', 5, 1], ['W', 5, 1]], perk: 'A dock token every 5 wins' },
 ];
 const SELL = [2, 6, 15, 40, 100, 250];
-const CHEST_SPILL = { wood: [3, 0, 0], iron: [4, 0, 1], silver: [5, 1, 2], gold: [6, 2, 2] }; // pieces, lowest and highest tier above the base
+const CHEST_SPILL = { wood: [1, 0, 0], iron: [3, 0, 0], silver: [6, 0, 0], gold: [10, 0, 0] }; // pieces, always level I: bigger chests give more of them
 const chestCount = () => Object.values(SAGA.chests).reduce((a, b) => a + b, 0);
 const pieceName = (ch, t) => LH_CHAINS[ch].tiers[t - 1];
 let lhFrom = null, lhSel = -1, lhDrag = null, lhAnim = {}; // lhAnim: cell index -> { k: 'pop' | 'merge', d: delay ms } for the next render
@@ -1510,13 +1509,13 @@ function openChest(kind, ch) {
   if (!ch) { showCard('chest', { kind }); return; } // the raider chooses what the chest holds
   if (room(ch) < count) { toast(`The ${LH_CHAINS[ch].name.toLowerCase()} corner is too full for ${count} pieces.`); buzz(); return; }
   const empties = lhEmpties().filter(i => quadOf(i) === ch);
-  const base = 1 + Math.min(2, Math.floor((save.level - 1) / 40)) + SAGA.runes; // later raids and runestones spill better pieces
+  const base = 1; // every chest spills level I pieces; merging is what makes them better
   SAGA.chests[kind]--; STATS.chestsOpened++;
   // the pieces land beside the pieces like them (same chain, same tier first), so twins sit together ready to merge
   const dist = (i, j) => Math.abs(Math.floor(i / LH_COLS) - Math.floor(j / LH_COLS)) + Math.abs(i % LH_COLS - j % LH_COLS);
   const spots = empties.slice();
   for (let k = 0; k < count; k++) {
-    const t = Math.min(4, base + lo + Math.floor(Math.random() * (hi - lo + 1)));
+    const t = base; // lo and hi are both zero now, so every piece is level I
     const kin = LH.board.map((q, i) => q && q.ch === ch ? i : -1).filter(i => i >= 0);
     let best = -1, bestScore = Infinity;
     for (const i of spots) {
