@@ -168,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2028",date:"2026-10-13 20:28 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2031",date:"2026-10-13 20:31 UTC"};</script>
 
 
 <div id="app">
@@ -526,7 +526,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.019';
+const BUILD = 'VR1.020';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1555,7 +1555,7 @@ function lhRender() {
   const rb = $('runeBtn'); if (rb) rb.onclick = () => showCard('rune');
   runeChip($('lhRunes'));
   // the board: cells sized once per visit (lhFit), never per tap, so the board never seems to zoom when the bar below it changes
-  const grid = $('lhGrid'); if (!grid.style.getPropertyValue('--c')) lhFit();
+  const grid = $('lhGrid');
   if (grid.children.length !== LH.board.length) { grid.innerHTML = ''; LH.board.forEach((_, i) => { const c = document.createElement('div'); c.className = 'lhcell q' + quadOf(i); c.dataset.i = i; const r = Math.floor(i / LH_COLS), col = i % LH_COLS; if ((r === 0 || r === LH_ROWS / 2) && (col === 0 || col === LH_COLS / 2)) c.dataset.q = LH_CHAINS[quadOf(i)].icon; grid.appendChild(c); }); }
   const wanted = p => hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
   LH.board.forEach((p, i) => { const c = grid.children[i]; c.innerHTML = ''; if (p && !(lhDrag && lhDrag.i === i)) { const el = pieceEl(p); if (i === lhSel) el.classList.add('sel'); if (wanted(p)) el.classList.add('want'); else if (p.t >= 6) el.classList.add('top'); const an = lhAnim[i]; if (an) { el.classList.add(an.k); el.style.animationDelay = an.d + 'ms'; } c.appendChild(el); } }); lhAnim = {};
@@ -1570,6 +1570,8 @@ function lhRender() {
     bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})${can ? `<br>The ${hall.name} wants this: +${p.t * 10} silver` : p.t >= 6 ? '<br>Finest work: tribute pays a dock token + 200 silver' : later ? `<br>Not needed now; the ${later.name} will want it` : hall ? `<br>Merge two to make a ${pieceName(p.ch, p.t + 1)}` : ''}</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : p.t >= 6 ? `<button class="boost" id="lhTribute">Tribute</button>` : ''}<button class="boost" id="lhSell">Sell <b>${rs(SELL[p.t - 1])}</b></button>`;
     const d = $('lhDeliver'); if (d) d.onclick = () => deliver(lhSel); const tr = $('lhTribute'); if (tr) tr.onclick = () => tribute(lhSel); $('lhSell').onclick = () => sell(lhSel);
   }
+  // measure the board last, once the order, shelf and bar have their content and the grid box has its true height
+  if (!grid.style.getPropertyValue('--c')) { lhFit(); requestAnimationFrame(lhFit); }
 }
 // dragging: a piece follows the finger as a ghost; letting go over a cell drops it there
 (() => {
