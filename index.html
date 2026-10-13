@@ -45,6 +45,7 @@ body {
 .bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #8d6540, var(--lemon)); border-radius: 99px; transition: width .25s; }
 .chip { font-size: 13px; font-weight: 800; padding: 4px 9px; border-radius: 99px; background: var(--wood); color: #f3e9d2; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .chip.easy { background: #2f7a4a; color: #e9ffe9; }
+.chip.late { background: #2b2b4a; color: #ffe9a8; font-weight: 700; }
 .iconbtn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--wood); color: #f3e9d2; font: 800 15px var(--body); cursor: pointer; flex: none; }
 .stage { flex: 1; min-height: 0; position: relative; }
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -79,6 +80,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="lvl" id="lvl">Raid 1</div>
     <div class="bar" aria-label="Shields smashed"><i id="prog"></i></div>
     <div class="chip" id="try">Try 1</div>
+    <div class="chip" id="sun" hidden>☀ 12</div>
     <button class="iconbtn" id="mute" aria-label="Sound on or off">♪</button>
   </div>
   <div class="stage" id="stage">
@@ -189,7 +191,8 @@ function lapHits(g0, ice0, color, ammo, apply) {
 }
 // Plan the harbor: ships are cut so that, sent in the planned order, each one spends everything in a single
 // lap. When no color can fill a whole ship, the planned ship comes home once and sails again later (a dock use).
-function planShips(grid, ice0, minAmmo, rng, docks) {
+function planShips(grid, ice0, minAmmo, rng, docks, maxAmmo) {
+  maxAmmo = Math.max(minAmmo + 4, maxAmmo || 0);
   const g = grid.map(r => r.slice()), ice = new Set(ice0), C = g[0].length, list = [], waiting = [];
   const count = () => { let k = 0; g.forEach(r => r.forEach(v => { if (v) k++; })); return k; };
   const totalOf = ch => { let k = 0; g.forEach((row, r) => row.forEach((v, c) => { if (v === ch) k += ice.has(r * C + c) ? 2 : 1; })); return k; };
@@ -202,7 +205,7 @@ function planShips(grid, ice0, minAmmo, rng, docks) {
     if (wi >= 0) { const j = waiting.splice(wi, 1)[0]; send(j.color, j.ammo); continue; }
     const colors = [...new Set(g.flat().filter(Boolean))];
     const opts = colors.map(color => ({ color, hits: lapHits(g, ice, color, 99).length, avail: totalOf(color) - (owed[color] || 0) })).filter(o => o.avail >= minAmmo);
-    const cut = o => { let ammo = Math.min(o.avail, minAmmo + ri(rng, 0, 4)); if (o.avail - ammo < minAmmo) ammo = o.avail; return ammo; };
+    const cut = o => { let ammo = Math.min(o.avail, ri(rng, minAmmo, maxAmmo)); if (o.avail - ammo < minAmmo) ammo = o.avail; return ammo; };
     const full = opts.filter(o => o.hits >= minAmmo);
     if (full.length) {
       const o = full[Math.floor(rng() * full.length)]; let ammo = cut(o);
@@ -235,7 +238,8 @@ function fits(canvas, rows, x0, y0) {
 function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
   const pick = arr => arr[ri(rng, 0, arr.length - 1)];
   const SCENE_W = W, canvas = Array.from({ length: H }, () => new Array(W).fill('.'));
-  const main = MOTIFS.main[(n * 7 + Math.floor(n / 53)) % MOTIFS.main.length];
+  const fitting = MOTIFS.main.filter(m => m.rows[0].length * scale <= W && m.rows.length * scale <= H - 3);
+  const main = fitting[Math.floor(((n * .6180339887) % 1) * fitting.length)]; // golden-ratio spread: neighbours differ, every picture gets its turn
   let mrows = scaleRows(main.rows, scale); if (rng() < .4) mrows = mrows.map(r => r.split('').reverse().join(''));
   const withSky = n >= 3, strip = withSky && rng() < .75 ? pick(MOTIFS.strip) : null;
   const groundTop = strip ? H - strip.rows.length : H;
@@ -247,7 +251,7 @@ function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
   let name = main.name;
   // a second picture beside the first on wide boards
   if (W >= 14 && rng() < .7) {
-    const other = MOTIFS.main[(n * 13 + 5) % MOTIFS.main.length], orows = other.rows, oh = orows.length, ow = orows[0].length;
+    const other = MOTIFS.main[(n * 13 + 5) % MOTIFS.main.length], orows = scaleRows(other.rows, other.rows[0].length * scale + mw <= W ? scale : 1), oh = orows.length, ow = orows[0].length;
     const oy = strip ? groundTop - oh : Math.max(0, Math.min(H - oh, my + ri(rng, -2, 2)));
     const spots = []; for (let x = 0; x + ow <= SCENE_W; x++) if (fits(canvas, orows, x, oy) && (x + ow < mx || x > mx + mw)) spots.push(x);
     if (spots.length && other !== main) { stamp(canvas, orows, pick(spots), oy, 'N'); name = `${main.name} and ${other.name}`; }
@@ -256,16 +260,16 @@ function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
   const skyN = withSky ? 1 + Math.floor((W - 8) / 6) : 0;
   for (let k = 0; k < skyN; k++) {
     if (rng() > .85) continue;
-    const sky = pick(MOTIFS.sky);
-    for (let t = 0; t < 12; t++) { const x = ri(rng, 0, SCENE_W - sky.rows[0].length), y = ri(rng, 0, Math.max(0, my - 1)); if (fits(canvas, sky.rows, x, y)) { stamp(canvas, sky.rows, x, y, 'S' + k); break; } }
+    const sky = pick(MOTIFS.sky), srows = scaleRows(sky.rows, scale);
+    for (let t = 0; t < 12; t++) { const x = ri(rng, 0, SCENE_W - srows[0].length), y = ri(rng, 0, Math.max(0, my - 1)); if (fits(canvas, srows, x, y)) { stamp(canvas, srows, x, y, 'S' + k); break; } }
   }
   // things standing on the ground beside the picture
   const objN = strip ? 1 + Math.floor((W - 8) / 6) : 0;
   for (let k = 0; k < objN; k++) {
     if (rng() > .75) continue;
-    const obj = pick(MOTIFS.obj), ow = obj.rows[0].length, oy = groundTop - obj.rows.length;
-    const spots = []; for (let x = 0; x + ow <= SCENE_W; x++) if (fits(canvas, obj.rows, x, oy)) spots.push(x);
-    if (spots.length) { stamp(canvas, obj.rows, pick(spots), oy, 'O' + k); if (!name.includes(' and ')) name = `${main.name} and ${obj.name}`; }
+    const obj = pick(MOTIFS.obj), orows = scaleRows(obj.rows, scale), ow = orows[0].length, oy = groundTop - orows.length;
+    const spots = []; for (let x = 0; x + ow <= SCENE_W; x++) if (fits(canvas, orows, x, oy)) spots.push(x);
+    if (spots.length) { stamp(canvas, orows, pick(spots), oy, 'O' + k); if (!name.includes(' and ')) name = `${main.name} and ${obj.name}`; }
   }
   const band = n >= 20 ? Math.floor(my * (.4 + rng() * .3)) : -1; // high sky and low sky in two colors
   if (withSky) canvas.forEach((row, y) => row.forEach((v, x) => { if (v === '.') row[x] = y < groundTop ? (y < band ? 'K2' : 'K.') : 'G.'; }));
@@ -288,11 +292,11 @@ function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
 }
 
 // Can a careful raider finish? Sends any front ship whose color shows at least as many hits as it has axes.
-function solvable(grid, ice, cols, docks) {
+function solvable(grid, ice, cols, docks, maxTrips) {
   // a careful raider: sends a ship (from the harbor or a dock) only when every axe it carries can land,
   // and otherwise the one that lands the most, docking what is left. Fails if the docks overflow.
   const g = grid.map(r => r.slice()), C = g[0].length, q = cols.map(c => c.slice()), iceLeft = new Set(ice), tray = [];
-  let left = 0; g.forEach(r => r.forEach(ch => { if (ch) left++; }));
+  let left = 0, trips = 0; g.forEach(r => r.forEach(ch => { if (ch) left++; }));
   const fire = ships => { for (const j of ships) {
     const hits = lapHits(g, iceLeft, j.color, j.ammo, true); left -= hits.filter(h => !h.crack).length;
     j.ammo -= hits.length; if (j.ammo > 0) tray.push(j); } };
@@ -308,10 +312,11 @@ function solvable(grid, ice, cols, docks) {
     const o = opts[0];
     if (!o.full && o.land === 0) return false;
     if (o.t !== undefined) tray.splice(o.t, 1); else o.ships.forEach(() => o.col.shift());
-    fire([{ color: o.color, ammo: o.ammo, pair: o.ships.length > 1 }]);
+    fire([{ color: o.color, ammo: o.ammo, pair: o.ships.length > 1 }]); trips++;
+    if (maxTrips && trips > maxTrips) return false;
     if (tray.reduce((a, j) => a + (j.pair ? 2 : 1), 0) > docks) return false;
   }
-  return true;
+  return trips || 1; // truthy: the number of trips a careful raider needs
 }
 
 // ---------- difficulty curve over 1000 raids: a steady climb with a breather every 7th raid and a hard one every 25th ----------
@@ -320,17 +325,21 @@ function difficulty(n) {
   const t = Math.min(1, n / 400), breather = n > 15 && n % 7 === 0, boss = n % 25 === 0;
   const m = boss ? 1.3 : breather ? .5 : 1;
   return {
-    colors: n < 3 ? 2 : Math.min(8, 3 + Math.floor(Math.sqrt(n) / 2.2)),
-    width: n < 50 ? 10 : n < 150 ? 12 : n < 300 ? 14 : n < 600 ? 16 : 20,
-    height: Math.min(24, Math.round((n < 50 ? 10 : n < 150 ? 12 : n < 300 ? 14 : n < 600 ? 16 : 20) * (n < 25 ? 1 + n / 100 : 1.25)) + (boss ? 1 : 0)),
-    scale: n < 600 ? 1 : 2,
+    colors: n < 3 ? 2 : Math.min(8, 3 + Math.floor(Math.sqrt(n) / 1.4)),
+    // raids 1-10: a small wall of big shields; from raid 11 the pictures are drawn at twice the detail on a wider wall
+    width: n < 11 ? 10 : n < 150 ? 16 : n < 300 ? 18 : 20,
+    height: Math.min(24, Math.round((n < 11 ? 10 : n < 150 ? 16 : n < 300 ? 18 : 20) * (n < 11 ? 1 + n / 50 : 1.25)) + (boss ? 1 : 0)),
+    scale: n < 11 ? 1 : 2,
     minAmmo: n > 10 ? 10 : 5,
+    maxAmmo: n > 10 ? Math.min(40, 14 + Math.round(n * .25)) : 9, // bigger ships on later raids: harder to send at the right moment
     lines: Math.min(6, 4 + Math.floor(n / 20)),
     ice: Math.min(.35, (.04 + t * .3) * m),
     mystery: Math.min(.7, (.12 + t * .5) * m),
     links: Math.min(8, (1 + n * .05) * m),
     tide: Math.max(4, Math.round(9 - t * 4 - (boss ? 1 : 0))),
     scramble: Math.min(4, 1.5 + n * .15),
+    // daylight: spare trips beyond what a careful raider needs; shrinks with the raid number
+    slack: n < 5 ? null : Math.max(1, Math.round((breather ? 3 : 1) + 4 * Math.max(0, 1 - n / 30) - (boss ? 1 : 0))),
     breather, boss
   };
 }
@@ -358,12 +367,12 @@ function buildLevel(n, fails) {
   const docks = 5; // never more than 5 ships in the docks
   // Scramble the helpful order; each failure scrambles it less. A scramble is only kept if a careful
   // raider can still finish. If no scramble works, relief steps thin the ice and finally shrink the ships.
-  let ice, order, cols, attempts = 0, solved = false;
+  let ice, order, cols, attempts = 0, solved = false, need = 0;
   for (let relief = 0; relief < 4 && !solved; relief++) {
     const iceN = n >= 6 ? Math.round(cells.length * D.ice * obsScale * [1, .5, 0, 0][relief]) : 0;
     ice = new Set(cells.slice(0, iceN));
     order = null;
-    for (let seed = 0; seed < 6 && !order; seed++) order = planShips(grid, ice, relief === 3 ? 5 : D.minAmmo, rngFrom(n * 9973 + 17 + relief * 11 + seed), relief === 3 ? 99 : docks);
+    for (let seed = 0; seed < 6 && !order; seed++) order = planShips(grid, ice, relief === 3 ? 5 : D.minAmmo, rngFrom(n * 9973 + 17 + relief * 11 + seed), relief === 3 ? 99 : docks, relief === 3 ? 9 : D.maxAmmo);
     if (!order) continue;
     let frac = D.scramble * Math.max(0, 1 - ease / 4);
     for (let attempt = 0; attempt < 12; attempt++, frac *= .6, attempts++) {
@@ -374,7 +383,7 @@ function buildLevel(n, fails) {
       }
       cols = Array.from({ length: K }, () => []);
       o.forEach((j, i) => cols[i % K].push(j));
-      if (solvable(grid, ice, cols, docks)) { solved = true; break; }
+      if ((need = solvable(grid, ice, cols, docks))) { solved = true; break; }
     }
   }
   // mystery jellies: from level 9, color hidden until launched
@@ -390,13 +399,17 @@ function buildLevel(n, fails) {
     if (col[i].link || col[i + 1].link || col[i].color !== col[i + 1].color || col[i].hidden || col[i + 1].hidden) continue;
     col[i].link = col[i + 1].link = linkId++;
   }
-  if (linkId > 1 && !solvable(grid, ice, cols, docks)) cols.forEach(c => c.forEach(j => { j.link = null; }));
+  if (linkId > 1) { const n2 = solvable(grid, ice, cols, docks); if (!n2) cols.forEach(c => c.forEach(j => { j.link = null; })); else need = n2; }
+  // daylight: from raid 5 a raid allows only so many trips (ship launches) before night falls.
+  // A careful raider (send a ship only when every axe can land, else the one that lands most) fits with trips to spare.
+  const trips = D.slack == null ? null : need + D.slack + ease * 2;
   const notes = [];
+  if (ease && trips) notes.push('more daylight');
   if (ease && n >= 6) notes.push(obsScale ? 'fewer obstacles' : 'no obstacles');
   if (ease) notes.push(ease >= 4 ? 'ships lined up in the best order' : 'a friendlier ship order');
   const bombs = 1 + Math.min(ease, 3), slotBoosts = 0;
   if (ease) notes.push(`${bombs} free hammers`);
-  return { n, name: art.name, grid, ice, cols, reinf, attempts, traySlots: docks, bombs, slotBoosts, notes, ease };
+  return { n, name: art.name, grid, ice, cols, reinf, attempts, traySlots: docks, bombs, slotBoosts, notes, ease, trips };
 }
 
 // ---------- persistence ----------
@@ -415,7 +428,7 @@ function startLevel(n) {
   S = { n, name: L.name, grid: L.grid, ice: L.ice, reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
     cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
     tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
-    bombs: L.bombs, slotBoosts: L.slotBoosts, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1 };
+    bombs: L.bombs, slotBoosts: L.slotBoosts, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1, trips: L.trips, tripsMax: L.trips };
   layout(); hud();
   toast(L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`);
   const fresh = [];
@@ -423,6 +436,7 @@ function startLevel(n) {
   if (L.cols.flat().some(j => j.hidden) && !save.seen.mystery) fresh.push('mystery');
   if (L.cols.flat().some(j => j.link) && !save.seen.link) fresh.push('link');
   if (L.reinf && !save.seen.reinf) fresh.push('reinf');
+  if (L.trips != null && !save.seen.daylight) fresh.push('daylight');
   if (fresh.length && save.seenHelp) { S.mode = 'paused'; showCard('intro', fresh); }
 }
 
@@ -487,8 +501,10 @@ function firstInLane(lane) {
   return null;
 }
 function activeBelt() { return S.belt.filter(j => !j.done).length; }
-function launch(j, from) {
+function launch(j, from, free) {
   if (activeBelt() >= BELT_CAP) { toast('The fjord is full. Wait for a ship to finish its run.'); buzz(); return false; }
+  if (S.trips !== null && S.trips <= 0) { toast('Night has fallen. No more trips today.'); buzz(); return false; }
+  if (S.trips !== null && !free) { S.trips--; if (S.trips === 0) toast('Last trip of the day!'); else if (S.trips <= 2) toast(`${S.trips} trips of daylight left`); }
   const minS = S.belt.reduce((m, b) => Math.min(m, b.s), Infinity);
   j.s = minS < G.spacing ? Math.min(0, minS - G.spacing) : 0;
   j.hidden = false; j.park = null;
@@ -514,7 +530,7 @@ function tapQueue(k) {
   if (j.link && col[1] && col[1].link === j.link) {
     if (activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
     const p0 = queueItemPos(k, 0), p1 = queueItemPos(k, 1), a = col.shift(), b = col.shift();
-    launch(a, p0); launch(b, p1); col.slide = 2;
+    launch(a, p0); launch(b, p1, true); col.slide = 2;
   } else if (activeBelt() < BELT_CAP) { col.shift(); launch(j, queueItemPos(k, 0)); col.slide = 1; }
   else launch(j, queueItemPos(k, 0)); // full fjord: launch() shows the warning
 }
@@ -525,7 +541,7 @@ function tapTray(i) {
   const mi = j.link ? S.tray.findIndex((o, k) => k !== i && o && o.link === j.link) : -1;
   if (mi >= 0 && activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
   const [x, y, sz] = traySlotRect(i);
-  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } }
+  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2], true); S.tray[mi] = null; } }
 }
 
 function hitCube(j, r, c) {
@@ -598,7 +614,9 @@ function lose(why) {
 }
 // no ships left to send while shields remain
 function checkStuck() {
-  if (S.mode !== 'play' || S.left === 0 || S.cols.some(c => c.length) || activeBelt() > 0 || S.shots.length) return;
+  if (S.mode !== 'play' || S.left === 0 || activeBelt() > 0 || S.shots.length) return;
+  if (S.trips === 0) { lose('night'); return; }
+  if (S.cols.some(c => c.length)) return;
   const docked = trayShips();
   if (!docked.length) { lose('ships'); return; }
   // docked ships whose color no longer shows anywhere can never fire again
@@ -876,6 +894,8 @@ function hud() {
   const f = save.fails[S.n] || 0;
   $('try').textContent = f ? `Try ${f + 1} · easier` : 'Try 1';
   $('try').classList.toggle('easy', f > 0);
+  $('sun').hidden = S.trips === null;
+  if (S.trips !== null) { $('sun').textContent = (S.trips <= 2 ? '🌙 ' : '☀ ') + S.trips + (S.trips === 1 ? ' trip' : ' trips'); $('sun').classList.toggle('late', S.trips <= 2); }
   $('nBomb').textContent = S.bombs; $('nSlot').textContent = S.slotBoosts;
   $('bBomb').disabled = !S.bombs; $('bSlot').disabled = !S.slotBoosts;
   $('bBomb').classList.toggle('on', S.mode === 'bomb');
@@ -899,7 +919,8 @@ function showCard(kind, extra) {
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
         <li><span>3</span>The axes add up exactly to the shields, nothing spare. A ship that comes home with axes left waits in a dock until you send it again. Never more than 5 in the docks: if a ship comes home and all 5 are taken, the raid fails. The order you send ships in is everything.</li>
-        <li><span>4</span>Every failed raid makes that raid a little easier next time.</li>
+        <li><span>4</span>Daylight is short: from raid 5 each raid allows only so many trips. Every ship you send uses one, and sending a ship again from the docks uses another. When the trips run out, night falls and the raid fails.</li>
+        <li><span>5</span>Every failed raid makes that raid a little easier next time.</li>
       </ul>
       <button class="cta" id="go">Begin raid ${n}</button>`;
     save.seenHelp = true;
@@ -911,6 +932,8 @@ function showCard(kind, extra) {
   } else if (kind === 'lose') {
     html = S.lossWhy === 'ships'
       ? `<h2>Out of ships</h2><p>No ship left can reach a shield that still stands. Raid ${n} just got a little easier for your next try.</p>`
+      : S.lossWhy === 'night'
+      ? `<h2>Night falls</h2><p>The trips ran out with shields still standing. Send ships that can throw every axe they carry, so no trip is wasted. Raid ${n} just got a little easier for your next try.</p>`
       : `<h2>Docks are full</h2><p>A ship came home and every dock was taken. Raid ${n} just got a little easier for your next try.</p>`;
     html += `<button class="cta" id="go">Try again</button>`;
   } else if (kind === 'restart') {
@@ -920,7 +943,8 @@ function showCard(kind, extra) {
     const txt = { ice: ['Frozen shields', 'A shield rimed with ice needs one extra axe from its color. The first axe cracks the ice, the next one smashes the shield.'],
       mystery: ['Fogbound ships', 'A ship in fog hides its sail color until it reaches the front of its line, so you cannot plan far ahead around it.'],
       link: ['Lashed ships', 'Two ships roped together always launch as a pair, so the fjord needs room for both.'],
-      reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'] };
+      reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'],
+      daylight: ['Daylight', 'The sun counter shows how many trips are left today. Every ship you send uses one, including a ship sent again from the docks. When it hits zero, night falls and the raid is lost, so pick ships that can throw all their axes.'] };
     html = `<h2>New on raid ${n}</h2><ul>${extra.map(k => `<li><span>!</span><div><b>${txt[k][0]}.</b> ${txt[k][1]}</div></li>`).join('')}</ul><button class="cta" id="go">Got it</button>`;
     extra.forEach(k => { save.seen[k] = true; }); persist();
   } else if (kind === 'levels') {
