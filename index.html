@@ -46,7 +46,6 @@ body {
 .bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #8d6540, var(--lemon)); border-radius: 99px; transition: width .25s; }
 .chip { font-size: 13px; font-weight: 800; padding: 4px 9px; border-radius: 99px; background: var(--wood); color: #f3e9d2; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .chip.easy { background: #2f7a4a; color: #e9ffe9; }
-.chip.late { background: #2b2b4a; color: #ffe9a8; font-weight: 700; }
 .iconbtn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--wood); color: #f3e9d2; font: 800 15px var(--body); cursor: pointer; flex: none; }
 .stage { flex: 1; min-height: 0; position: relative; }
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -81,7 +80,6 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="lvl" id="lvl">Raid 1</div>
     <div class="bar" aria-label="Shields smashed"><i id="prog"></i></div>
     <div class="chip" id="try">Try 1</div>
-    <div class="chip" id="sun" hidden>☀ 12</div>
     <button class="iconbtn" id="mute" aria-label="Sound on or off">♪</button>
   </div>
   <div class="stage" id="stage">
@@ -309,9 +307,11 @@ function solvable(grid, ice, cols, docks, maxTrips) {
       opts.push({ ships: pair ? [j, col[1]] : [j], col, ammo: j.ammo + (pair ? col[1].ammo : 0), color: j.color }); });
     if (!opts.length) return false;
     opts.forEach(o => { o.land = Math.min(hits[o.color] || 0, o.ammo); o.full = o.land === o.ammo; });
-    opts.sort((a, b) => (b.full - a.full) || (b.land - a.land) || ((a.t === undefined) - (b.t === undefined)));
-    const o = opts[0];
-    if (!o.full && o.land === 0) return false;
+    // a docked ship only sets out with a full load (the game refuses otherwise), so a partial trip must come from the harbor
+    const can = opts.filter(o => o.full || (o.t === undefined && o.land > 0));
+    if (!can.length) return false;
+    can.sort((a, b) => (b.full - a.full) || (b.land - a.land) || ((a.t === undefined) - (b.t === undefined)));
+    const o = can[0];
     if (o.t !== undefined) tray.splice(o.t, 1); else o.ships.forEach(() => o.col.shift());
     fire([{ color: o.color, ammo: o.ammo, pair: o.ships.length > 1 }]); trips++;
     if (maxTrips && trips > maxTrips) return false;
@@ -339,8 +339,6 @@ function difficulty(n) {
     links: Math.min(8, (1 + n * .05) * m),
     tide: Math.max(4, Math.round(9 - t * 4 - (boss ? 1 : 0))),
     scramble: Math.min(4, 1.5 + n * .15),
-    // daylight: spare trips beyond what a careful raider needs; shrinks with the raid number
-    slack: n < 5 ? null : Math.max(1, Math.round((breather ? 3 : 1) + 4 * Math.max(0, 1 - n / 30) - (boss ? 1 : 0))),
     breather, boss
   };
 }
@@ -401,16 +399,12 @@ function buildLevel(n, fails) {
     col[i].link = col[i + 1].link = linkId++;
   }
   if (linkId > 1) { const n2 = solvable(grid, ice, cols, docks); if (!n2) cols.forEach(c => c.forEach(j => { j.link = null; })); else need = n2; }
-  // daylight: from raid 5 a raid allows only so many trips (ship launches) before night falls.
-  // A careful raider (send a ship only when every axe can land, else the one that lands most) fits with trips to spare.
-  const trips = D.slack == null ? null : need + D.slack + ease * 2;
   const notes = [];
-  if (ease && trips) notes.push('more daylight');
   if (ease && n >= 6) notes.push(obsScale ? 'fewer obstacles' : 'no obstacles');
   if (ease) notes.push(ease >= 4 ? 'ships lined up in the best order' : 'a friendlier ship order');
   const bombs = 1 + Math.min(ease, 3), slotBoosts = 0;
   if (ease) notes.push(`${bombs} free hammers`);
-  return { n, name: art.name, grid, ice, cols, reinf, attempts, traySlots: docks, bombs, slotBoosts, notes, ease, trips };
+  return { n, name: art.name, grid, ice, cols, reinf, attempts, traySlots: docks, bombs, slotBoosts, notes, ease };
 }
 
 // ---------- persistence ----------
@@ -429,7 +423,7 @@ function startLevel(n) {
   S = { n, name: L.name, grid: L.grid, ice: L.ice, reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
     cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
     tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
-    bombs: L.bombs, slotBoosts: L.slotBoosts, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1, trips: L.trips, tripsMax: L.trips };
+    bombs: L.bombs, slotBoosts: L.slotBoosts, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1 };
   layout(); hud();
   toast(L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`);
   const fresh = [];
@@ -437,7 +431,6 @@ function startLevel(n) {
   if (L.cols.flat().some(j => j.hidden) && !save.seen.mystery) fresh.push('mystery');
   if (L.cols.flat().some(j => j.link) && !save.seen.link) fresh.push('link');
   if (L.reinf && !save.seen.reinf) fresh.push('reinf');
-  if (L.trips != null && !save.seen.daylight) fresh.push('daylight');
   if (fresh.length && save.seenHelp) { S.mode = 'paused'; showCard('intro', fresh); }
 }
 
@@ -502,10 +495,8 @@ function firstInLane(lane) {
   return null;
 }
 function activeBelt() { return S.belt.filter(j => !j.done).length; }
-function launch(j, from, free) {
+function launch(j, from) {
   if (activeBelt() >= BELT_CAP) { toast('The fjord is full. Wait for a ship to finish its run.'); buzz(); return false; }
-  if (S.trips !== null && S.trips <= 0) { toast('Night has fallen. No more trips today.'); buzz(); return false; }
-  if (S.trips !== null && !free) { S.trips--; if (S.trips === 0) toast('Last trip of the day!'); else if (S.trips <= 2) toast(`${S.trips} trips of daylight left`); }
   const minS = S.belt.reduce((m, b) => Math.min(m, b.s), Infinity);
   j.s = minS < G.spacing ? Math.min(0, minS - G.spacing) : 0;
   j.hidden = false; j.park = null;
@@ -531,18 +522,22 @@ function tapQueue(k) {
   if (j.link && col[1] && col[1].link === j.link) {
     if (activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
     const p0 = queueItemPos(k, 0), p1 = queueItemPos(k, 1), a = col.shift(), b = col.shift();
-    launch(a, p0); launch(b, p1, true); col.slide = 2;
+    launch(a, p0); launch(b, p1); col.slide = 2;
   } else if (activeBelt() < BELT_CAP) { col.shift(); launch(j, queueItemPos(k, 0)); col.slide = 1; }
   else launch(j, queueItemPos(k, 0)); // full fjord: launch() shows the warning
 }
 const SPENT = { spent: true }; // a dock that has been used once is wrecked for the rest of the raid
 const trayShips = () => S.tray.filter(j => j && !j.spent);
+const showing = (color, need) => lapHits(S.grid, S.ice, color, need).length >= need; // one lap, exactly as the ship would sail it
 function tapTray(i) {
   const j = S.tray[i]; if (!j || j.spent || j.park) return;
+  // the crew will not row out with nothing to throw at: a docked ship waits until its color shows on the wall
+  const mate = j.link ? S.tray.find((o, k) => k !== i && o && o.link === j.link) : null;
+  if (!showing(j.color, j.ammo + (mate ? mate.ammo : 0))) { toast(`Fewer than ${j.ammo + (mate ? mate.ammo : 0)} shields of that color in reach. The ship waits in the dock.`); buzz(); return; }
   const mi = j.link ? S.tray.findIndex((o, k) => k !== i && o && o.link === j.link) : -1;
   if (mi >= 0 && activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
   const [x, y, sz] = traySlotRect(i);
-  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2], true); S.tray[mi] = null; } }
+  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } }
 }
 
 function hitCube(j, r, c) {
@@ -616,13 +611,11 @@ function lose(why) {
 // no ships left to send while shields remain
 function checkStuck() {
   if (S.mode !== 'play' || S.left === 0 || activeBelt() > 0 || S.shots.length) return;
-  if (S.trips === 0) { lose('night'); return; }
   if (S.cols.some(c => c.length)) return;
   const docked = trayShips();
   if (!docked.length) { lose('ships'); return; }
-  // docked ships whose color no longer shows anywhere can never fire again
-  const ex = [...exposed(S.grid)].map(i => S.grid[Math.floor(i / S.C)][i % S.C]);
-  if (!docked.some(j => ex.includes(j.color))) lose('ships');
+  // no docked ship can set out: none has enough shields of its color showing on the wall
+  if (!docked.some(j => { const mate = j.link ? docked.find(o => o !== j && o.link === j.link) : null; return showing(j.color, j.ammo + (mate ? mate.ammo : 0)); })) lose('ships');
 }
 function win() {
   S.mode = 'won'; save.level = Math.max(save.level, Math.min(MAX_LEVEL, S.n + 1)); persist(); sfx('win');
@@ -895,8 +888,6 @@ function hud() {
   const f = save.fails[S.n] || 0;
   $('try').textContent = f ? `Try ${f + 1} · easier` : 'Try 1';
   $('try').classList.toggle('easy', f > 0);
-  $('sun').hidden = S.trips === null;
-  if (S.trips !== null) { $('sun').textContent = (S.trips <= 2 ? '🌙 ' : '☀ ') + S.trips + (S.trips === 1 ? ' trip' : ' trips'); $('sun').classList.toggle('late', S.trips <= 2); }
   $('nBomb').textContent = S.bombs; $('nSlot').textContent = S.slotBoosts;
   $('bBomb').disabled = !S.bombs; $('bSlot').disabled = !S.slotBoosts;
   $('bBomb').classList.toggle('on', S.mode === 'bomb');
@@ -920,7 +911,7 @@ function showCard(kind, extra) {
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
         <li><span>3</span>The axes add up exactly to the shields, nothing spare. A ship that comes home with axes left waits in a dock until you send it again. Never more than 5 in the docks: if a ship comes home and all 5 are taken, the raid fails. The order you send ships in is everything.</li>
-        <li><span>4</span>Daylight is short: from raid 5 each raid allows only so many trips. Every ship you send uses one, and sending a ship again from the docks uses another. When the trips run out, night falls and the raid fails.</li>
+        <li><span>4</span>A docked ship will only set out again when a shield of its color is showing on the wall, so a ship sent at the wrong time can sit in a dock for a long while.</li>
         <li><span>5</span>Every failed raid makes that raid a little easier next time.</li>
       </ul>
       <button class="cta" id="go">Begin raid ${n}</button>`;
@@ -932,9 +923,7 @@ function showCard(kind, extra) {
       <button class="cta" id="go">Raid ${n + 1}</button><button class="link" id="again">Replay raid ${n}</button>`;
   } else if (kind === 'lose') {
     html = S.lossWhy === 'ships'
-      ? `<h2>Out of ships</h2><p>No ship left can reach a shield that still stands. Raid ${n} just got a little easier for your next try.</p>`
-      : S.lossWhy === 'night'
-      ? `<h2>Night falls</h2><p>The trips ran out with shields still standing. Send ships that can throw every axe they carry, so no trip is wasted. Raid ${n} just got a little easier for your next try.</p>`
+      ? `<h2>Stranded</h2><p>The harbor is empty and no docked ship has enough shields of its color showing to set out again. Raid ${n} just got a little easier for your next try.</p>`
       : `<h2>Docks are full</h2><p>A ship came home and every dock was taken. Raid ${n} just got a little easier for your next try.</p>`;
     html += `<button class="cta" id="go">Try again</button>`;
   } else if (kind === 'restart') {
@@ -944,8 +933,7 @@ function showCard(kind, extra) {
     const txt = { ice: ['Frozen shields', 'A shield rimed with ice needs one extra axe from its color. The first axe cracks the ice, the next one smashes the shield.'],
       mystery: ['Fogbound ships', 'A ship in fog hides its sail color until it reaches the front of its line, so you cannot plan far ahead around it.'],
       link: ['Lashed ships', 'Two ships roped together always launch as a pair, so the fjord needs room for both.'],
-      reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'],
-      daylight: ['Daylight', 'The sun counter shows how many trips are left today. Every ship you send uses one, including a ship sent again from the docks. When it hits zero, night falls and the raid is lost, so pick ships that can throw all their axes.'] };
+      reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'] };
     html = `<h2>New on raid ${n}</h2><ul>${extra.map(k => `<li><span>!</span><div><b>${txt[k][0]}.</b> ${txt[k][1]}</div></li>`).join('')}</ul><button class="cta" id="go">Got it</button>`;
     extra.forEach(k => { save.seen[k] = true; }); persist();
   } else if (kind === 'levels') {
