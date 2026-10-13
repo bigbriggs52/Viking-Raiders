@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -48,7 +48,8 @@ body {
 .chip.easy { background: #2f7a4a; color: #e9ffe9; }
 .iconbtn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--wood); color: #f3e9d2; font: 800 15px var(--body); cursor: pointer; flex: none; }
 .stage { flex: 1; min-height: 0; position: relative; }
-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+* { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .boosters { display: flex; gap: 8px; }
 .boost { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; border-radius: 14px; border: 0; cursor: pointer;
   background: linear-gradient(var(--wood-hi), var(--wood)); color: #f3e9d2; font: 800 15px var(--body); box-shadow: 0 4px 0 #3d2a18; }
@@ -974,6 +975,11 @@ function sfx(kind) {
 function buzz() { try { navigator.vibrate && navigator.vibrate(30); } catch (e) {} }
 
 // ---------- boot ----------
+// iPhone: no double-tap or pinch zoom inside the game
+let lastTap = 0;
+document.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTap < 350 && !e.target.closest('button')) e.preventDefault(); lastTap = now; }, { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+document.addEventListener('dblclick', e => e.preventDefault());
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 50));
 if (window.visualViewport) visualViewport.addEventListener('resize', resize);
