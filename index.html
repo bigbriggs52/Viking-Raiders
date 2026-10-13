@@ -155,7 +155,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1956",date:"2026-10-13 19:56 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1959",date:"2026-10-13 19:59 UTC"};</script>
 
 
 <div id="app">
@@ -505,7 +505,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.014';
+const BUILD = 'VR1.015';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1390,7 +1390,22 @@ function openChest(kind) {
   const ch = pool[Math.floor(Math.random() * pool.length)];
   const base = 1 + Math.min(2, Math.floor((save.level - 1) / 40)); // later raids spill better pieces
   SAGA.chests[kind]--; STATS.chestsOpened++;
-  empties.sort(() => Math.random() - .5).slice(0, count).forEach(i => { LH.board[i] = { ch, t: Math.min(4, base + lo + Math.floor(Math.random() * (hi - lo + 1))) }; });
+  // the pieces land beside the pieces like them (same chain, same tier first), so twins sit together ready to merge
+  const dist = (i, j) => Math.abs(Math.floor(i / LH_COLS) - Math.floor(j / LH_COLS)) + Math.abs(i % LH_COLS - j % LH_COLS);
+  const spots = empties.slice();
+  for (let k = 0; k < count; k++) {
+    const t = Math.min(4, base + lo + Math.floor(Math.random() * (hi - lo + 1)));
+    const kin = LH.board.map((q, i) => q && q.ch === ch ? i : -1).filter(i => i >= 0);
+    let best = -1, bestScore = Infinity;
+    for (const i of spots) {
+      let sc = 0;
+      if (kin.length) { let near = Infinity, twin = Infinity; kin.forEach(j => { const d = dist(i, j); near = Math.min(near, d); if (LH.board[j].t === t) twin = Math.min(twin, d); }); sc = Math.min(twin, near + .5); }
+      else sc = dist(i, 20) * .1; // an empty board: start near the middle
+      sc += Math.random() * .3;
+      if (sc < bestScore) { bestScore = sc; best = i; }
+    }
+    LH.board[best] = { ch, t }; spots.splice(spots.indexOf(best), 1);
+  }
   sfx('crack'); lhSel = -1; persist(); lhRender();
   toast(`${count} ${LH_CHAINS[ch].name.toLowerCase()} pieces from the ${CHEST_NAME[kind]}.`);
 }
