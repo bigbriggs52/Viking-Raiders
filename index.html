@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>html,body{margin:0;background:#d6e4ec}[hidden]{display:none!important}</style>
 <title>Viking Raiders</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Viking Raiders">
@@ -36,7 +36,7 @@ html, body { height: 100%; }
 @supports (height: 100dvh) { html, body { height: 100dvh; } }
 body {
   background: var(--ink); color: var(--cream); font-family: var(--body);
-  overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none;
+  overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
 }
 #app { position: fixed; inset: 0; max-width: 560px; margin: 0 auto; padding-inline: 10px; padding-block: 6px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; }
@@ -64,7 +64,8 @@ body {
 .iconbtn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--wood); color: #f3e9d2; font: 800 15px var(--body); cursor: pointer; flex: none; }
 .stage { flex: 1; min-height: 0; position: relative; }
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-* { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+* { touch-action: none; -webkit-tap-highlight-color: transparent; }
+.saga, .hblist, .scroll, .saga *, .hblist *, .scroll * { touch-action: pan-y; }
 .boosters { display: flex; gap: 8px; }
 .boost { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; border-radius: 14px; border: 0; cursor: pointer;
   background: linear-gradient(var(--wood-hi), var(--wood)); color: #f3e9d2; font: 800 15px var(--body); box-shadow: 0 4px 0 #3d2a18; }
@@ -86,7 +87,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .link { background: none; border: 0; color: var(--mute); font: 800 14px var(--body); cursor: pointer; padding: 4px; }
 .toast { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); background: #2f7a4a; color: #f1fff3; font-weight: 800; font-size: 13px; padding: 8px 14px; border-radius: 12px; max-width: calc(100% - 20px); text-align: center; z-index: 4; transition: opacity .4s; pointer-events: none; box-sizing: border-box; }
 /* the Longhouse: a merge board on its own screen */
-#lh { touch-action: manipulation; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#lh { touch-action: none; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #lh .hud .lvl { flex: 1; }
 .lhorder { background: var(--syrup); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 8px 10px; font-size: 13px; line-height: 1.35; }
 .lhorder b.h { font-family: var(--display); font-weight: 400; font-size: 17px; color: var(--wood); }
@@ -122,20 +123,25 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .lhbar .boost { font-size: 14px; }
 .lhbar .hint { flex: 1; display: grid; place-items: center; font-size: 13px; color: var(--mute); text-align: center; }
 /* the Harbor: an idle clicker */
-#hb { touch-action: manipulation; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#hb { touch-action: none; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #hb .hud .lvl { flex: 1; }
 .hbscene { background: linear-gradient(#bfe0ee 0, #bfe0ee 58%, #4aa3cf 58%, #2d6f8f 100%); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 6px 8px 4px; }
 .hbscene .town { display: flex; justify-content: space-around; align-items: flex-end; height: 54px; }
 .hbscene .bld { display: grid; justify-items: center; gap: 1px; font-size: 30px; line-height: 1; position: relative; }
 .hbscene .bld.off { opacity: .25; filter: grayscale(1); }
 .hbscene .bld i { font: 800 10px var(--body); font-style: normal; background: var(--wood); color: #ffd37a; border-radius: 8px; padding: 1px 5px; }
+.hbscene .rates { display: flex; gap: 6px; margin-top: 4px; }
+.hbscene .rate { flex: 1; background: rgba(243, 233, 210, .92); border-radius: 10px; padding: 4px 6px; text-align: center; line-height: 1.15; }
+.hbscene .rate b { display: block; font-family: var(--display); font-weight: 400; font-size: 18px; color: var(--wood); font-variant-numeric: tabular-nums; }
+.hbscene .rate small { font-size: 10.5px; color: var(--mute); font-weight: 800; }
+.hbscene .rate em { color: #2f7a4a; font-style: normal; }
 .hbscene .inc { display: flex; justify-content: space-between; align-items: center; color: #f3e9d2; font-weight: 800; font-size: 13px; margin-top: 4px; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
 .hbscene .ms { height: 8px; background: rgba(0,0,0,.25); border-radius: 99px; overflow: hidden; margin-top: 3px; }
 .hbscene .ms i { display: block; height: 100%; background: #ffd37a; }
 .hbscene .msl { color: #f3e9d2; font-size: 11px; font-weight: 800; margin-top: 2px; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
 .hblist h3 { margin: 4px 2px 0; font-family: var(--display); font-weight: 400; font-size: 15px; color: var(--wood); }
 .hbtapwrap { position: relative; }
-.hbtap { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 84px; background: linear-gradient(#8d6540, #6b4a2e); border: 0; border-radius: 20px; box-shadow: 0 6px 0 #3d2a18; color: #f3e9d2; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; transition: transform .05s; }
+.hbtap { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 84px; background: linear-gradient(#8d6540, #6b4a2e); border: 0; border-radius: 20px; box-shadow: 0 6px 0 #3d2a18; color: #f3e9d2; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; transition: transform .05s; }
 .hbtap:active, .hbtap.hit { transform: translateY(4px); box-shadow: 0 2px 0 #3d2a18; }
 .hbtap .fish { font-size: 46px; line-height: 1; transition: transform .08s; }
 .hbtap.hit .fish { transform: scale(1.2) rotate(-10deg); }
@@ -161,7 +167,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2003",date:"2026-10-13 20:03 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2020",date:"2026-10-13 20:20 UTC"};</script>
 
 
 <div id="app">
@@ -182,14 +188,14 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="toast" id="toast" hidden></div>
   </div>
   <div id="lh" hidden>
-    <div class="hud"><div class="lvl">Longhouse</div><div class="chip" id="lhSilver">0 silver</div><div class="chip" id="lhTokens" hidden>0 dock tokens</div><button class="iconbtn" id="lhClose" aria-label="Back to the raid">✕</button></div>
+    <div class="hud"><div class="lvl">Longhouse</div><div class="chip" id="lhSilver">0 silver</div><div class="chip" id="lhTokens" hidden>0 dock tokens</div><div class="chip" id="lhRunes" hidden></div><button class="iconbtn" id="lhClose" aria-label="Back to the raid">✕</button></div>
     <div class="lhorder" id="lhOrder"></div>
     <div class="lhgrid" id="lhGrid"></div>
     <div class="lhshelf" id="lhShelf"></div>
     <div class="lhbar" id="lhBar"></div>
   </div>
   <div id="hb" hidden>
-    <div class="hud"><div class="lvl">Harbor</div><div class="chip" id="hbSilver">0 silver</div><button class="iconbtn" id="hbClose" aria-label="Back to the raid">✕</button></div>
+    <div class="hud"><div class="lvl">Harbor</div><div class="chip" id="hbSilver">0 silver</div><div class="chip" id="hbRunes" hidden></div><button class="iconbtn" id="hbClose" aria-label="Back to the raid">✕</button></div>
     <div class="hbscene" id="hbScene"></div>
     <div class="hblist" id="hbList"></div>
     <div class="hbtapwrap"><div class="hbtap" id="hbBarrel"><div class="fish">🐟</div><div class="txt"><b id="hbTap">+1 silver</b><small id="hbCombo">Tap the barrel</small></div></div><div class="floats" id="hbFloats"></div></div>
@@ -406,8 +412,10 @@ function solvable(grid, ice, cols, docks, maxTrips) {
     const hits = {}; [...new Set(g.flat().filter(Boolean))].forEach(ch => { hits[ch] = lapHits(g, iceLeft, ch, 99).length; });
     const opts = [];
     tray.forEach((j, t) => opts.push({ ships: [j], t, ammo: j.ammo, color: j.color }));
-    q.forEach(col => { if (!col.length) return; const j = col[0], pair = j.link && col[1] && col[1].link === j.link;
-      opts.push({ ships: pair ? [j, col[1]] : [j], col, ammo: j.ammo + (pair ? col[1].ammo : 0), color: j.color }); });
+    q.forEach((col, k) => { if (!col.length) return; const j = col[0];
+      let mate = null, mcol = col;
+      if (j.link) { if (col[1] && col[1].link === j.link) mate = col[1]; else { mcol = q.find((c, k2) => k2 !== k && c.length && c[0].link === j.link); if (!mcol) return; mate = mcol[0]; } }
+      opts.push({ ships: mate ? [j, mate] : [j], col, mcol, ammo: j.ammo + (mate ? mate.ammo : 0), color: j.color }); });
     if (!opts.length) return false;
     opts.forEach(o => { o.land = Math.min(hits[o.color] || 0, o.ammo); o.full = o.land === o.ammo; });
     // a docked ship only sets out with a full load (the game refuses otherwise), so a partial trip must come from the harbor
@@ -415,7 +423,7 @@ function solvable(grid, ice, cols, docks, maxTrips) {
     if (!can.length) return false;
     can.sort((a, b) => (b.full - a.full) || (b.land - a.land) || ((a.t === undefined) - (b.t === undefined)));
     const o = can[0];
-    if (o.t !== undefined) tray.splice(o.t, 1); else o.ships.forEach(() => o.col.shift());
+    if (o.t !== undefined) tray.splice(o.t, 1); else { o.col.shift(); if (o.ships.length > 1) o.mcol.shift(); }
     fire([{ color: o.color, ammo: o.ammo, pair: o.ships.length > 1 }]); trips++;
     if (maxTrips && trips > maxTrips) return false;
     if (tray.reduce((a, j) => a + (j.pair ? 2 : 1), 0) > docks) return false;
@@ -497,6 +505,12 @@ function buildLevel(n, fails, tight) {
   let linkId = 1;
   for (let tries = 0; tries < 120 && linkId <= linkN; tries++) {
     const col = cols[ri(orng, 0, K - 1)]; if (col.length < 2) continue;
+    if (n >= 18 && K > 1 && orng() < .5) { // lashed across two lines: the partner may sit deeper in its line, so that line must be worked first
+      const k2 = (cols.indexOf(col) + ri(orng, 1, K - 1)) % K, col2 = cols[k2]; if (!col2.length) continue;
+      const a = col[ri(orng, 0, col.length - 1)], d = Math.min(col2.length - 1, ri(orng, 0, 2)), b = col2[d];
+      if (a.link || b.link || a.color !== b.color || a.hidden || b.hidden) continue;
+      a.link = b.link = linkId++; continue;
+    }
     const i = ri(orng, 0, col.length - 2);
     if (col[i].link || col[i + 1].link || col[i].color !== col[i + 1].color || col[i].hidden || col[i + 1].hidden) continue;
     col[i].link = col[i + 1].link = linkId++;
@@ -511,12 +525,12 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.017';
+const BUILD = 'VR1.018';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
 // ---------- the saga: silver, chests, streaks, achievements and stats (2026-10-13) ----------
-const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons'];
+const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons', 'runes'];
 if (!save.saga) {
   // first run with the saga: raids already beaten count as won and reached, but never as first-try wins
   const st = {}; STAT_KEYS.forEach(k => st[k] = 0); st.wins = st.reach = Math.max(0, save.level - 1);
@@ -535,6 +549,11 @@ const hallsDone = () => LH.hall; // finished halls, in order: Hearth, Feast Hall
 const hornEvery = () => hallsDone() >= 1 ? 5 : 10;
 const sixthSail = () => SAGA.streak >= 3; // three straight wins: six ships may sail the fjord at once
 const beltCap = () => sixthSail() ? 6 : 5;
+if (!SAGA.runes) SAGA.runes = 0;
+// runestones: the prestige of the Longhouse and Harbor. Each one raised keeps paying a quarter more silver from everything, for good
+const RUNE_HB = 100; // harbor level needed, together with a finished longhouse
+const runeMult = () => 1 + .25 * SAGA.runes;
+const rs = n => Math.round(n * runeMult());
 const CHEST_NAME = { wood: 'wooden chest', iron: 'iron chest', silver: 'silver chest', gold: 'gold chest' };
 // every achievement has a shape badge, so tiers never rely on color alone
 const ACH = [
@@ -557,7 +576,7 @@ const ACH = [
 ];
 const TIER_NAME = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
 function giveChest(kind, n = 1) { SAGA.chests[kind] = (SAGA.chests[kind] || 0) + n; STATS.chests += n; }
-function giveSilver(n) { SAGA.silver += n; STATS.silverAll += n; }
+function giveSilver(n) { SAGA.silver += n; STATS.silverAll += n; } // callers pass the runestone-boosted amount (rs) so the number shown is the number paid
 // award every tier the stats now reach; returns the new ones for the win card
 function checkAch() {
   const out = [];
@@ -695,6 +714,12 @@ function tapQueue(k) {
     if (activeBelt() + 2 > beltCap()) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
     const p0 = queueItemPos(k, 0), p1 = queueItemPos(k, 1), a = col.shift(), b = col.shift();
     launch(a, p0); launch(b, p1); col.slide = 2;
+  } else if (j.link) { // lashed to a ship in another line: both must be at the front of their lines
+    const k2 = S.cols.findIndex((c, i) => i !== k && c.length && c[0].link === j.link);
+    if (k2 < 0) { toast('Lashed to a ship further back in another line. Clear the ships ahead of it first.'); buzz(); return; }
+    if (activeBelt() + 2 > beltCap()) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
+    const col2 = S.cols[k2], p0 = queueItemPos(k, 0), p1 = queueItemPos(k2, 0), a = col.shift(), b = col2.shift();
+    launch(a, p0); launch(b, p1); col.slide = 1; col2.slide = 1;
   } else if (activeBelt() < beltCap()) { col.shift(); launch(j, queueItemPos(k, 0)); col.slide = 1; }
   else launch(j, queueItemPos(k, 0)); // full fjord: launch() shows the warning
 }
@@ -716,6 +741,19 @@ function tapTray(i) {
   if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; S.dockSails++; STATS.fullLoad++; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } packTray(); }
 }
 
+// a short label inside the fjord, on the widest run of empty cells (the belt lane and the docks stay clear of it)
+function boardLabel(txt, color) {
+  const fs = Math.max(12, Math.min(16, Math.round(G.cell * .6))); ctx.font = `800 ${fs}px ${BODY_FONT}`;
+  const tw = ctx.measureText(txt).width + fs * 1.2, th = fs * 1.6, need = Math.ceil(tw / G.cell);
+  let best = null;
+  for (let r = 0; r < S.R; r++) { let run = 0; for (let c = 0; c <= S.C; c++) {
+    if (c < S.C && !S.grid[r][c]) { run++; continue; }
+    if (run >= need) { const sc = Math.abs(r - S.R / 2) - run * .05; if (!best || sc < best.sc) best = { sc, r, c0: c - run, run }; }
+    run = 0; } }
+  const [x, y] = best ? cellCenter(best.r, best.c0 + best.run / 2 - .5) : [G.bx + G.cell * S.C / 2, G.by + G.cell * S.R / 2];
+  rr(x - tw / 2, y - th / 2, tw, th, th / 2); ctx.fillStyle = 'rgba(243,233,210,.92)'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = color; ctx.stroke();
+  ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, x, y + 1);
+}
 function hitCube(j, r, c) {
   const color = S.grid[r][c], idx = r * S.C + c;
   const [fx, fy] = beltPos(j.s), [tx, ty] = cellCenter(r, c);
@@ -763,7 +801,7 @@ function removeAmmo(color, n) {
   S.belt.forEach(j => { if (n && !j.done && j.color === color) { take(j); if (j.ammo <= 0) { const mate = partnerOf(j); if (!mate || mate.ammo <= 0) { j.done = true; j.popT = 0; if (mate) { mate.done = true; mate.popT = 0; } } } } });
   for (const col of S.cols) for (let i = col.length - 1; i >= 0 && n; i--) if (col[i].color === color) {
     take(col[i]);
-    if (col[i].ammo <= 0) { const lk = col[i].link; col.splice(i, 1); if (lk) col.forEach(o => { if (o.link === lk) o.link = null; }); }
+    if (col[i].ammo <= 0) { const lk = col[i].link; col.splice(i, 1); if (lk) S.cols.forEach(c => c.forEach(o => { if (o.link === lk) o.link = null; })); }
   }
 }
 function bomb(r0, c0) {
@@ -785,7 +823,7 @@ function catapult(j) {
   if (!S.catapults) return;
   const ships = [j]; const lk = j.link;
   const inTray = S.tray.indexOf(j), col = S.cols.find(c => c.includes(j));
-  if (lk) { if (inTray >= 0) { const m = S.tray.find(o => o && o !== j && o.link === lk); if (m) ships.push(m); } else if (col) { const m = col.find(o => o !== j && o.link === lk); if (m) ships.push(m); } }
+  if (lk) { if (inTray >= 0) { const m = S.tray.find(o => o && o !== j && o.link === lk); if (m) ships.push(m); } else if (col) { const m = S.cols.flat().find(o => o !== j && o.link === lk); if (m) ships.push(m); } }
   let n = ships.reduce((a, o) => a + o.ammo, 0);
   const hits = lapHits(S.grid, S.ice, j.color, n, true); // outermost shields of that color go first (ice counts two)
   const gone = new Set();
@@ -793,8 +831,8 @@ function catapult(j) {
   n -= hits.length;
   for (let r = 0; r < S.R && n > 0; r++) for (let c = 0; c < S.C && n > 0; c++) { const idx = r * S.C + c; if (S.grid[r][c] === j.color && !gone.has(idx)) { n -= S.ice.has(idx) ? 2 : 1; S.ice.delete(idx); S.grid[r][c] = null; gone.add(idx); S.dying.push({ r, c, color: j.color, t: 0 }); } }
   S.left -= gone.size;
-  ships.forEach(o => { const ti = S.tray.indexOf(o); if (ti >= 0) S.tray[ti] = null; else if (col) col.splice(col.indexOf(o), 1); });
-  if (col) col.slide = ships.length; else packTray();
+  ships.forEach(o => { const ti = S.tray.indexOf(o); if (ti >= 0) S.tray[ti] = null; else { const c = S.cols.find(c => c.includes(o)); if (c) { c.splice(c.indexOf(o), 1); c.slide = (c.slide || 0) + 1; } } });
+  if (!col) packTray();
   for (let i = 0; i < 30; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 200; S.parts.push({ x: W / 2, y: G.B0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, life: .8, color: i % 2 ? PAL[j.color] : '#6b4a2e', size: 3 + Math.random() * 4 }); }
   S.catapults--; S.usedC++; STATS.catapults++; raidRec(S.n).c++; S.mode = 'play'; sfx('boom'); buzz(); hud();
   toast(`Catapulted! ${ships.length > 1 ? 'Both lashed ships' : 'The ship'} and ${gone.size} shields are gone.`);
@@ -848,6 +886,7 @@ function win() {
     if (SAGA.streak === 3) R.sixth = true; }
   hbSettle();
   if (hallsDone() >= 2) R.silver = Math.round(R.silver * 1.5); // the Feast Hall
+  R.silver = rs(R.silver); // runestones
   if (hallsDone() >= 6 && STATS.wins % 5 === 0) { LH.tokens++; R.token = true; } // the Great Hall
   giveSilver(R.silver);
   R.ach = checkAch(); S.reward = R; persist(); sfx('win');
@@ -1094,8 +1133,8 @@ function draw() {
   }
   const free = S.tray.filter(x => !x).length;
   if (S.warn && S.mode !== 'won') { /* banner drawn after the docks */ }
-  else if (S.fast > 1.5) { ctx.fillStyle = '#9a6b12'; ctx.textAlign = 'center'; ctx.fillText('Full sail', W / 2, G.trayY - 2); }
-  else if (free <= 1 && S.mode !== 'won') { ctx.fillStyle = free ? '#9a6b12' : '#c0392b'; ctx.textAlign = 'center'; ctx.fillText(free ? '1 dock left' : 'Docks full', W / 2, G.trayY - 2); }
+  else if (S.fast > 1.5) boardLabel('Full sail', '#9a6b12');
+  else if (free <= 1 && S.mode !== 'won') boardLabel(free ? '1 dock left' : 'Docks full', free ? '#9a6b12' : '#c0392b');
   // queues
   S.cols.forEach((col, k) => {
     const sl = col.slide || 0;
@@ -1103,20 +1142,34 @@ function draw() {
       const [x, y, s] = queueItemPos(k, i + sl), j = col[i];
       drawShip(x, y, s, j.hidden && i > (hallsDone() >= 5 ? 1 : 0) ? null : j.color, j.ammo, { alpha: i ? .6 : 1, still: i > 0, seed: j.id, link: !!j.link });
     }
-    // lashed pairs: two taut ropes between the ships and a LASHED tag, drawn over both ships
-    for (let i = 0; i < Math.min(col.length, 3) - 1; i++) {
-      const j = col[i]; if (!(j.link && col[i + 1].link === j.link)) continue;
-      const [x, y, s] = queueItemPos(k, i + sl), [x2, y2, s2] = queueItemPos(k, i + 1 + sl);
-      ctx.strokeStyle = '#c27a2c'; ctx.lineWidth = Math.max(3, s * .09); ctx.lineCap = 'round'; ctx.beginPath();
-      ctx.moveTo(x - s * .3, y + s * .3); ctx.lineTo(x2 - s2 * .3, y2 - s2 * .35); ctx.moveTo(x + s * .3, y + s * .3); ctx.lineTo(x2 + s2 * .3, y2 - s2 * .35); ctx.stroke();
-      // the tag sits on the ropes, to the right of the sails so it never covers a number
-      const my = (y + s * .3 + y2 - s2 * .35) / 2, th = Math.max(13, s * .26), fs = Math.round(th * .6);
-      ctx.font = `800 ${fs}px ${BODY_FONT}`; const tw = ctx.measureText('LASHED').width + th * .9, tx = x + s * .62;
-      rr(tx - tw / 2, my - th / 2, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
-      ctx.fillStyle = '#f3e9d2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LASHED', tx, my + 1);
-    }
     if (col.length > 3) { const [x, y] = queueItemPos(k, 2); ctx.fillStyle = 'rgba(43,33,24,.7)'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('+' + (col.length - 3), x, y + G.js * .36); }
   });
+  // lashed pairs: two taut ropes between the ships and a LASHED tag, in one line or across two lines
+  const knotTag = (tx, ty, ts, link) => { const tag = String.fromCharCode(65 + (link - 1) % 26), th = Math.max(14, ts * .3); ctx.font = `800 ${Math.round(th * .7)}px ${BODY_FONT}`; const tw = ctx.measureText('⛓' + tag).width + th * .6, cx = tx + ts * .42, cy = ty + ts * .36;
+    rr(cx - tw / 2, cy - th / 2, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+    ctx.fillStyle = '#f3e9d2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⛓' + tag, cx, cy + 1); };
+  const seen = new Set();
+  S.cols.forEach((col, k) => { col.slice(0, 3).forEach((j, i) => {
+    if (!j.link || seen.has(j.link)) return;
+    let k2 = -1, i2 = -1;
+    S.cols.forEach((c, kk) => { if (k2 >= 0) return; const ii = c.findIndex(o => o !== j && o.link === j.link); if (ii >= 0) { k2 = kk; i2 = ii; } });
+    if (k2 < 0) return; seen.add(j.link);
+    if (i2 > 2) { const [x, y, s] = queueItemPos(k, i + (col.slide || 0)); knotTag(x, y, s, j.link); return; } // partner hidden deeper in another line
+    const [x, y, s] = queueItemPos(k, i + (col.slide || 0)), [x2, y2, s2] = queueItemPos(k2, i2 + (S.cols[k2].slide || 0));
+    if (k2 !== k) { // across two lines: the same knot letter on both ships, so the pair reads at a glance without ropes over other ships
+      knotTag(x, y, s, j.link); knotTag(x2, y2, s2, j.link); return;
+    }
+    const dx = x2 - x, dy = y2 - y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, px = -uy, py = ux;
+    const ax = x + ux * s * .33, ay = y + uy * s * .33, bx = x2 - ux * s2 * .36, by = y2 - uy * s2 * .36;
+    ctx.strokeStyle = '#c27a2c'; ctx.lineWidth = Math.max(3, s * .09); ctx.lineCap = 'round'; ctx.beginPath();
+    ctx.moveTo(ax + px * s * .3, ay + py * s * .3); ctx.lineTo(bx + px * s2 * .3, by + py * s2 * .3);
+    ctx.moveTo(ax - px * s * .3, ay - py * s * .3); ctx.lineTo(bx - px * s2 * .3, by - py * s2 * .3); ctx.stroke();
+    // the tag sits on the ropes, beside the sails so it never covers a number
+    const vert = Math.abs(dx) < s * .5, mx = (ax + bx) / 2, my = (ay + by) / 2, th = Math.max(13, s * .26), fs = Math.round(th * .6);
+    ctx.font = `800 ${fs}px ${BODY_FONT}`; const tw = ctx.measureText('LASHED').width + th * .9, tx = vert ? x + s * .62 : mx, ty = vert ? my : my - s * .3;
+    rr(tx - tw / 2, ty - th / 2, tw, th, th / 2); ctx.fillStyle = '#8d4f1c'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+    ctx.fillStyle = '#f3e9d2'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('LASHED', tx, ty + 1);
+  }); });
   // particles
   for (const p of S.parts) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); }
   ctx.globalAlpha = 1;
@@ -1229,20 +1282,36 @@ function showCard(kind, extra) {
     });
   } else if (kind === 'lhHelp') {
     html = `<h2>The Longhouse</h2><ul>
-      <li><span>1</span><div><b>Tap a chest.</b> Its pieces land in their own corner: timber top left, iron top right, food bottom left, wool bottom right.</div></li>
+      <li><span>1</span><div><b>Tap a chest and choose what it holds.</b> Pieces live in their own corner only: timber top left, iron top right, food bottom left, wool bottom right.</div></li>
       <li><span>2</span><div><b>Drag a piece onto one just like it.</b> The two become one better piece. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
       <li><span>4</span><div><b>Glowing pieces</b> are the ones the hall wants right now. A level VI piece is the top: tap it for a tribute (a dock token and silver).</div></li>
-      <li><span>5</span><div><b>Board full?</b> Tap a piece and Sell it for silver.</div></li></ul>
+      <li><span>5</span><div><b>Board full?</b> Tap a piece and Sell it for silver.</div></li>
+      <li><span>6</span><div><b>Every hall built?</b> Raise a runestone: start over with a quarter more silver from everything, forever.</div></li></ul>
       <button class="cta" id="lhOk">Let's build</button>`;
-    setTimeout(() => { $('lhOk').onclick = () => { $('ov').hidden = true; }; });
+    setTimeout(() => { const b = $('lhOk'); if (b) b.onclick = () => { $('ov').hidden = true; }; });
+  } else if (kind === 'rune') {
+    html = `<h2>Raise a runestone</h2><ul>
+      <li><span>+</span><div><b>Forever:</b> a quarter more silver from raids, the harbor, taps and deliveries. Now x${runeMult().toFixed(2)}, after this x${(runeMult() + .25).toFixed(2)}.</div></li>
+      <li><span>+</span><div><b>Chests spill better pieces:</b> one tier higher for each runestone.</div></li>
+      <li><span>!</span><div><b>Starts over:</b> the longhouse board and halls (and their perks), every harbor building, the barrel, and your silver.</div></li>
+      <li><span>=</span><div><b>Stays:</b> chests, dock tokens, Mead Horns, boons, achievements, stats and your raids.</div></li></ul>
+      <button class="cta" id="runeGo">Raise runestone ${SAGA.runes + 1}</button><button class="link" id="runeNo">Not yet</button>`;
+    setTimeout(() => { $('runeGo').onclick = raiseRune; $('runeNo').onclick = () => { $('ov').hidden = true; }; });
+  } else if (kind === 'chest') {
+    const kind2 = extra.kind, [count] = CHEST_SPILL[kind2], hall = HALLS[Math.min(LH.hall, HALLS.length - 1)];
+    const room = c => lhEmpties().filter(i => quadOf(i) === c).length;
+    const need = c => hall.wants.filter(([ch, t, n]) => ch === c && (LH.done[ch + t] || 0) < n).length;
+    html = `<h2>Open the ${CHEST_NAME[kind2]}</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">${count} pieces. Choose what they are:</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${QUAD.map(c => `<button class="link" data-ch="${c}" ${room(c) < count ? 'disabled' : ''} style="background:${LH_CHAINS[c].color};color:#fff;border-radius:12px;padding:12px 8px;font-size:16px;text-align:left;line-height:1.2">${LH_CHAINS[c].icon} ${LH_CHAINS[c].name}<br><small style="font-weight:600;opacity:.9">${room(c) < count ? 'corner too full' : need(c) ? `the ${hall.name} wants ${need(c)} kind${need(c) > 1 ? 's' : ''}` : `${room(c)} free cells`}</small></button>`).join('')}</div><button class="link" id="chestNo">Not now</button>`;
+    setTimeout(() => { card.querySelectorAll('[data-ch]').forEach(b => b.onclick = () => { $('ov').hidden = true; openChest(kind2, b.dataset.ch); }); $('chestNo').onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'hbHelp') {
     html = `<h2>The Harbor</h2><ul>
-      <li><span>1</span><div><b>Tap the barrel</b> at the bottom for silver. Quick taps build a catch streak worth up to triple.</div></li>
+      <li><span>1</span><div><b>Tap the barrel</b> at the bottom for silver. Quick taps build a catch streak: taps pay up to triple and the buildings work double while it lasts.</div></li>
       <li><span>2</span><div><b>Build the harbor.</b> Each building earns silver every minute, even while the app is closed.</div></li>
-      <li><span>3</span><div><b>Spend silver on raids:</b> extra hammers and catapults, dock tokens, Mead Horns, and chests for the Longhouse.</div></li></ul>
+      <li><span>3</span><div><b>Spend silver on raids:</b> extra hammers and catapults, dock tokens, Mead Horns, and chests for the Longhouse.</div></li>
+      <li><span>4</span><div><b>Reach level ${RUNE_HB}</b> with every hall built and you can raise a runestone: start over, earning a quarter more silver from everything for good.</div></li></ul>
       <button class="cta" id="hbOk">To the harbor</button>`;
-    setTimeout(() => { $('hbOk').onclick = () => { $('ov').hidden = true; }; });
+    setTimeout(() => { const b = $('hbOk'); if (b) b.onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'saga') {
     const tab = (extra && extra.tab) || 'ach';
     let body = '';
@@ -1257,7 +1326,7 @@ function showCard(kind, extra) {
         <h3>Time</h3>${r('Raids beaten under par', st.swift)}${r('Own bests beaten', st.ownBest)}${r('Time raiding', fmtT(st.time))}
         <h3>Fighting</h3>${r('Axes thrown', st.axes)}${r('Shields broken', st.shields)}${r('Ships sailed', st.sailed)}${r('Lashed pairs sailed', Math.floor(st.lashed / 2))}${r('Full-load dock sailings', st.fullLoad)}${r('Hammers used', st.hammers)}${r('Catapults used', st.catapults)}
         <h3>Treasure</h3>${r('Silver in the purse', SAGA.silver)}${r('Silver earned all time', st.silverAll)}${r('Chests', Object.keys(CHEST_NAME).map(k => `${SAGA.chests[k] || 0} ${k}`).join(', '))}
-        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}
+        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Runestones raised', st.runes)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}
         ${rec ? `<h3>Raid ${S.n}</h3>${r('Tries', rec.t)}${r('Wins', rec.w)}${r('Best time', rec.b ? fmtT(rec.b) : '\u2014')}${r('Par', fmtT(S.par))}${r('Under par', rec.s ? 'Yes \u2605' : 'Not yet')}${r('Hammers / catapults used', rec.h + ' / ' + rec.c)}` : ''}
         <p style="font-size:12px;margin-top:6px">Counting since ${SAGA.since}. Raids won before then count as wins, not as first tries.</p>`;
     }
@@ -1269,14 +1338,14 @@ function showCard(kind, extra) {
   } else if (kind === 'intro') {
     const txt = { ice: ['Frozen shields', 'A shield rimed with ice needs one extra axe from its color. The first axe cracks the ice, the next one smashes the shield.'],
       mystery: ['Fogbound ships', 'A ship in fog hides its sail color until it reaches the front of its line, so you cannot plan far ahead around it.'],
-      link: ['Lashed ships', 'Two ships roped together always launch as a pair, so the fjord needs room for both.'],
+      link: ['Lashed ships', 'Two ships roped together always launch as a pair, so the fjord needs room for both. Later the rope can cross two lines: then both ships must be at the front of their lines before either can sail.'],
       reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'] };
     html = `<h2>New on raid ${n}</h2><ul>${extra.map(k => `<li><span>!</span><div><b>${txt[k][0]}.</b> ${txt[k][1]}</div></li>`).join('')}</ul><button class="cta" id="go">Got it</button>`;
     extra.forEach(k => { save.seen[k] = true; }); persist();
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
     let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
-    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button>`;
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto" class="scroll">${b}</div><button class="link" id="cancel">Close</button>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
   card.innerHTML = html; $('ov').hidden = false;
@@ -1341,6 +1410,9 @@ document.addEventListener('touchend', e => {
   lastTap = now;
 }, { passive: false });
 document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+// two fingers down at once (a small raider tapping with both thumbs) must not pinch-zoom either
+document.addEventListener('touchstart', e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', e => { if (e.touches.length > 1 || e.scale && e.scale !== 1) e.preventDefault(); }, { passive: false });
 document.addEventListener('dblclick', e => e.preventDefault());
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', () => setTimeout(resize, 50));
@@ -1387,19 +1459,15 @@ function closeLH() {
 }
 $('lhClose').onclick = closeLH;
 // a chest spills pieces of one chain, leaning toward what the current hall still needs
-function openChest(kind) {
+function openChest(kind, ch) {
   if (!SAGA.chests[kind]) return;
   const [count, lo, hi] = CHEST_SPILL[kind];
-  const hall = HALLS[Math.min(LH.hall, HALLS.length - 1)];
-  const need = hall.wants.filter(([ch, t, n]) => (LH.done[ch + t] || 0) < n).map(w => w[0]);
-  // the chest picks a chain whose corner has room, leaning toward what the hall still needs
   const room = c => lhEmpties().filter(i => quadOf(i) === c).length;
-  let pool = (need.length && Math.random() < .7 ? need : Object.keys(LH_CHAINS)).filter(c => room(c) >= count);
-  if (!pool.length) pool = Object.keys(LH_CHAINS).filter(c => room(c) >= count);
-  if (!pool.length) { toast(`Every corner is too full for a ${CHEST_NAME[kind]} (${count} pieces). Merge, deliver or sell first.`); buzz(); return; }
-  const ch = pool[Math.floor(Math.random() * pool.length)];
+  if (!Object.keys(LH_CHAINS).some(c => room(c) >= count)) { toast(`Every corner is too full for a ${CHEST_NAME[kind]} (${count} pieces). Merge, deliver or sell first.`); buzz(); return; }
+  if (!ch) { showCard('chest', { kind }); return; } // the raider chooses what the chest holds
+  if (room(ch) < count) { toast(`The ${LH_CHAINS[ch].name.toLowerCase()} corner is too full for ${count} pieces.`); buzz(); return; }
   const empties = lhEmpties().filter(i => quadOf(i) === ch);
-  const base = 1 + Math.min(2, Math.floor((save.level - 1) / 40)); // later raids spill better pieces
+  const base = 1 + Math.min(2, Math.floor((save.level - 1) / 40)) + SAGA.runes; // later raids and runestones spill better pieces
   SAGA.chests[kind]--; STATS.chestsOpened++;
   // the pieces land beside the pieces like them (same chain, same tier first), so twins sit together ready to merge
   const dist = (i, j) => Math.abs(Math.floor(i / LH_COLS) - Math.floor(j / LH_COLS)) + Math.abs(i % LH_COLS - j % LH_COLS);
@@ -1425,6 +1493,7 @@ const lhNeighbors = i => [i - LH_COLS, i + LH_COLS, i % LH_COLS ? i - 1 : -1, (i
 function lhDrop(a, b) {
   const p = LH.board[a]; if (!p || a === b || b < 0) return false;
   const q = LH.board[b];
+  if (quadOf(b) !== p.ch || (q && quadOf(a) !== q.ch)) { toast(`${LH_CHAINS[p.ch].name} stays in the ${LH_CHAINS[p.ch].name.toLowerCase()} corner.`); buzz(); return false; }
   if (!q) { LH.board[b] = p; LH.board[a] = null; return true; }
   if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); if (q.ch === p.ch && q.t === p.t) toast(`${pieceName(p.ch, p.t)} is the best of its kind: deliver or sell it.`); return true; } // different pieces swap places
   // two alike pieces become one of the next tier (the user's rule, 2026-10-13)
@@ -1439,18 +1508,34 @@ function deliver(i) {
   const p = LH.board[i]; if (!p || LH.hall >= HALLS.length) return;
   const hall = HALLS[LH.hall], w = hall.wants.find(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
   if (!w) return;
-  LH.done[p.ch + p.t] = (LH.done[p.ch + p.t] || 0) + 1; LH.board[i] = null; STATS.delivered++; lhSel = -1; sfx('launch'); giveSilver(p.t * 10);
+  LH.done[p.ch + p.t] = (LH.done[p.ch + p.t] || 0) + 1; LH.board[i] = null; STATS.delivered++; lhSel = -1; sfx('launch'); giveSilver(rs(p.t * 10));
   if (hall.wants.every(([ch, t, n]) => (LH.done[ch + t] || 0) >= n)) {
-    const bonus = 250 * (LH.hall + 1); LH.hall++; LH.done = {}; LH.tokens++; STATS.halls++; giveChest('gold'); giveSilver(bonus);
+    const bonus = rs(250 * (LH.hall + 1)); LH.hall++; LH.done = {}; LH.tokens++; STATS.halls++; giveChest('gold'); giveSilver(bonus);
     sfx('win'); buzz();
     toast(`The ${hall.name} is finished! ${hall.perk}. Plus a dock token, a gold chest and ${bonus} silver.`);
     checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`));
-  } else toast(`${pieceName(p.ch, p.t)} delivered to the ${hall.name}, +${p.t * 10} silver.`);
+  } else toast(`${pieceName(p.ch, p.t)} delivered to the ${hall.name}, +${rs(p.t * 10)} silver.`);
   persist(); lhRender();
 }
 // a top-tier piece is a tribute to the jarl: a dock token and silver, so merging all the way up always pays
-function tribute(i) { const p = LH.board[i]; if (!p || p.t < 6) return; LH.board[i] = null; LH.tokens++; giveSilver(200); STATS.delivered++; lhSel = -1; sfx('win'); buzz(); persist(); lhRender(); toast(`${pieceName(p.ch, p.t)} given as tribute: a dock token and 200 silver.`); }
-function sell(i) { const p = LH.board[i]; if (!p) return; const v = SELL[p.t - 1]; LH.board[i] = null; giveSilver(v); lhSel = -1; sfx('pop'); persist(); lhRender(); toast(`${pieceName(p.ch, p.t)} sold for ${v} silver.`); }
+function tribute(i) { const p = LH.board[i]; if (!p || p.t < 6) return; LH.board[i] = null; LH.tokens++; giveSilver(rs(200)); STATS.delivered++; lhSel = -1; sfx('win'); buzz(); persist(); lhRender(); toast(`${pieceName(p.ch, p.t)} given as tribute: a dock token and ${rs(200)} silver.`); }
+function sell(i) { const p = LH.board[i]; if (!p) return; const v = rs(SELL[p.t - 1]); LH.board[i] = null; giveSilver(v); lhSel = -1; sfx('pop'); persist(); lhRender(); toast(`${pieceName(p.ch, p.t)} sold for ${v} silver.`); }
+// the prestige: with every hall built and the harbor at level RUNE_HB, raise a runestone. The longhouse and harbor start over, the silver goes with them,
+// and the runestone pays a quarter more silver from everything, forever. Chests, horns, boons, tokens, achievements and stats stay.
+const runeReady = () => LH.hall >= HALLS.length && hbLevel() >= RUNE_HB;
+const runeText = () => `${SAGA.runes ? `${SAGA.runes} raised, silver x${runeMult().toFixed(2)}. ` : ''}Needs every hall built (${Math.min(LH.hall, HALLS.length)}/${HALLS.length}) and harbor level ${RUNE_HB} (${hbLevel()}).`;
+function raiseRune() {
+  if (!runeReady()) return;
+  SAGA.runes++; STATS.runes++;
+  LH.board.fill(null); LH.hall = 0; LH.done = {};
+  HB.b = HB.b.map(() => 0); HB.tap = 0; HB.ms = 0; HB.last = Date.now(); hbAcc = 0; combo = 0; tapLog = [];
+  SAGA.silver = 0; lhSel = -1;
+  checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`));
+  sfx('win'); buzz(); persist(); $('ov').hidden = true; lhRender(); if (hbLive()) hbRender();
+  toast(`Runestone ${SAGA.runes} raised! Everything pays x${runeMult().toFixed(2)} silver from now on. The longhouse and harbor start anew.`);
+}
+const runeRow = () => `<div class="hbrow"><div class="ic">\u16B1</div><div class="txt"><b>Runestone${SAGA.runes ? ` <span style="color:var(--mute);font-weight:500">${SAGA.runes} raised</span>` : ''}</b><small>${runeReady() ? 'Ready! Start the longhouse and harbor over and earn a quarter more silver from everything, forever' : runeText()}</small></div><button class="boost" id="runeBtn" ${runeReady() ? '' : 'disabled'}>Raise<small>${runeReady() ? 'prestige' : 'not yet'}</small></button></div>`;
+const runeChip = el => { el.hidden = !SAGA.runes; el.textContent = `\u16B1 ${SAGA.runes} · silver x${runeMult().toFixed(2)}`; };
 function pieceEl(p) { const el = document.createElement('div'); el.className = `piece t${p.t}`; el.style.background = LH_CHAINS[p.ch].color; el.innerHTML = `${LH_CHAINS[p.ch].icon}<i>${TIER_NAME[p.t - 1]}</i>`; el.title = pieceName(p.ch, p.t); return el; }
 function lhRender() {
   $('lhSilver').textContent = `${SAGA.silver} silver`;
@@ -1458,8 +1543,10 @@ function lhRender() {
   // the order
   const hall = HALLS[LH.hall];
   $('lhOrder').innerHTML = hall
-    ? `<b class="h">Build the ${hall.name}</b> <span style="color:var(--mute)">${LH.hall + 1} of ${HALLS.length}</span><div class="wants">${hall.wants.map(([ch, t, n]) => `<span class="want${(LH.done[ch + t] || 0) >= n ? ' met' : ''}">${LH_CHAINS[ch].icon} ${pieceName(ch, t)} ${TIER_NAME[t - 1]} \u00b7 ${Math.min(n, LH.done[ch + t] || 0)}/${n}</span>`).join('')}</div><div class="perk">Finish it for: ${hall.perk.toLowerCase()}, plus a dock token, a gold chest and ${250 * (LH.hall + 1)} silver. Each piece delivered pays silver too.</div>`
-    : `<b class="h">The longhouse is complete!</b><div class="perk">Every hall is built and every reward stays on.</div>`;
+    ? `<b class="h">Build the ${hall.name}</b> <span style="color:var(--mute)">${LH.hall + 1} of ${HALLS.length}</span><div class="wants">${hall.wants.map(([ch, t, n]) => `<span class="want${(LH.done[ch + t] || 0) >= n ? ' met' : ''}">${LH_CHAINS[ch].icon} ${pieceName(ch, t)} ${TIER_NAME[t - 1]} \u00b7 ${Math.min(n, LH.done[ch + t] || 0)}/${n}</span>`).join('')}</div><div class="perk">Finish it for: ${hall.perk.toLowerCase()}, plus a dock token, a gold chest and ${rs(250 * (LH.hall + 1))} silver. Each piece delivered pays silver too.</div>`
+    : `<b class="h">The longhouse is complete!</b><div class="perk">Every hall is built and every reward stays on.</div>${runeRow()}`;
+  const rb = $('runeBtn'); if (rb) rb.onclick = () => showCard('rune');
+  runeChip($('lhRunes'));
   // the board: cells sized so all six columns and seven rows fit, whatever the phone
   const grid = $('lhGrid'), gr = grid.getBoundingClientRect();
   if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(28, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
@@ -1474,7 +1561,7 @@ function lhRender() {
   if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest. 2. Drag a piece onto its twin. 3. Tap a piece, then Deliver.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
   else {
     const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n), later = !can && p.t < 6 && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === p.ch && t === p.t));
-    bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})${can ? `<br>The ${hall.name} wants this: +${p.t * 10} silver` : p.t >= 6 ? '<br>Finest work: tribute pays a dock token + 200 silver' : later ? `<br>Not needed now; the ${later.name} will want it` : hall ? `<br>Merge two to make a ${pieceName(p.ch, p.t + 1)}` : ''}</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : p.t >= 6 ? `<button class="boost" id="lhTribute">Tribute</button>` : ''}<button class="boost" id="lhSell">Sell <b>${SELL[p.t - 1]}</b></button>`;
+    bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})${can ? `<br>The ${hall.name} wants this: +${p.t * 10} silver` : p.t >= 6 ? '<br>Finest work: tribute pays a dock token + 200 silver' : later ? `<br>Not needed now; the ${later.name} will want it` : hall ? `<br>Merge two to make a ${pieceName(p.ch, p.t + 1)}` : ''}</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : p.t >= 6 ? `<button class="boost" id="lhTribute">Tribute</button>` : ''}<button class="boost" id="lhSell">Sell <b>${rs(SELL[p.t - 1])}</b></button>`;
     const d = $('lhDeliver'); if (d) d.onclick = () => deliver(lhSel); const tr = $('lhTribute'); if (tr) tr.onclick = () => tribute(lhSel); $('lhSell').onclick = () => sell(lhSel);
   }
 }
@@ -1515,21 +1602,24 @@ const HB_B = [
   { name: 'Toll Bridge', ic: '\u{1F309}', base: 600, cost: 150000, what: 'Every cart pays a coin' },
 ];
 const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(n < 1e7 ? 2 : 1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(n < 1e5 ? 1 : 0) + 'k' : String(Math.floor(n));
-const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 10)) : 0; }; // silver per minute; every tenth level doubles it
+const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 10)) * runeMult() : 0; }; // silver per minute; every tenth level doubles it
 const hbCost = i => Math.round(HB_B[i].cost * Math.pow(1.15, HB.b[i]));
 const hbRate = () => HB_B.reduce((a, _, i) => a + hbOut(i), 0);
-const tapGain = () => (1 + HB.tap * 2) * Math.pow(2, Math.floor(HB.tap / 10));
+const tapGain = () => (1 + HB.tap * 2) * Math.pow(2, Math.floor(HB.tap / 10)) * runeMult();
 const tapCost = () => Math.round(20 * Math.pow(1.3, HB.tap));
 let hbAcc = 0; // fractions of silver carried between settles
 // bank what the buildings earned since the last settle; away time counts up to eight hours
 function hbSettle() {
   const now = Date.now(), dt = Math.min(HB_OFFLINE_CAP, Math.max(0, now - (HB.last || now))); HB.last = now;
-  const rate = hbRate(); if (!rate || !dt) return 0;
+  const rate = hbRate() * (hbLive() && comboMult() > 1 ? 2 : 1); if (!rate || !dt) return 0; // a catch streak sets the whole harbor rowing: buildings work double
   hbAcc += rate * dt / 60000; const got = Math.floor(hbAcc); hbAcc -= got;
   if (got) giveSilver(got);
   return got;
 }
-let hbTimer = 0, combo = 0, comboT = 0;
+let hbTimer = 0, combo = 0, comboT = 0, tapLog = []; // tapLog: [time, silver] of recent taps, for the live taps-per-second readout
+const hbLive = () => !$('hb').hidden;
+const tapRate = () => { const now = Date.now(); tapLog = tapLog.filter(t => now - t[0] < 5000); return tapLog.reduce((a, t) => a + t[1], 0) / 5; };
+const fmtR = r => r >= 100 ? fmtN(r) : r >= 10 ? r.toFixed(1) : r.toFixed(2);
 if (!HB.ms) HB.ms = 0;
 if (!SAGA.boons) SAGA.boons = { hammer: 0, cata: 0 };
 // raid boons: silver spent here shows up in the next raid
@@ -1546,9 +1636,9 @@ const hbLevel = () => HB.b.reduce((a, b) => a + b, 0) + HB.tap;
 function hbMilestones() {
   while (HB.ms < MILES.length && hbLevel() >= MILES[HB.ms][0]) {
     const [, k, txt] = MILES[HB.ms++];
-    if (k === 'horn') { if (SAGA.horns < HORN_MAX) { SAGA.horns++; STATS.hornsEarned++; } else giveSilver(1000); }
+    if (k === 'horn') { if (SAGA.horns < HORN_MAX) { SAGA.horns++; STATS.hornsEarned++; } else giveSilver(rs(1000)); }
     else if (k === 'token') LH.tokens++; else giveChest(k);
-    sfx('win'); buzz(); toast(`Harbor level ${MILES[HB.ms - 1][0]}: ${txt}${k === 'horn' && SAGA.horns >= HORN_MAX ? ' (horns full, so 1000 silver instead)' : ''}!`);
+    sfx('win'); buzz(); toast(`Harbor level ${MILES[HB.ms - 1][0]}: ${txt}${k === 'horn' && SAGA.horns >= HORN_MAX ? ' (horns full, so ${rs(1000)} silver instead)' : ''}!`);
   }
 }
 function openHB() {
@@ -1556,7 +1646,7 @@ function openHB() {
   if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   const away = Math.max(hbPending.away, Date.now() - (HB.last || Date.now())), got = hbSettle() + hbPending.got; hbPending = { away: 0, got: 0 };
   if (got > 0 && away > 60e3) { STATS.haul = Math.max(STATS.haul, got); toast(away >= HB_OFFLINE_CAP ? `The hold was full: the harbor earned ${fmtN(got)} silver while you were away.` : `While you were raiding, the harbor earned ${fmtN(got)} silver.`); sfx('win'); }
-  $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } hbSettle(); if (combo && Date.now() - comboT > 1200) { combo = 0; } hbRender(true); }, 1000);
+  $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } if (combo && Date.now() - comboT > 1200) combo = 0; hbSettle(); hbRender(true); }, 250);
   if (!save.seen.hb) { save.seen.hb = true; persist(); showCard('hbHelp'); }
 }
 function closeHB() { hbSettle(); persist(); clearInterval(hbTimer); $('hb').hidden = true; if (S && S.mode === 'paused') { S.mode = S.resumeMode || 'play'; S.resumeMode = null; } if (S) { S.slotBoosts = LH.tokens > 0 && S.tray.length < 6 ? 1 : 0; hud(); } }
@@ -1565,7 +1655,7 @@ $('hbClose').onclick = closeHB;
 const comboMult = () => 1 + Math.min(2, Math.floor(combo / 10) * .5);
 $('hbBarrel').onpointerdown = e => {
   e.preventDefault(); const now = Date.now(); combo = now - comboT < 700 ? combo + 1 : 1; comboT = now;
-  const m = comboMult(), g = Math.round(tapGain() * m); giveSilver(g); STATS.taps++; tap();
+  const m = comboMult(), g = Math.round(tapGain() * m); giveSilver(g); STATS.taps++; tap(); tapLog.push([now, g]);
   const el = $('hbBarrel'); el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 90);
   const f = document.createElement('span'); f.textContent = '+' + fmtN(g); if (m > 1) f.className = 'big'; const wr = $('hbFloats').getBoundingClientRect(); f.style.left = Math.max(12, Math.min(wr.width - 12, e.clientX - wr.left + (Math.random() - .5) * 30)) + 'px'; $('hbFloats').appendChild(f); setTimeout(() => f.remove(), 800); if ($('hbFloats').children.length > 12) $('hbFloats').firstChild.remove();
   if (STATS.taps % 20 === 0) { persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); }
@@ -1583,31 +1673,36 @@ function hbBoon(id) {
   sfx('launch'); persist(); hbRender(); toast(`${b.name}: ${b.what.toLowerCase()}.`);
 }
 function hbRender(light) {
-  $('hbSilver').textContent = `${fmtN(SAGA.silver)} silver`;
+  $('hbSilver').textContent = `${fmtN(SAGA.silver)} silver`; runeChip($('hbRunes'));
   const m = comboMult(); $('hbTap').textContent = `+${fmtN(Math.round(tapGain() * m))} silver`;
-  $('hbCombo').textContent = m > 1 ? `Catch streak x${m}! Keep tapping` : combo > 3 ? `Keep tapping for a catch streak (${combo}/10)` : 'Tap the barrel';
+  $('hbCombo').textContent = m > 1 ? `Catch streak x${m}: taps pay more and the buildings row double` : combo > 3 ? `Keep tapping for a catch streak (${combo}/10)` : 'Tap the barrel. Quick taps start a catch streak';
   const r = hbRate(), lvl = hbLevel(), next = MILES[HB.ms], prev = HB.ms ? MILES[HB.ms - 1][0] : 0;
+  const rowing = comboMult() > 1, idle = r / 60 * (rowing ? 2 : 1), taps = tapRate();
+  const rates = () => `<div class="rate"><b>${fmtR(idle + taps)}</b><small>silver a second now</small></div><div class="rate"><b>${fmtR(idle)}</b><small>buildings${rowing ? ' <em>x2 rowing!</em>' : ''}</small></div><div class="rate"><b>${fmtR(taps)}</b><small>your taps</small></div>`;
   if (light && $('hbList').children.length) {
+    const rt = $('hbRates'); if (rt) rt.innerHTML = rates();
     $('hbList').querySelectorAll('[data-b]').forEach(b => { const i = +b.dataset.b; b.disabled = i < 0 ? HB.tap >= HB_MAX || SAGA.silver < tapCost() : HB.b[i] >= HB_MAX || SAGA.silver < hbCost(i); });
     $('hbList').querySelectorAll('[data-k]').forEach(b => { b.disabled = SAGA.silver < KEY_PRICE[b.dataset.k]; });
     $('hbList').querySelectorAll('[data-boon]').forEach(b => { b.disabled = SAGA.silver < BOONS.find(x => x.id === b.dataset.boon).cost; });
     return;
   }
   $('hbScene').innerHTML = `<div class="town">${HB_B.map((b, i) => `<div class="bld${HB.b[i] ? '' : ' off'}">${b.ic}<i>${HB.b[i] ? 'lv ' + HB.b[i] : '—'}</i></div>`).join('')}</div>
-    <div class="inc"><span>${r ? `${fmtN(r)} silver a minute, even while away` : 'Build a Fish Rack to start earning'}</span><span>Harbor level ${lvl}</span></div>
+    <div class="rates" id="hbRates">${rates()}</div>
+    <div class="inc"><span>${r ? `${fmtN(r)} a minute while away, a catch streak doubles it` : 'Build a Fish Rack to start earning'}</span><span>Level ${lvl}</span></div>
     ${next ? `<div class="ms"><i style="width:${Math.round(100 * (lvl - prev) / (next[0] - prev))}%"></i></div><div class="msl">Next reward at level ${next[0]}: ${next[2]}</div>` : '<div class="msl">Every harbor reward claimed</div>'}`;
   const row = (ic, name, what, lvl, out, i, cost, maxed) => `<div class="hbrow"><div class="ic">${ic}</div><div class="txt"><b>${name}${lvl ? ` <span style="color:var(--mute);font-weight:500">level ${lvl}</span>` : ''}</b><small>${what}${out}</small></div><button class="boost" data-b="${i}" ${maxed || SAGA.silver < cost ? 'disabled' : ''}>${maxed ? 'Finished' : lvl ? 'Upgrade' : 'Build'}<small>${maxed ? 'level ' + HB_MAX : fmtN(cost) + ' silver'}</small></button></div>`;
   $('hbList').innerHTML = `<h3>Buildings</h3>` + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtN(hbOut(i))} a minute` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('')
     + row('\u{1F6E2}', 'Bigger barrel', 'More silver for every tap', HB.tap, HB.tap ? ` · +${fmtN(tapGain())} a tap` : '', -1, tapCost(), HB.tap >= HB_MAX)
     + `<h3>For the next raid</h3>` + BOONS.map(b => `<div class="hbrow"><div class="ic">${b.ic}</div><div class="txt"><b>${b.name}${b.id === 'hammer' && SAGA.boons.hammer ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.hammer} ready</span>` : b.id === 'cata' && SAGA.boons.cata ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.cata} ready</span>` : b.id === 'horn' ? ` <span style="color:var(--mute);font-weight:500">${SAGA.horns} of ${HORN_MAX}</span>` : b.id === 'token' ? ` <span style="color:var(--mute);font-weight:500">${LH.tokens} held</span>` : ''}</b><small>${b.what}</small></div><button class="boost" data-boon="${b.id}" ${SAGA.silver < b.cost ? 'disabled' : ''}>Buy<small>${fmtN(b.cost)} silver</small></button></div>`).join('')
-    + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${CHEST_SPILL[k][0]} pieces</small></div><button class="boost" data-k="${k}" ${SAGA.silver < KEY_PRICE[k] ? 'disabled' : ''}>Buy<small>${fmtN(KEY_PRICE[k])} silver</small></button></div>`).join('');
+    + `<h3>Runestone</h3>` + runeRow() + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${CHEST_SPILL[k][0]} pieces</small></div><button class="boost" data-k="${k}" ${SAGA.silver < KEY_PRICE[k] ? 'disabled' : ''}>Buy<small>${fmtN(KEY_PRICE[k])} silver</small></button></div>`).join('');
   $('hbList').querySelectorAll('[data-b]').forEach(b => b.onclick = () => +b.dataset.b < 0 ? hbTapUp() : hbBuy(+b.dataset.b));
   $('hbList').querySelectorAll('[data-k]').forEach(b => b.onclick = () => hbKey(b.dataset.k));
   $('hbList').querySelectorAll('[data-boon]').forEach(b => b.onclick = () => hbBoon(b.dataset.boon));
+  const rb = $('runeBtn'); if (rb) rb.onclick = () => showCard('rune');
 }
 let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() }; // banked while the game was closed; the Harbor screen tells the tale
 
-window.JB = { get S() { return S; }, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+window.JB = { get S() { return S; }, raiseRune, runeReady, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
 })();
 </script>
 
