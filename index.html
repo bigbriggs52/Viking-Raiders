@@ -168,7 +168,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2050",date:"2026-10-13 20:50 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2121",date:"2026-10-13 21:21 UTC"};</script>
 
 
 <div id="app">
@@ -532,7 +532,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.023';
+const BUILD = 'VR1.024';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -637,15 +637,22 @@ function resize() {
   cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   if (S) layout();
 }
+// tall phones have spare height under the queue: a first pass measures it, a second pass spreads the wall, docks and queue down through it
+let layoutPad = [0, 0, 0];
 function layout() {
-  const { R, C } = S;
+  layoutPad = [0, 0, 0]; layoutOnce();
+  const extra = H - (G.qTop + G.js * 3.4) - 12;
+  if (extra > 0) { layoutPad = [extra * .3, extra * .25, extra * .35]; layoutOnce(); }
+}
+function layoutOnce() {
+  const { R, C } = S, P = layoutPad;
   const boardH = Math.min(H * .62, H - 270); // the harbor always keeps room for three readable rows
   const cell = Math.max(8, Math.min(56, (W - 76) / C, boardH / (R + 2.4))); // the wall takes the width, but the fjord keeps room for a whole ship on each side
   const gap = Math.max(14, cell * .7);
   const bw = C * cell, bh = R * cell;
   // ships on the fjord stay readable on wide walls: never smaller than about 42px, and the wall sits low enough for their sails
   const bs = Math.min(Math.max(cell * 1.8, 42), 60);
-  const bx = (W - bw) / 2, by = gap + Math.max(cell * 1.0, bs * 1.15);
+  const bx = (W - bw) / 2, by = gap + Math.max(cell * 1.0, bs * 1.15) + P[0];
   const L0 = bx - gap, R0 = bx + bw + gap, T0 = by - gap, B0 = by + bh + gap;
   const w = R0 - L0, h = B0 - T0, len = 2 * w + 2 * h;
   const lanes = [];
@@ -654,12 +661,12 @@ function layout() {
   for (let c = 0; c < C; c++) lanes.push({ s: w + h + (R0 - (bx + (c + .5) * cell)), side: 't', i: c });
   for (let r = 0; r < R; r++) lanes.push({ s: 2 * w + h + (by + (r + .5) * cell - T0), side: 'l', i: r });
   lanes.sort((a, b) => a.s - b.s);
-  const trayY = B0 + cell * .4 + 8;
+  const trayY = B0 + cell * .4 + 8 + P[0] * 0 + P[1];
   const nT = S.tray.length;
   const slot = Math.min(64, (W - 8) / (nT + 1.2) - 6, (H - B0 - 8) * .26); // docks sized by the room below the wall, not by the shield size
   const trayW = nT * (slot + 6) - 6, cw = slot * 1.15;
   const trayX = Math.max(cw + 10, (W - trayW) / 2);
-  const qTop = trayY + slot + 12;
+  const qTop = trayY + slot + 12 + P[2];
   const K = S.cols.length, colW = Math.min(150, (W - 8) / K);
   const js = Math.max(26, Math.min(112, colW * .72, (H - qTop - 4) / 3.2));
   // a lap of the fjord takes about the same time whatever the wall size
