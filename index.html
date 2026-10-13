@@ -46,6 +46,21 @@ body {
 .bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #8d6540, var(--lemon)); border-radius: 99px; transition: width .25s; }
 .chip { font-size: 13px; font-weight: 800; padding: 4px 9px; border-radius: 99px; background: var(--wood); color: #f3e9d2; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .chip.easy { background: #2f7a4a; color: #e9ffe9; }
+.chip.clock { background: #e3d3b0; color: #2b2118; }
+.chip.clock.swift { background: #2f7a4a; color: #e9ffe9; }
+.saga { text-align: left; max-height: 56vh; overflow: auto; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.35; }
+.saga .ach { display: flex; gap: 10px; align-items: center; padding: 6px 8px; border-radius: 10px; background: #e3d3b0; }
+.saga .ach.done { background: #d9ecd9; }
+.saga .ach .sym { flex: none; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--wood); color: #ffd37a; font-size: 17px; font-weight: 800; }
+.saga .ach.done .sym { background: #2f7a4a; color: #fff; }
+.saga .ach b { display: block; font-size: 14px; }
+.saga .ach small { color: var(--mute); font-size: 12px; }
+.saga .row { display: flex; justify-content: space-between; gap: 8px; padding: 3px 6px; border-bottom: 1px dashed #c9b893; }
+.saga .row b { font-variant-numeric: tabular-nums; }
+.saga h3 { margin: 6px 0 2px; font-family: var(--display); font-weight: 400; font-size: 15px; color: var(--wood); }
+.tabs { display: flex; gap: 6px; } .tabs button { flex: 1; border: 0; border-radius: 10px; padding: 8px 4px; font: 800 14px var(--body); background: #e3d3b0; color: var(--mute); cursor: pointer; } .tabs button.on { background: var(--wood); color: #ffd37a; }
+.reward { background: #e3d3b0; border-radius: 12px; padding: 8px 10px; font-size: 14px; line-height: 1.5; color: var(--cream); }
+.reward .new { color: #2f7a4a; font-weight: 800; }
 .iconbtn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--wood); color: #f3e9d2; font: 800 15px var(--body); cursor: pointer; flex: none; }
 .stage { flex: 1; min-height: 0; position: relative; }
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
@@ -74,7 +89,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1834",date:"2026-10-13 18:34 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1842",date:"2026-10-13 18:42 UTC"};</script>
 
 
 <div id="app">
@@ -82,6 +97,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="lvl" id="lvl">Raid 1</div>
     <div class="bar" aria-label="Shields smashed"><i id="prog"></i></div>
     <div class="chip" id="try">Try 1</div>
+    <div class="chip clock" id="clock" hidden>0:00</div>
     <button class="iconbtn" id="menu" aria-label="Menu">☰</button>
   </div>
   <div class="boosters">
@@ -345,7 +361,7 @@ function difficulty(n) {
   };
 }
 // ---------- level builder: same level number always gives the same puzzle, eased by past failures ----------
-function buildLevel(n, fails) {
+function buildLevel(n, fails, tight) {
   const rng = rngFrom(n * 9973 + 17), D = difficulty(n);
   const art = composeScene(n, rng, D.width, D.height, D.colors, D.minAmmo, D.scale);
   let grid = parseGrid(art.rows);
@@ -357,7 +373,7 @@ function buildLevel(n, fails) {
     grid = grid.map(r => r.map(ch => thin.includes(ch) ? big : ch));
   }
   const ease = Math.min(fails, 6);
-  const obsScale = Math.max(0, 1 - ease / 3);
+  const obsScale = Math.max(0, 1 - ease / 3) * (n >= 15 && tight ? 1.25 : 1); // the sixth sail brings heavier defenses
   // frozen cubes: from level 6, need an extra hit
   const C = grid[0].length, cells = [];
   grid.forEach((row, r) => row.forEach((ch, c) => { if (ch) cells.push(r * C + c); }));
@@ -410,25 +426,75 @@ function buildLevel(n, fails) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.005';
+const BUILD = 'VR1.006';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
-let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {} };
+let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
+// ---------- the saga: silver, chests, streaks, achievements and stats (2026-10-13) ----------
+const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests'];
+if (!save.saga) {
+  // first run with the saga: raids already beaten count as won and reached, but never as first-try wins
+  const st = {}; STAT_KEYS.forEach(k => st[k] = 0); st.wins = st.reach = Math.max(0, save.level - 1);
+  save.saga = { since: new Date().toISOString().slice(0, 10), silver: 0, chests: { wood: 0, iron: 0, silver: 0, gold: 0 }, streak: 0, horns: 0, sinceHorn: 0, ach: {}, stats: st, raids: {} };
+}
+STAT_KEYS.forEach(k => { if (save.saga.stats[k] == null) save.saga.stats[k] = 0; });
+const SAGA = save.saga, STATS = SAGA.stats;
+const HORN_EVERY = 10, HORN_MAX = 3;
+const sixthSail = () => SAGA.streak >= 3; // three straight wins: six ships may sail the fjord at once
+const beltCap = () => sixthSail() ? 6 : 5;
+const CHEST_NAME = { wood: 'wooden chest', iron: 'iron chest', silver: 'silver chest', gold: 'gold chest' };
+// every achievement has a shape badge, so tiers never rely on color alone
+const ACH = [
+  { id: 'first', name: 'First Blood', sym: '\u25cf', desc: 'Win a raid', tiers: [1], key: 'wins', chest: ['wood'] },
+  { id: 'shores', name: 'Far Shores', sym: '\u25b2', desc: 'Reach raid', tiers: [10, 25, 50, 100, 250, 500, 1000], key: 'reach', chest: ['iron', 'iron', 'silver', 'silver', 'gold', 'gold', 'gold'] },
+  { id: 'master', name: 'Fjord Master', sym: '\u25a0', desc: 'Raids won', tiers: [50, 200, 1000], key: 'wins', silver: [200, 1000, 5000] },
+  { id: 'wall', name: 'Unbroken Wall', sym: '\u2b1f', desc: 'Wins in a row', tiers: [3, 5, 10, 25, 50], key: 'best', chest: ['iron', 'iron', 'iron', 'gold', 'gold'] },
+  { id: 'swift', name: 'Swift Longship', sym: '\u2605', desc: 'Raids beaten under par', tiers: [5, 25, 100], key: 'swift', chest: ['iron', 'silver', 'gold'] },
+  { id: 'ownbest', name: 'Own Best', sym: '\u25c6', desc: 'Own best times beaten', tiers: [1, 10, 50], key: 'ownBest', silver: [25, 100, 500] },
+  { id: 'bare', name: 'Bare Hands', sym: '\u271a', desc: 'Wins without hammer or catapult', tiers: [1, 10, 50], key: 'bare', chest: ['iron', 'silver', 'gold'] },
+  { id: 'fullhold', name: 'Full Hold', sym: '\u2b22', desc: 'Raids with 5 full-load dock sailings', tiers: [1, 10], key: 'fullHold', chest: ['iron', 'silver'] },
+  { id: 'straight', name: 'Straight Line', sym: '\u2665', desc: 'Wins without using a dock', tiers: [1, 10], key: 'straight', chest: ['iron', 'silver'] },
+  { id: 'lashed', name: 'Lashed Luck', sym: '\u2715', desc: 'Wins on raids with 3 or more lashed pairs', tiers: [1, 10], key: 'lashedWins', chest: ['iron', 'silver'] },
+  { id: 'rich', name: 'Rich Harbor', sym: '\u25c9', desc: 'Silver earned', tiers: [10000, 100000, 1000000], key: 'silverAll', chest: ['silver', 'gold', 'gold'] },
+];
+const TIER_NAME = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+function giveChest(kind, n = 1) { SAGA.chests[kind] = (SAGA.chests[kind] || 0) + n; STATS.chests += n; }
+function giveSilver(n) { SAGA.silver += n; STATS.silverAll += n; }
+// award every tier the stats now reach; returns the new ones for the win card
+function checkAch() {
+  const out = [];
+  for (const a of ACH) {
+    const have = SAGA.ach[a.id] || 0, v = STATS[a.key] || 0;
+    for (let t = have; t < a.tiers.length && v >= a.tiers[t]; t++) {
+      SAGA.ach[a.id] = t + 1;
+      const r = { a, tier: t + 1 };
+      if (a.chest) { giveChest(a.chest[t]); r.chest = a.chest[t]; }
+      if (a.silver) { giveSilver(a.silver[t]); r.silver = a.silver[t]; }
+      out.push(r);
+    }
+  }
+  return out;
+}
+const fmtT = t => { t = Math.max(0, Math.round(t)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+const raidRec = n => SAGA.raids[n] || (SAGA.raids[n] = { t: 0, w: 0, b: 0, s: 0, h: 0, c: 0 });
+const clockOn = () => S && S.n >= 11 && save.clock !== false;
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {} };
 
 // ---------- state ----------
-const BELT_CAP = 5, HOP = .32, PARK = .3, FAST = 3, SHOT = .22; // SHOT: seconds an axe is in the air
+const HOP = .32, PARK = .3, FAST = 3, SHOT = .22; // SHOT: seconds an axe is in the air
 const easeOut = t => 1 - (1 - t) * (1 - t);
 let S = null, uid = 1;
 function startLevel(n) {
-  const L = buildLevel(n, save.fails[n] || 0);
+  const L = buildLevel(n, save.fails[n] || 0, sixthSail());
   let total = 0; L.grid.forEach(r => r.forEach(c => { if (c) total++; }));
   S = { n, name: L.name, grid: L.grid, ice: L.ice, reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
     cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
     tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
-    bombs: L.bombs, slotBoosts: L.slotBoosts, catapults: 1, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1 };
+    bombs: L.bombs, slotBoosts: L.slotBoosts, catapults: 1, total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1,
+    t: 0, par: L.cols.flat().length * 5 + 15 /* a swift star for a brisk raid, with room for a young raider to think */, usedH: 0, usedC: 0, dockSails: 0, pairs: L.cols.flat().filter(j => j.link).length / 2 };
+  raidRec(n).t++; persist();
   layout(); hud();
-  toast(L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`);
+  toast((L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`) + (sixthSail() ? ' \u00b7 Sixth Sail: 6 ships may sail' : ''));
   const fresh = [];
   if (L.ice.size && !save.seen.ice) fresh.push('ice');
   if (L.cols.flat().some(j => j.hidden) && !save.seen.mystery) fresh.push('mystery');
@@ -502,12 +568,12 @@ function firstInLane(lane) {
 }
 function activeBelt() { return S.belt.filter(j => !j.done).length; }
 function launch(j, from) {
-  if (activeBelt() >= BELT_CAP) { toast('The fjord is full. Wait for a ship to finish its run.'); buzz(); return false; }
+  if (activeBelt() >= beltCap()) { toast('The fjord is full. Wait for a ship to finish its run.'); buzz(); return false; }
   const minS = S.belt.reduce((m, b) => Math.min(m, b.s), Infinity);
   j.s = minS < G.spacing ? Math.min(0, minS - G.spacing) : 0;
   j.hidden = false; j.park = null;
   j.hop = { x0: from[0], y0: from[1], t: 0 }; j.lapHit = false;
-  S.belt.push(j); S.launched++; sfx('launch');
+  S.belt.push(j); S.launched++; sfx('launch'); STATS.sailed++; if (j.link) STATS.lashed++;
   if (S.reinf && S.launched % S.reinf.every === 0) tide();
   return true;
 }
@@ -526,10 +592,10 @@ function tapQueue(k) {
   const col = S.cols[k]; if (!col.length) return;
   const j = col[0];
   if (j.link && col[1] && col[1].link === j.link) {
-    if (activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
+    if (activeBelt() + 2 > beltCap()) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
     const p0 = queueItemPos(k, 0), p1 = queueItemPos(k, 1), a = col.shift(), b = col.shift();
     launch(a, p0); launch(b, p1); col.slide = 2;
-  } else if (activeBelt() < BELT_CAP) { col.shift(); launch(j, queueItemPos(k, 0)); col.slide = 1; }
+  } else if (activeBelt() < beltCap()) { col.shift(); launch(j, queueItemPos(k, 0)); col.slide = 1; }
   else launch(j, queueItemPos(k, 0)); // full fjord: launch() shows the warning
 }
 // docked ships always fill the docks from the left: when one leaves, the rest slide over
@@ -547,23 +613,23 @@ function tapTray(i) {
   const mate = j.link ? S.tray.find((o, k) => k !== i && o && o.link === j.link) : null;
   if (!showing(j.color, j.ammo + (mate ? mate.ammo : 0))) { toast(`Fewer than ${j.ammo + (mate ? mate.ammo : 0)} shields of that color in reach. The ship waits in the dock.`); buzz(); return; }
   const mi = j.link ? S.tray.findIndex((o, k) => k !== i && o && o.link === j.link) : -1;
-  if (mi >= 0 && activeBelt() + 2 > BELT_CAP) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
+  if (mi >= 0 && activeBelt() + 2 > beltCap()) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
   const [x, y, sz] = traySlotRect(i);
-  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } packTray(); }
+  if (launch(j, [x + sz / 2, y + sz / 2])) { S.tray[i] = null; S.dockSails++; STATS.fullLoad++; if (mi >= 0) { const [x2, y2] = traySlotRect(mi); launch(S.tray[mi], [x2 + sz / 2, y2 + sz / 2]); S.tray[mi] = null; } packTray(); }
 }
 
 function hitCube(j, r, c) {
   const color = S.grid[r][c], idx = r * S.C + c;
   const [fx, fy] = beltPos(j.s), [tx, ty] = cellCenter(r, c);
   S.shots.push({ fx, fy, tx, ty, t: 0, color });
-  j.ammo--; j.lapHit = true; tap();
+  j.ammo--; j.lapHit = true; tap(); STATS.axes++;
   if (S.ice.has(idx)) {
     // frozen shield: the first axe shatters the ice, and a second axe (if the ship has one) follows at once
     S.ice.delete(idx); sfx('crack');
     for (let i = 0; i < 8; i++) { const a = Math.random() * 6.28, v = 40 + Math.random() * 100; S.parts.push({ x: tx, y: ty, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, life: .45, color: '#d8f6ff', size: 2 + Math.random() * 3 }); }
-    if (j.ammo > 0) { S.shots.push({ fx, fy, tx, ty, t: -.08, color }); j.ammo--; S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: -.08 }); sfx('pop'); }
+    if (j.ammo > 0) { S.shots.push({ fx, fy, tx, ty, t: -.08, color }); j.ammo--; S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: -.08 }); sfx('pop'); STATS.axes++; STATS.shields++; }
   } else {
-    S.grid[r][c] = null; S.left--;
+    S.grid[r][c] = null; S.left--; STATS.shields++;
     S.dying.push({ r, c, color, t: 0 });
     sfx('pop');
   }
@@ -613,7 +679,7 @@ function bomb(r0, c0) {
   for (const k in hit) removeAmmo(k, hit[k]);
   const [x, y] = cellCenter(r0, c0);
   for (let i = 0; i < 26; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 220; S.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: .7, color: i % 3 ? '#c9922a' : '#6b4a2e', size: 3 + Math.random() * 4 }); }
-  S.bombs--; sfx('boom'); hud(); return true;
+  S.bombs--; S.usedH++; STATS.hammers++; raidRec(S.n).h++; sfx('boom'); hud(); return true;
 }
 // catapult: one chosen ship (and its lashed partner) is flung away, together with as many shields of its color
 // from the wall, outermost first, so the axes still add up exactly to the shields
@@ -632,12 +698,17 @@ function catapult(j) {
   ships.forEach(o => { const ti = S.tray.indexOf(o); if (ti >= 0) S.tray[ti] = null; else if (col) col.splice(col.indexOf(o), 1); });
   if (col) col.slide = ships.length; else packTray();
   for (let i = 0; i < 30; i++) { const a = Math.random() * 6.28, v = 60 + Math.random() * 200; S.parts.push({ x: W / 2, y: G.B0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 120, life: .8, color: i % 2 ? PAL[j.color] : '#6b4a2e', size: 3 + Math.random() * 4 }); }
-  S.catapults--; S.mode = 'play'; sfx('boom'); buzz(); hud();
+  S.catapults--; S.usedC++; STATS.catapults++; raidRec(S.n).c++; S.mode = 'play'; sfx('boom'); buzz(); hud();
   toast(`Catapulted! ${ships.length > 1 ? 'Both lashed ships' : 'The ship'} and ${gone.size} shields are gone.`);
 }
 function lose(why) {
   if (S.mode === 'lost' || S.mode === 'won') return;
-  S.mode = 'lost'; S.lossWhy = why; save.fails[S.n] = (save.fails[S.n] || 0) + 1; persist(); sfx('lose');
+  S.mode = 'lost'; S.lossWhy = why; save.fails[S.n] = (save.fails[S.n] || 0) + 1;
+  STATS[why === 'ships' ? 'lossShips' : 'lossFull']++; STATS.time += S.t;
+  // a loss ends the streak unless a Mead Horn is spent; either way nothing already earned is taken away
+  S.streakLost = 0; S.hornSaved = false;
+  if (SAGA.streak > 0) { if (SAGA.horns > 0) { SAGA.horns--; STATS.hornsUsed++; S.hornSaved = true; } else { S.streakLost = SAGA.streak; SAGA.streak = 0; SAGA.sinceHorn = 0; } }
+  S.newAch = checkAch(); persist(); sfx('lose');
   setTimeout(() => showCard('lose'), 500);
 }
 // no ships left to send while shields remain
@@ -662,7 +733,24 @@ function dockWarn() {
   return { stuck, left, n: pairs, dire: !left && stuck.length === docked.length };
 }
 function win() {
-  S.mode = 'won'; save.level = Math.max(save.level, Math.min(MAX_LEVEL, S.n + 1)); persist(); sfx('win');
+  S.mode = 'won'; save.level = Math.max(save.level, Math.min(MAX_LEVEL, S.n + 1));
+  const n = S.n, first = !(save.fails[n] || 0), rec = raidRec(n), R = { silver: 0, lines: [], ach: [] };
+  STATS.wins++; STATS[first ? 'first' : 'retry']++; STATS.time += S.t; STATS.reach = Math.max(STATS.reach, n); rec.w++;
+  // silver and a wooden chest for every win; more silver on later raids
+  R.silver += 20 + Math.round(n * .4); giveChest('wood'); R.chest = 'wood';
+  if (S.t <= S.par) { R.swift = true; R.silver += 25; if (!rec.s) { rec.s = 1; STATS.swift++; } }
+  if (rec.b && S.t < rec.b) { R.ownBest = true; R.silver += 10; STATS.ownBest++; }
+  if (!rec.b || S.t < rec.b) rec.b = S.t;
+  if (!S.usedH && !S.usedC) STATS.bare++;
+  if (S.dockSails >= 5) STATS.fullHold++;
+  if (!S.dockSails) STATS.straight++;
+  if (S.pairs >= 3) STATS.lashedWins++;
+  // streaks count first tries only; a horn is banked every ten straight wins
+  if (first) { SAGA.streak++; SAGA.sinceHorn++; STATS.best = Math.max(STATS.best, SAGA.streak); R.streak = SAGA.streak;
+    if (SAGA.sinceHorn >= HORN_EVERY) { SAGA.sinceHorn = 0; if (SAGA.horns < HORN_MAX) { SAGA.horns++; STATS.hornsEarned++; R.horn = true; } }
+    if (SAGA.streak === 3) R.sixth = true; }
+  giveSilver(R.silver);
+  R.ach = checkAch(); S.reward = R; persist(); sfx('win');
   for (let i = 0; i < 60; i++) { const x = Math.random() * W; S.parts.push({ x, y: -10, vx: (Math.random() - .5) * 80, vy: 80 + Math.random() * 220, life: 1.6, color: PAL[PROC_COLORS[i % 8]], size: 3 + Math.random() * 4 }); }
   setTimeout(() => showCard('win'), 900);
 }
@@ -687,6 +775,7 @@ function update(dt) {
       if (S.mode === 'lost') break;
     }
   }
+  if (playing) { S.t += dt; const el = $('clock'); if (clockOn()) { const txt = fmtT(S.t); if (el.textContent !== txt) { el.textContent = txt; el.classList.toggle('swift', S.t <= S.par); } el.hidden = false; } else el.hidden = true; }
   S.tray.forEach(j => { if (j && j.park && (j.park.t += dt) >= PARK) j.park = null; });
   if ((S.warnT = (S.warnT || 0) + dt) > .3) { S.warnT = 0; const w = dockWarn(); S.warn = w;
     if (w && !S.warned) { S.warned = true; buzz(); toast(w.dire ? 'Careful! The harbor is empty and no docked ship can sail. Clear its color with the ships on the fjord, or use a power-up.' : `Careful! Only ${w.left || 'no'} harbor ship${w.left === 1 ? '' : 's'} left and ${w.n > 1 ? w.n + ' docked ships' : 'a docked ship'} can't sail yet. Clear ${w.n > 1 ? 'their colors' : 'its color'} or the raid is lost.`); } }
@@ -894,14 +983,14 @@ function draw() {
   }
   {
     // fjord counter: a wave badge at the far left, away from the docks
-    const n = activeBelt(), full = n >= BELT_CAP, cx = 4 + G.cw / 2, cy = G.trayY, bs = G.slot;
+    const n = activeBelt(), full = n >= beltCap(), cx = 4 + G.cw / 2, cy = G.trayY, bs = G.slot;
     rr(cx - G.cw / 2, cy, G.cw, bs, bs * .18); ctx.fillStyle = full ? '#f3d5cf' : '#dbe9f0'; ctx.fill();
     ctx.lineWidth = 2; ctx.strokeStyle = full ? '#c0392b' : '#4aa3cf'; ctx.stroke();
     ctx.beginPath(); ctx.lineWidth = Math.max(2, bs * .07); ctx.strokeStyle = full ? '#c0392b' : '#2d6f8f'; ctx.lineCap = 'round';
     for (let i = -2; i <= 1; i++) { const wx = cx + i * bs * .2; ctx.moveTo(wx, cy + bs * .36); ctx.quadraticCurveTo(wx + bs * .1, cy + bs * .22, wx + bs * .2, cy + bs * .36); }
     ctx.stroke();
     ctx.font = `800 ${Math.round(bs * .34)}px ${BODY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = full ? '#c0392b' : '#2d6f8f'; ctx.fillText(n + '/' + BELT_CAP, cx, cy + bs * .84);
+    ctx.fillStyle = full ? '#c0392b' : '#2d6f8f'; ctx.fillText(n + '/' + beltCap(), cx, cy + bs * .84);
   }
   const free = S.tray.filter(x => !x).length;
   if (S.warn && S.mode !== 'won') { /* banner drawn after the docks */ }
@@ -970,6 +1059,13 @@ function hud() {
   $('bBomb').disabled = !S.bombs; $('bSlot').disabled = !S.slotBoosts; $('bCata').disabled = !S.catapults;
   $('bBomb').classList.toggle('on', S.mode === 'bomb'); $('bCata').classList.toggle('on', S.mode === 'catapult');
 }
+function rewardHtml(R) {
+  if (!R) return '';
+  const l = [`+${R.silver} silver, +1 ${CHEST_NAME[R.chest]}${R.swift ? ' \u00b7 <span class="new">\u2605 under par</span>' : ''}${R.ownBest ? ' \u00b7 <span class="new">own best</span>' : ''}`];
+  if (R.streak) l.push(`Streak: ${R.streak} in a row${R.sixth ? ' \u00b7 <span class="new">Sixth Sail hoisted: 6 ships may sail</span>' : ''}${R.horn ? ' \u00b7 <span class="new">Mead Horn earned</span>' : ''}`);
+  R.ach.forEach(x => l.push(`<span class="new">${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}</span> \u00b7 ${x.chest ? CHEST_NAME[x.chest] : x.silver + ' silver'}`));
+  return `<div class="reward">${l.join('<br>')}</div>`;
+}
 let toastT = 0;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; el.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => { el.style.opacity = 0; setTimeout(() => el.hidden = true, 400); }, 3200); }
 $('bBomb').onclick = () => { unlockAudio(); if (!S || !S.bombs || (S.mode !== 'play' && S.mode !== 'bomb' && S.mode !== 'catapult')) return; S.mode = S.mode === 'bomb' ? 'play' : 'bomb'; if (S.mode === 'bomb') toast('Tap the shield wall to smash a 3×3 area'); hud(); };
@@ -998,27 +1094,51 @@ function showCard(kind, extra) {
     html = n >= MAX_LEVEL
       ? `<h2>Valhalla!</h2><p>All ${MAX_LEVEL} raids won. The skalds will sing of this for a thousand years.</p><button class="cta" id="again">Replay raid ${n}</button>`
       : `<h2>Raid ${n} won!</h2><p>${(save.fails[n] || 0) ? `Took ${save.fails[n] + 1} tries.` : 'First try!'}${difficulty(n + 1).boss ? ' A great raid is next: a bigger wall and heavier defenses.' : ' The next shield wall awaits.'}</p>
-      <button class="cta" id="go">Raid ${n + 1}</button><button class="link" id="again">Replay raid ${n}</button>`;
+      ${rewardHtml(S.reward)}<button class="cta" id="go">Raid ${n + 1}</button><button class="link" id="again">Replay raid ${n}</button>`;
   } else if (kind === 'lose') {
     html = S.lossWhy === 'ships'
       ? `<h2>Stranded</h2><p>The harbor is empty and no docked ship has enough shields of its color showing to set out again. Raid ${n} just got a little easier for your next try.</p>`
       : `<h2>Docks are full</h2><p>A ship came home and every dock was taken. Raid ${n} just got a little easier for your next try.</p>`;
+    if (S.hornSaved) html += `<div class="reward"><span class="new">A Mead Horn saved your streak of ${SAGA.streak}.</span> ${SAGA.horns} left.</div>`;
+    else if (S.streakLost) html += `<div class="reward">Your streak of ${S.streakLost} ends here. A new one starts with the next first-try win.${sixthSail() ? '' : S.streakLost >= 3 ? ' The Sixth Sail is furled until then.' : ''}</div>`;
     html += `<button class="cta" id="go">Try again</button>`;
   } else if (kind === 'menu') {
     const sw = (on) => `<b style="float:right;font-family:var(--display);color:${on ? '#ffd37a' : '#b9a98f'}">${on ? 'On' : 'Off'}</b>`;
     const row = (id, label, on) => `<button class="link" id="${id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">${label}${sw(on)}</button>`;
-    html = `<h2>Viking Raiders</h2>${row('tMusic', 'Music', save.music)}${row('tSound', 'Sound effects', !save.muted)}${row('tVibe', 'Vibration', save.vibe)}
+    html = `<h2>Viking Raiders</h2>${row('tMusic', 'Music', save.music)}${row('tSound', 'Sound effects', !save.muted)}${row('tVibe', 'Vibration', save.vibe)}${row('tClock', 'Hourglass (from raid 11)', save.clock !== false)}
+      <button class="link" id="tSaga" style="display:block;width:100%;text-align:left;background:var(--lemon);color:#2b2118;border-radius:12px;padding:10px 14px;font-size:16px">Saga: achievements and stats<b style="float:right;font-family:var(--display)">${SAGA.silver} silver</b></button>
       <button class="link" id="retreat" style="color:#f3e9d2;background:#8d4f1c;border-radius:12px;padding:10px 14px;font-size:16px">Retreat from raid ${n}</button>
       <p style="margin:4px 0 0;font-size:12px;opacity:.65;line-height:1.5">Version ${BUILD}${window.VR_UPDATE ? ` · Update ${window.VR_UPDATE.id}` : ' · Claude page'}<br>${matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'Installed app' : 'In the browser'}<span id="upd"></span></p><button class="cta" id="cancel">Back to the raid</button>`;
     setTimeout(() => {
       $('tMusic').onclick = () => { save.music = !save.music; persist(); music(); showCard('menu'); };
       $('tSound').onclick = () => { save.muted = !save.muted; persist(); showCard('menu'); };
       $('tVibe').onclick = () => { save.vibe = !save.vibe; persist(); if (save.vibe) buzz(); showCard('menu'); };
+      $('tClock').onclick = () => { save.clock = save.clock === false ? null : false; persist(); showCard('menu'); };
+      $('tSaga').onclick = () => showCard('saga');
       $('retreat').onclick = () => showCard('restart');
       // the installed app asks the web host which version is current
       if (window.VR_UPDATE) fetch('version.json', { cache: 'no-store' }).then(r => r.json()).then(v => { const el = $('upd'); if (!el) return;
         el.textContent = v.build === BUILD ? ' · up to date' : ` · ${v.build} is out: close the app fully and open it again`; }).catch(() => {});
     });
+  } else if (kind === 'saga') {
+    const tab = (extra && extra.tab) || 'ach';
+    let body = '';
+    if (tab === 'ach') {
+      body = ACH.map(a => { const t = SAGA.ach[a.id] || 0, done = t >= a.tiers.length, next = done ? null : a.tiers[t], v = STATS[a.key] || 0;
+        return `<div class="ach${t ? ' done' : ''}"><div class="sym">${a.sym}</div><div><b>${a.name}${t ? ' ' + TIER_NAME[t - 1] : ''}</b><small>${a.desc}${done ? ': all done' : `: ${a.key === 'silverAll' || a.key === 'reach' ? v.toLocaleString() : v} of ${next.toLocaleString()}`}${a.chest || a.silver ? ' \u00b7 ' + (done ? '' : a.chest ? CHEST_NAME[a.chest[t]] : a.silver[t] + ' silver') : ''}</small></div></div>`; }).join('');
+    } else {
+      const r = (k, v) => `<div class="row"><span>${k}</span><b>${v}</b></div>`, st = STATS, rec = S ? raidRec(S.n) : null;
+      const rate = st.wins ? Math.round(100 * st.first / Math.max(1, st.first + st.retry)) : 0;
+      body = `<h3>Raiding</h3>${r('Raids won', st.wins)}${r('Highest raid reached', st.reach)}${r('First-try wins', st.first)}${r('Retry wins', st.retry)}${r('First-try rate', rate + '%')}${r('Lost: stranded', st.lossShips)}${r('Lost: docks full', st.lossFull)}${r('Retreats', st.retreats)}
+        <h3>Streaks</h3>${r('Current streak', SAGA.streak)}${r('Best streak', st.best)}${r('Mead Horns held', SAGA.horns + ' of ' + HORN_MAX)}${r('Horns earned / used', st.hornsEarned + ' / ' + st.hornsUsed)}${r('Sixth Sail', sixthSail() ? 'Hoisted' : 'Furled')}
+        <h3>Time</h3>${r('Raids beaten under par', st.swift)}${r('Own bests beaten', st.ownBest)}${r('Time raiding', fmtT(st.time))}
+        <h3>Fighting</h3>${r('Axes thrown', st.axes)}${r('Shields broken', st.shields)}${r('Ships sailed', st.sailed)}${r('Lashed pairs sailed', Math.floor(st.lashed / 2))}${r('Full-load dock sailings', st.fullLoad)}${r('Hammers used', st.hammers)}${r('Catapults used', st.catapults)}
+        <h3>Treasure</h3>${r('Silver in the purse', SAGA.silver)}${r('Silver earned all time', st.silverAll)}${r('Chests', Object.keys(CHEST_NAME).map(k => `${SAGA.chests[k] || 0} ${k}`).join(', '))}
+        ${rec ? `<h3>Raid ${S.n}</h3>${r('Tries', rec.t)}${r('Wins', rec.w)}${r('Best time', rec.b ? fmtT(rec.b) : '\u2014')}${r('Par', fmtT(S.par))}${r('Under par', rec.s ? 'Yes \u2605' : 'Not yet')}${r('Hammers / catapults used', rec.h + ' / ' + rec.c)}` : ''}
+        <p style="font-size:12px;margin-top:6px">Counting since ${SAGA.since}. Raids won before then count as wins, not as first tries.</p>`;
+    }
+    html = `<h2>Saga</h2><div class="tabs"><button id="tabA" class="${tab === 'ach' ? 'on' : ''}">Achievements</button><button id="tabS" class="${tab === 'stats' ? 'on' : ''}">Stats</button></div><div class="saga">${body}</div><button class="link" id="cancel">Close</button>`;
+    setTimeout(() => { $('tabA').onclick = () => showCard('saga', { tab: 'ach' }); $('tabS').onclick = () => showCard('saga', { tab: 'stats' }); });
   } else if (kind === 'restart') {
     html = `<h2>Retreat and retry?</h2><p>${S.launched ? 'This counts as a try, so the raid will ease up a little.' : 'You have not launched a ship yet.'}</p>
       <button class="cta" id="go">Retreat</button><button class="link" id="cancel">Keep raiding</button>`;
@@ -1041,7 +1161,7 @@ function showCard(kind, extra) {
     unlockAudio(); $('ov').hidden = true; save.seenHelp = true; persist();
     if (kind === 'intro') { S.mode = 'play'; return; }
     if (kind === 'win') startLevel(n + 1);
-    else if (kind === 'restart') { if (S.launched) { save.fails[n] = (save.fails[n] || 0) + 1; persist(); } startLevel(n); }
+    else if (kind === 'restart') { if (S.launched) { save.fails[n] = (save.fails[n] || 0) + 1; STATS.retreats++; STATS.time += S.t; persist(); } startLevel(n); }
     else startLevel(kind === 'help' && S ? S.n : n);
   };
   if (again) again.onclick = () => { $('ov').hidden = true; startLevel(n); };
@@ -1103,7 +1223,7 @@ $('ov').hidden = true;
 startLevel(save.level);
 if (!save.seenHelp) showCard('help');
 requestAnimationFrame(frame);
-window.JB = { get S() { return S; }, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+window.JB = { get S() { return S; }, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
 })();
 </script>
 
