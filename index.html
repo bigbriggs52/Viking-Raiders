@@ -137,7 +137,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1853",date:"2026-10-13 18:53 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1859",date:"2026-10-13 18:59 UTC"};</script>
 
 
 <div id="app">
@@ -487,7 +487,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.008';
+const BUILD = 'VR1.009';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1203,7 +1203,7 @@ function showCard(kind, extra) {
   } else if (kind === 'lhHelp') {
     html = `<h2>The Longhouse</h2><ul>
       <li><span>1</span><div><b>Tap a chest.</b> Its pieces land on the board.</div></li>
-      <li><span>2</span><div><b>Drag a piece onto two of the same.</b> Three become one better piece. Five become two.</div></li>
+      <li><span>2</span><div><b>Drag a piece onto one just like it.</b> When three of a kind touch, they become one better piece. Five become two. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
       <li><span>4</span><div><b>Board full?</b> Tap a piece and Sell it for silver.</div></li></ul>
       <button class="cta" id="lhOk">Let's build</button>`;
@@ -1367,13 +1367,14 @@ function lhDrop(a, b) {
   const p = LH.board[a]; if (!p || a === b || b < 0) return false;
   const q = LH.board[b];
   if (!q) { LH.board[b] = p; LH.board[a] = null; return true; }
-  if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { buzz(); return false; }
+  if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); return true; } // different pieces swap places
   LH.board[a] = null;
-  // the group: every alike piece joined to the target, nearest first
-  const seen = new Set([b]), queue = [b], group = [];
-  while (queue.length) { const i = queue.shift(); group.push(i); for (const j of lhNeighbors(i)) { const o = LH.board[j]; if (!seen.has(j) && o && o.ch === p.ch && o.t === p.t) { seen.add(j); queue.push(j); } } }
+  // the group: every alike piece touching the target or touching the dragged piece's old spot, nearest the target first
+  const same = i => { const o = LH.board[i]; return o && o.ch === p.ch && o.t === p.t; };
+  const seen = new Set([b]), queue = [b, ...lhNeighbors(a).filter(j => same(j) && !seen.has(j) && seen.add(j))], group = [];
+  while (queue.length) { const i = queue.shift(); group.push(i); for (const j of lhNeighbors(i)) if (!seen.has(j) && same(j)) { seen.add(j); queue.push(j); } }
   const size = group.length + 1; // plus the dragged piece
-  if (size < 3) { LH.board[a] = p; buzz(); return false; }
+  if (size < 3) { LH.board[a] = p; buzz(); toast(`Two ${pieceName(p.ch, p.t).toLowerCase()}s is not enough. Bring a third one next to them.`); return false; }
   const take = size >= 5 ? 5 : 3, eat = group.slice(0, take - 1);
   eat.forEach(i => { LH.board[i] = null; });
   LH.board[b] = { ch: p.ch, t: p.t + 1 };
@@ -1416,7 +1417,7 @@ function lhRender() {
   $('lhShelf').querySelectorAll('[data-chest]').forEach(b => b.onclick = () => openChest(b.dataset.chest));
   // the action bar
   const p = lhSel >= 0 ? LH.board[lhSel] : null, bar = $('lhBar');
-  if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest. 2. Drag matching pieces together. 3. Tap a piece, then Deliver.' : LH.board.some(Boolean) ? 'Drag matching pieces together. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
+  if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest. 2. Drag matching pieces together. 3. Tap a piece, then Deliver.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag matching pieces together. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
   else {
     const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
     bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : ''}<button class="boost" id="lhSell">Sell <b>${SELL[p.t - 1]}</b></button>`;
