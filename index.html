@@ -116,11 +116,27 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 /* the Harbor: an idle clicker */
 #hb { position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #hb .hud .lvl { flex: 1; }
-.barrel { display: grid; place-items: center; gap: 2px; background: var(--syrup); border: 3px solid var(--wood-hi); border-radius: 18px; padding: 10px; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-.barrel .fish { font-size: 54px; line-height: 1; transition: transform .08s; }
-.barrel.hit .fish { transform: scale(1.18) rotate(-8deg); }
-.barrel b { font-family: var(--display); font-weight: 400; font-size: 17px; color: var(--wood); }
-.barrel small { color: var(--mute); font-size: 12px; }
+.hbscene { background: linear-gradient(#bfe0ee 0, #bfe0ee 58%, #4aa3cf 58%, #2d6f8f 100%); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 6px 8px 4px; }
+.hbscene .town { display: flex; justify-content: space-around; align-items: flex-end; height: 54px; }
+.hbscene .bld { display: grid; justify-items: center; gap: 1px; font-size: 30px; line-height: 1; position: relative; }
+.hbscene .bld.off { opacity: .25; filter: grayscale(1); }
+.hbscene .bld i { font: 800 10px var(--body); font-style: normal; background: var(--wood); color: #ffd37a; border-radius: 8px; padding: 1px 5px; }
+.hbscene .inc { display: flex; justify-content: space-between; align-items: center; color: #f3e9d2; font-weight: 800; font-size: 13px; margin-top: 4px; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.hbscene .ms { height: 8px; background: rgba(0,0,0,.25); border-radius: 99px; overflow: hidden; margin-top: 3px; }
+.hbscene .ms i { display: block; height: 100%; background: #ffd37a; }
+.hbscene .msl { color: #f3e9d2; font-size: 11px; font-weight: 800; margin-top: 2px; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
+.hblist h3 { margin: 4px 2px 0; font-family: var(--display); font-weight: 400; font-size: 15px; color: var(--wood); }
+.hbtapwrap { position: relative; }
+.hbtap { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 84px; background: linear-gradient(#8d6540, #6b4a2e); border: 0; border-radius: 20px; box-shadow: 0 6px 0 #3d2a18; color: #f3e9d2; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; transition: transform .05s; }
+.hbtap:active, .hbtap.hit { transform: translateY(4px); box-shadow: 0 2px 0 #3d2a18; }
+.hbtap .fish { font-size: 46px; line-height: 1; transition: transform .08s; }
+.hbtap.hit .fish { transform: scale(1.2) rotate(-10deg); }
+.hbtap b { display: block; font-family: var(--display); font-weight: 400; font-size: 22px; color: #ffd37a; }
+.hbtap small { display: block; font-size: 12px; opacity: .85; }
+.floats { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.floats span { position: absolute; bottom: 60%; font: 800 20px var(--body); color: #ffd37a; text-shadow: 0 2px 0 #3d2a18; animation: rise .8s ease-out forwards; }
+.floats span.big { font-size: 26px; color: #fff3c4; }
+@keyframes rise { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -70px); opacity: 0; } }
 .hblist { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
 .hbrow { display: flex; align-items: center; gap: 8px; background: var(--syrup); border-radius: 12px; padding: 6px 8px; font-size: 13px; line-height: 1.3; }
 .hbrow .ic { font-size: 26px; width: 34px; text-align: center; flex: none; }
@@ -137,7 +153,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1900",date:"2026-10-13 19:00 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1905",date:"2026-10-13 19:05 UTC"};</script>
 
 
 <div id="app">
@@ -166,9 +182,9 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
   </div>
   <div id="hb" hidden>
     <div class="hud"><div class="lvl">Harbor</div><div class="chip" id="hbSilver">0 silver</div><button class="iconbtn" id="hbClose" aria-label="Back to the raid">✕</button></div>
-    <div class="barrel" id="hbBarrel"><div class="fish">🐟</div><b id="hbTap">+1 silver a tap</b><small id="hbRate">The harbor earns nothing yet</small></div>
+    <div class="hbscene" id="hbScene"></div>
     <div class="hblist" id="hbList"></div>
-    <div class="hbkeys" id="hbKeys"></div>
+    <div class="hbtapwrap"><div class="hbtap" id="hbBarrel"><div class="fish">🐟</div><div class="txt"><b id="hbTap">+1 silver</b><small id="hbCombo">Tap the barrel</small></div></div><div class="floats" id="hbFloats"></div></div>
   </div>
   <div class="overlay" id="ov">
     <div class="card" id="card"></div>
@@ -487,12 +503,12 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.010';
+const BUILD = 'VR1.011';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
 // ---------- the saga: silver, chests, streaks, achievements and stats (2026-10-13) ----------
-const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor'];
+const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons'];
 if (!save.saga) {
   // first run with the saga: raids already beaten count as won and reached, but never as first-try wins
   const st = {}; STAT_KEYS.forEach(k => st[k] = 0); st.wins = st.reach = Math.max(0, save.level - 1);
@@ -561,10 +577,12 @@ function startLevel(n) {
     cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
     tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
     bombs: L.bombs + (hallsDone() >= 4 && n % 3 === 0 ? 1 : 0), slotBoosts: LH.tokens > 0 ? 1 : 0, catapults: 1 + (hallsDone() >= 3 && n % 3 === 0 ? 1 : 0), total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1,
+    boon: SAGA.boons ? { h: SAGA.boons.hammer || 0, c: SAGA.boons.cata || 0 } : { h: 0, c: 0 },
     t: 0, par: L.cols.flat().length * 5 + 15 /* a swift star for a brisk raid, with room for a young raider to think */, usedH: 0, usedC: 0, dockSails: 0, pairs: L.cols.flat().filter(j => j.link).length / 2 };
+  if (S.boon.h || S.boon.c) { S.bombs += S.boon.h; S.catapults += S.boon.c; SAGA.boons = { hammer: 0, cata: 0 }; }
   raidRec(n).t++; persist();
   layout(); hud();
-  toast((L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`) + (sixthSail() ? ' \u00b7 Sixth Sail: 6 ships may sail' : ''));
+  toast((L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`) + (sixthSail() ? ' \u00b7 Sixth Sail: 6 ships may sail' : '') + (S.boon.h || S.boon.c ? ' \u00b7 Harbor boon: ' + [S.boon.h ? `+${S.boon.h} hammer` : '', S.boon.c ? `+${S.boon.c} catapult` : ''].filter(Boolean).join(', ') : ''));
   const fresh = [];
   if (L.ice.size && !save.seen.ice) fresh.push('ice');
   if (L.cols.flat().some(j => j.hidden) && !save.seen.mystery) fresh.push('mystery');
@@ -1208,6 +1226,13 @@ function showCard(kind, extra) {
       <li><span>4</span><div><b>Board full?</b> Tap a piece and Sell it for silver.</div></li></ul>
       <button class="cta" id="lhOk">Let's build</button>`;
     setTimeout(() => { $('lhOk').onclick = () => { $('ov').hidden = true; }; });
+  } else if (kind === 'hbHelp') {
+    html = `<h2>The Harbor</h2><ul>
+      <li><span>1</span><div><b>Tap the barrel</b> at the bottom for silver. Quick taps build a catch streak worth up to triple.</div></li>
+      <li><span>2</span><div><b>Build the harbor.</b> Each building earns silver every minute, even while the app is closed.</div></li>
+      <li><span>3</span><div><b>Spend silver on raids:</b> extra hammers and catapults, dock tokens, Mead Horns, and chests for the Longhouse.</div></li></ul>
+      <button class="cta" id="hbOk">To the harbor</button>`;
+    setTimeout(() => { $('hbOk').onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'saga') {
     const tab = (extra && extra.tab) || 'ach';
     let body = '';
@@ -1379,13 +1404,13 @@ function deliver(i) {
   const p = LH.board[i]; if (!p || LH.hall >= HALLS.length) return;
   const hall = HALLS[LH.hall], w = hall.wants.find(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n);
   if (!w) return;
-  LH.done[p.ch + p.t] = (LH.done[p.ch + p.t] || 0) + 1; LH.board[i] = null; STATS.delivered++; lhSel = -1; sfx('launch');
+  LH.done[p.ch + p.t] = (LH.done[p.ch + p.t] || 0) + 1; LH.board[i] = null; STATS.delivered++; lhSel = -1; sfx('launch'); giveSilver(p.t * 10);
   if (hall.wants.every(([ch, t, n]) => (LH.done[ch + t] || 0) >= n)) {
-    LH.hall++; LH.done = {}; LH.tokens++; STATS.halls++; giveChest('gold'); giveSilver(100);
+    const bonus = 250 * (LH.hall + 1); LH.hall++; LH.done = {}; LH.tokens++; STATS.halls++; giveChest('gold'); giveSilver(bonus);
     sfx('win'); buzz();
-    toast(`The ${hall.name} is finished! ${hall.perk}. Plus a dock token, a gold chest and 100 silver.`);
+    toast(`The ${hall.name} is finished! ${hall.perk}. Plus a dock token, a gold chest and ${bonus} silver.`);
     checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`));
-  } else toast(`${pieceName(p.ch, p.t)} delivered to the ${hall.name}.`);
+  } else toast(`${pieceName(p.ch, p.t)} delivered to the ${hall.name}, +${p.t * 10} silver.`);
   persist(); lhRender();
 }
 function sell(i) { const p = LH.board[i]; if (!p) return; const v = SELL[p.t - 1]; LH.board[i] = null; giveSilver(v); lhSel = -1; sfx('pop'); persist(); lhRender(); toast(`${pieceName(p.ch, p.t)} sold for ${v} silver.`); }
@@ -1466,36 +1491,84 @@ function hbSettle() {
   if (got) giveSilver(got);
   return got;
 }
-let hbFrom = null, hbTimer = 0;
+let hbTimer = 0, combo = 0, comboT = 0;
+if (!HB.ms) HB.ms = 0;
+if (!SAGA.boons) SAGA.boons = { hammer: 0, cata: 0 };
+// raid boons: silver spent here shows up in the next raid
+const BOONS = [
+  { id: 'hammer', ic: '\u{1F528}', name: 'Extra hammer', what: 'One more hammer in your next raid', cost: 300 },
+  { id: 'cata', ic: '\u{1F3F9}', name: 'Extra catapult', what: 'One more catapult in your next raid', cost: 500 },
+  { id: 'token', ic: '⚓', name: 'Dock token', what: 'A sixth dock for one raid', cost: 1500 },
+  { id: 'horn', ic: '\u{1F37A}', name: 'Mead Horn', what: 'Saves your win streak once', cost: 2500 },
+];
+// harbor milestones: every building level counts, and each step pays something that matters in a raid
+const MILES = [[10, 'wood', 'a wooden chest'], [25, 'horn', 'a Mead Horn'], [50, 'token', 'a dock token'], [75, 'gold', 'a gold chest'], [100, 'horn', 'a Mead Horn'], [125, 'token', 'a dock token'], [150, 'gold', 'a gold chest'], [200, 'horn', 'a Mead Horn'], [250, 'token', 'a dock token'], [300, 'gold', 'a gold chest']];
+const hbLevel = () => HB.b.reduce((a, b) => a + b, 0) + HB.tap;
+function hbMilestones() {
+  while (HB.ms < MILES.length && hbLevel() >= MILES[HB.ms][0]) {
+    const [, k, txt] = MILES[HB.ms++];
+    if (k === 'horn') { if (SAGA.horns < HORN_MAX) { SAGA.horns++; STATS.hornsEarned++; } else giveSilver(1000); }
+    else if (k === 'token') LH.tokens++; else giveChest(k);
+    sfx('win'); buzz(); toast(`Harbor level ${MILES[HB.ms - 1][0]}: ${txt}${k === 'horn' && SAGA.horns >= HORN_MAX ? ' (horns full, so 1000 silver instead)' : ''}!`);
+  }
+}
 function openHB() {
   $('ov').hidden = true;
   if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   const away = Math.max(hbPending.away, Date.now() - (HB.last || Date.now())), got = hbSettle() + hbPending.got; hbPending = { away: 0, got: 0 };
   if (got > 0 && away > 60e3) { STATS.haul = Math.max(STATS.haul, got); toast(away >= HB_OFFLINE_CAP ? `The hold was full: the harbor earned ${fmtN(got)} silver while you were away.` : `While you were raiding, the harbor earned ${fmtN(got)} silver.`); sfx('win'); }
-  $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } hbSettle(); hbRender(true); }, 1000);
+  $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } hbSettle(); if (combo && Date.now() - comboT > 1200) { combo = 0; } hbRender(true); }, 1000);
+  if (!save.seen.hb) { save.seen.hb = true; persist(); showCard('hbHelp'); }
 }
-function closeHB() { hbSettle(); persist(); clearInterval(hbTimer); $('hb').hidden = true; if (S && S.mode === 'paused') { S.mode = S.resumeMode || 'play'; S.resumeMode = null; } }
+function closeHB() { hbSettle(); persist(); clearInterval(hbTimer); $('hb').hidden = true; if (S && S.mode === 'paused') { S.mode = S.resumeMode || 'play'; S.resumeMode = null; } if (S) { S.slotBoosts = LH.tokens > 0 && S.tray.length < 6 ? 1 : 0; hud(); } }
 $('hbClose').onclick = closeHB;
-$('hbBarrel').onpointerdown = e => { e.preventDefault(); const g = tapGain(); giveSilver(g); STATS.taps++; tap(); const el = $('hbBarrel'); el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 90); if (STATS.taps % 20 === 0) { persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); } hbRender(true); };
-function hbBuy(i) { const c = hbCost(i); if (HB.b[i] >= HB_MAX || SAGA.silver < c) { buzz(); return; } hbSettle(); SAGA.silver -= c; HB.b[i]++; STATS.harbor++; sfx('launch'); persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); hbRender(); }
-function hbTapUp() { const c = tapCost(); if (HB.tap >= HB_MAX || SAGA.silver < c) { buzz(); return; } SAGA.silver -= c; HB.tap++; STATS.harbor++; sfx('launch'); persist(); hbRender(); }
+// tapping: a rhythm of quick taps builds a catch multiplier up to x3, so staying on the barrel pays more than idling
+const comboMult = () => 1 + Math.min(2, Math.floor(combo / 10) * .5);
+$('hbBarrel').onpointerdown = e => {
+  e.preventDefault(); const now = Date.now(); combo = now - comboT < 700 ? combo + 1 : 1; comboT = now;
+  const m = comboMult(), g = Math.round(tapGain() * m); giveSilver(g); STATS.taps++; tap();
+  const el = $('hbBarrel'); el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 90);
+  const f = document.createElement('span'); f.textContent = '+' + fmtN(g); if (m > 1) f.className = 'big'; const wr = $('hbFloats').getBoundingClientRect(); f.style.left = Math.max(12, Math.min(wr.width - 12, e.clientX - wr.left + (Math.random() - .5) * 30)) + 'px'; $('hbFloats').appendChild(f); setTimeout(() => f.remove(), 800); if ($('hbFloats').children.length > 12) $('hbFloats').firstChild.remove();
+  if (STATS.taps % 20 === 0) { persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); }
+  hbRender(true);
+};
+function hbBuy(i) { const c = hbCost(i); if (HB.b[i] >= HB_MAX || SAGA.silver < c) { buzz(); return; } hbSettle(); SAGA.silver -= c; HB.b[i]++; STATS.harbor++; sfx('launch'); hbMilestones(); persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); hbRender(); }
+function hbTapUp() { const c = tapCost(); if (HB.tap >= HB_MAX || SAGA.silver < c) { buzz(); return; } SAGA.silver -= c; HB.tap++; STATS.harbor++; sfx('launch'); hbMilestones(); persist(); hbRender(); }
 const KEY_PRICE = { wood: 500, iron: 2000, silver: 8000, gold: 30000 };
 function hbKey(k) { const c = KEY_PRICE[k]; if (SAGA.silver < c) { buzz(); return; } SAGA.silver -= c; giveChest(k); sfx('crack'); persist(); hbRender(); toast(`A ${CHEST_NAME[k]} for the Longhouse.`); }
+function hbBoon(id) {
+  const b = BOONS.find(x => x.id === id); if (SAGA.silver < b.cost) { buzz(); return; }
+  if (id === 'horn' && SAGA.horns >= HORN_MAX) { toast('You already hold all 3 Mead Horns.'); buzz(); return; }
+  SAGA.silver -= b.cost; STATS.boons++;
+  if (id === 'horn') { SAGA.horns++; STATS.hornsEarned++; } else if (id === 'token') LH.tokens++; else SAGA.boons[id] = (SAGA.boons[id] || 0) + 1;
+  sfx('launch'); persist(); hbRender(); toast(`${b.name}: ${b.what.toLowerCase()}.`);
+}
 function hbRender(light) {
   $('hbSilver').textContent = `${fmtN(SAGA.silver)} silver`;
-  $('hbTap').textContent = `+${fmtN(tapGain())} silver a tap`;
-  const r = hbRate(); $('hbRate').textContent = r ? `The harbor earns ${fmtN(r)} silver a minute, awake or asleep (up to 8 hours away)` : 'Build a fish rack and the harbor starts earning on its own';
-  if (light && $('hbList').children.length) { $('hbList').querySelectorAll('[data-b]').forEach(b => { const i = +b.dataset.b; b.disabled = i < 0 ? HB.tap >= HB_MAX || SAGA.silver < tapCost() : HB.b[i] >= HB_MAX || SAGA.silver < hbCost(i); }); $('hbKeys').querySelectorAll('[data-k]').forEach(b => { b.disabled = SAGA.silver < KEY_PRICE[b.dataset.k]; }); return; }
+  const m = comboMult(); $('hbTap').textContent = `+${fmtN(Math.round(tapGain() * m))} silver`;
+  $('hbCombo').textContent = m > 1 ? `Catch streak x${m}! Keep tapping` : combo > 3 ? `Keep tapping for a catch streak (${combo}/10)` : 'Tap the barrel';
+  const r = hbRate(), lvl = hbLevel(), next = MILES[HB.ms], prev = HB.ms ? MILES[HB.ms - 1][0] : 0;
+  if (light && $('hbList').children.length) {
+    $('hbList').querySelectorAll('[data-b]').forEach(b => { const i = +b.dataset.b; b.disabled = i < 0 ? HB.tap >= HB_MAX || SAGA.silver < tapCost() : HB.b[i] >= HB_MAX || SAGA.silver < hbCost(i); });
+    $('hbList').querySelectorAll('[data-k]').forEach(b => { b.disabled = SAGA.silver < KEY_PRICE[b.dataset.k]; });
+    $('hbList').querySelectorAll('[data-boon]').forEach(b => { b.disabled = SAGA.silver < BOONS.find(x => x.id === b.dataset.boon).cost; });
+    return;
+  }
+  $('hbScene').innerHTML = `<div class="town">${HB_B.map((b, i) => `<div class="bld${HB.b[i] ? '' : ' off'}">${b.ic}<i>${HB.b[i] ? 'lv ' + HB.b[i] : '—'}</i></div>`).join('')}</div>
+    <div class="inc"><span>${r ? `${fmtN(r)} silver a minute, even while away` : 'Build a Fish Rack to start earning'}</span><span>Harbor level ${lvl}</span></div>
+    ${next ? `<div class="ms"><i style="width:${Math.round(100 * (lvl - prev) / (next[0] - prev))}%"></i></div><div class="msl">Next reward at level ${next[0]}: ${next[2]}</div>` : '<div class="msl">Every harbor reward claimed</div>'}`;
   const row = (ic, name, what, lvl, out, i, cost, maxed) => `<div class="hbrow"><div class="ic">${ic}</div><div class="txt"><b>${name}${lvl ? ` <span style="color:var(--mute);font-weight:500">level ${lvl}</span>` : ''}</b><small>${what}${out}</small></div><button class="boost" data-b="${i}" ${maxed || SAGA.silver < cost ? 'disabled' : ''}>${maxed ? 'Finished' : lvl ? 'Upgrade' : 'Build'}<small>${maxed ? 'level ' + HB_MAX : fmtN(cost) + ' silver'}</small></button></div>`;
-  $('hbList').innerHTML = row('\u{1F6E2}', 'Bigger barrel', 'More silver for every tap', HB.tap, HB.tap ? ` · +${fmtN(tapGain())} a tap` : '', -1, tapCost(), HB.tap >= HB_MAX)
-    + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtN(hbOut(i))} a minute` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('');
+  $('hbList').innerHTML = `<h3>Buildings</h3>` + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtN(hbOut(i))} a minute` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('')
+    + row('\u{1F6E2}', 'Bigger barrel', 'More silver for every tap', HB.tap, HB.tap ? ` · +${fmtN(tapGain())} a tap` : '', -1, tapCost(), HB.tap >= HB_MAX)
+    + `<h3>For the next raid</h3>` + BOONS.map(b => `<div class="hbrow"><div class="ic">${b.ic}</div><div class="txt"><b>${b.name}${b.id === 'hammer' && SAGA.boons.hammer ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.hammer} ready</span>` : b.id === 'cata' && SAGA.boons.cata ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.cata} ready</span>` : b.id === 'horn' ? ` <span style="color:var(--mute);font-weight:500">${SAGA.horns} of ${HORN_MAX}</span>` : b.id === 'token' ? ` <span style="color:var(--mute);font-weight:500">${LH.tokens} held</span>` : ''}</b><small>${b.what}</small></div><button class="boost" data-boon="${b.id}" ${SAGA.silver < b.cost ? 'disabled' : ''}>Buy<small>${fmtN(b.cost)} silver</small></button></div>`).join('')
+    + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${CHEST_SPILL[k][0]} pieces</small></div><button class="boost" data-k="${k}" ${SAGA.silver < KEY_PRICE[k] ? 'disabled' : ''}>Buy<small>${fmtN(KEY_PRICE[k])} silver</small></button></div>`).join('');
   $('hbList').querySelectorAll('[data-b]').forEach(b => b.onclick = () => +b.dataset.b < 0 ? hbTapUp() : hbBuy(+b.dataset.b));
-  $('hbKeys').innerHTML = Object.keys(KEY_PRICE).map(k => `<button class="boost" data-k="${k}" ${SAGA.silver < KEY_PRICE[k] ? 'disabled' : ''}>${CHEST_NAME[k].split(' ')[0][0].toUpperCase() + CHEST_NAME[k].split(' ')[0].slice(1)} chest<small>${fmtN(KEY_PRICE[k])} silver</small></button>`).join('');
-  $('hbKeys').querySelectorAll('[data-k]').forEach(b => b.onclick = () => hbKey(b.dataset.k));
+  $('hbList').querySelectorAll('[data-k]').forEach(b => b.onclick = () => hbKey(b.dataset.k));
+  $('hbList').querySelectorAll('[data-boon]').forEach(b => b.onclick = () => hbBoon(b.dataset.boon));
 }
 let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() }; // banked while the game was closed; the Harbor screen tells the tale
 
-window.JB = { get S() { return S; }, HB, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+window.JB = { get S() { return S; }, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
 })();
 </script>
 
