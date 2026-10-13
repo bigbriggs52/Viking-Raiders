@@ -161,7 +161,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2001",date:"2026-10-13 20:01 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-2003",date:"2026-10-13 20:03 UTC"};</script>
 
 
 <div id="app">
@@ -511,7 +511,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.016';
+const BUILD = 'VR1.017';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -709,9 +709,7 @@ const trayShips = () => S.tray.filter(j => j && !j.spent);
 const showing = (color, need) => lapHits(S.grid, S.ice, color, need).length >= need; // one lap, exactly as the ship would sail it
 function tapTray(i) {
   const j = S.tray[i]; if (!j || j.spent || j.park) return;
-  // the crew will not row out with nothing to throw at: a docked ship waits until its color shows on the wall
-  const mate = j.link ? S.tray.find((o, k) => k !== i && o && o.link === j.link) : null;
-  if (!showing(j.color, j.ammo + (mate ? mate.ammo : 0))) { toast(`Fewer than ${j.ammo + (mate ? mate.ammo : 0)} shields of that color in reach. The ship waits in the dock.`); buzz(); return; }
+  // a docked ship can always sail again (the user's rule, 2026-10-13, replacing the full-load rule)
   const mi = j.link ? S.tray.findIndex((o, k) => k !== i && o && o.link === j.link) : -1;
   if (mi >= 0 && activeBelt() + 2 > beltCap()) { toast('Lashed ships need two free spots on the fjord.'); buzz(); return; }
   const [x, y, sz] = traySlotRect(i);
@@ -816,13 +814,12 @@ function checkStuck() {
   if (S.mode !== 'play' || S.left === 0 || activeBelt() > 0 || S.shots.length) return;
   if (S.cols.some(c => c.length)) return;
   const docked = trayShips();
-  if (!docked.length) { lose('ships'); return; }
-  // no docked ship can set out: none has enough shields of its color showing on the wall
-  if (!docked.some(j => { const mate = j.link ? docked.find(o => o !== j && o.link === j.link) : null; return showing(j.color, j.ammo + (mate ? mate.ammo : 0)); })) lose('ships');
+  if (!docked.length) lose('ships'); // nothing left anywhere to throw an axe, yet shields remain
 }
 // early warning: the harbor is nearly empty and a docked ship still has no lap that could empty it
 const harborLeft = () => S.cols.reduce((a, c) => a + c.length, 0);
 function dockWarn() {
+  return null; // retired 2026-10-13: docked ships can always sail, so there is no stranding to warn about
   if (!S || S.mode !== 'play' && S.mode !== 'bomb' && S.mode !== 'catapult' || !S.left) return null;
   const docked = trayShips(); if (!docked.length) return null;
   const stuck = docked.filter(j => { const mate = j.link ? docked.find(o => o !== j && o.link === j.link) : null; return !showing(j.color, j.ammo + (mate ? mate.ammo : 0)); });
@@ -1189,7 +1186,7 @@ function showCard(kind, extra) {
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
         <li><span>3</span>The axes add up exactly to the shields, nothing spare. A ship that comes home with axes left waits in a dock until you send it again. Never more than 5 in the docks: if a ship comes home and all 5 are taken, the raid fails. The order you send ships in is everything.</li>
-        <li><span>4</span>A docked ship will only set out again when a shield of its color is showing on the wall, so a ship sent at the wrong time can sit in a dock for a long while.</li>
+        <li><span>4</span>A docked ship can set out again whenever you tap it. Send it when shields of its color face the water, or it comes straight back to the dock.</li>
         <li><span>5</span>Once per raid you get a hammer (smash a 3×3 patch of wall) and a catapult (fling one ship away together with its share of shields). The menu at the top right has sound, music, vibration and retreat.</li>
         <li><span>6</span>Every failed raid makes that raid a little easier next time.</li>
       </ul>
@@ -1203,7 +1200,7 @@ function showCard(kind, extra) {
     setTimeout(() => { const b = $('toLH'); if (b) b.onclick = () => openLH('win'); });
   } else if (kind === 'lose') {
     html = S.lossWhy === 'ships'
-      ? `<h2>Stranded</h2><p>The harbor is empty and no docked ship has enough shields of its color showing to set out again. Raid ${n} just got a little easier for your next try.</p>`
+      ? `<h2>Stranded</h2><p>No ship is left to throw an axe, yet shields remain. Raid ${n} just got a little easier for your next try.</p>`
       : `<h2>Docks are full</h2><p>A ship came home and every dock was taken. Raid ${n} just got a little easier for your next try.</p>`;
     if (S.hornSaved) html += `<div class="reward"><span class="new">A Mead Horn saved your streak of ${SAGA.streak}.</span> ${SAGA.horns} left.</div>`;
     else if (S.streakLost) html += `<div class="reward">Your streak of ${S.streakLost} ends here. A new one starts with the next first-try win.${sixthSail() ? '' : S.streakLost >= 3 ? ' The Sixth Sail is furled until then.' : ''}</div>`;
