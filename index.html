@@ -153,7 +153,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-1905",date:"2026-10-13 19:05 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261013-1907",date:"2026-10-13 19:07 UTC"};</script>
 
 
 <div id="app">
@@ -503,7 +503,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.011';
+const BUILD = 'VR1.012';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1468,7 +1468,7 @@ function lhRender() {
 
 // ---------- the Harbor: an idle clicker that earns silver while the phone is in your pocket ----------
 if (!SAGA.hb) SAGA.hb = { b: [0, 0, 0, 0, 0], tap: 0, last: Date.now() };
-const HB = SAGA.hb, HB_MAX = 25, HB_OFFLINE_CAP = 8 * 3600e3;
+const HB = SAGA.hb, HB_MAX = 100, HB_OFFLINE_CAP = 8 * 3600e3; // every tenth level doubles a building's output, so the climb stays worth it
 const HB_B = [
   { name: 'Fish Rack', ic: '\u{1F41F}', base: 1, cost: 50, what: 'Dried cod for the market' },
   { name: 'Smithy', ic: '⚒', base: 5, cost: 400, what: 'Nails, hinges and axe heads' },
@@ -1503,6 +1503,7 @@ const BOONS = [
 ];
 // harbor milestones: every building level counts, and each step pays something that matters in a raid
 const MILES = [[10, 'wood', 'a wooden chest'], [25, 'horn', 'a Mead Horn'], [50, 'token', 'a dock token'], [75, 'gold', 'a gold chest'], [100, 'horn', 'a Mead Horn'], [125, 'token', 'a dock token'], [150, 'gold', 'a gold chest'], [200, 'horn', 'a Mead Horn'], [250, 'token', 'a dock token'], [300, 'gold', 'a gold chest']];
+for (let L = 350; L <= 600; L += 50) MILES.push([L, ['horn', 'token', 'gold'][(L / 50) % 3], ['a Mead Horn', 'a dock token', 'a gold chest'][(L / 50) % 3]]); // up to all six buildings at level 100
 const hbLevel = () => HB.b.reduce((a, b) => a + b, 0) + HB.tap;
 function hbMilestones() {
   while (HB.ms < MILES.length && hbLevel() >= MILES[HB.ms][0]) {
