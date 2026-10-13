@@ -363,7 +363,7 @@ function buildLevel(n, fails) {
   const orng = rngFrom(n * 77 + 3);
   cells.sort(() => orng() - .5);
   const K = D.lines + ri(rng, -1, 0);
-  const reinf = n >= 15 && obsScale > 0 ? { every: D.tide + ease * 2 } : null;
+  const reinf = null; // the tide (a harbor reshuffle every 8th launch) was removed on 2026-10-13 at the user's request
   const docks = 5; // never more than 5 ships in the docks
   // Scramble the helpful order; each failure scrambles it less. A scramble is only kept if a careful
   // raider can still finish. If no scramble works, relief steps thin the ice and finally shrink the ships.
@@ -431,7 +431,6 @@ function startLevel(n) {
   if (L.ice.size && !save.seen.ice) fresh.push('ice');
   if (L.cols.flat().some(j => j.hidden) && !save.seen.mystery) fresh.push('mystery');
   if (L.cols.flat().some(j => j.link) && !save.seen.link) fresh.push('link');
-  if (L.reinf && !save.seen.reinf) fresh.push('reinf');
   if (fresh.length && save.seenHelp) { S.mode = 'paused'; showCard('intro', fresh); }
 }
 
@@ -915,7 +914,7 @@ function showCard(kind, extra) {
   if (S && kind === 'restart') S.mode = 'paused';
   let html = '';
   if (kind === 'help') {
-    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build 24f4c497</small></h2>
+    html = `<h2>Viking Raiders <small style="font-size:11px;opacity:.6">build b5480544</small></h2>
       <ul>
         <li><span>1</span>Tap the front longship in a line to send it down the fjord.</li>
         <li><span>2</span>It hurls axes at shields with its own color and emblem that face the water. The number on the sail is how many axes it carries.</li>
@@ -948,7 +947,7 @@ function showCard(kind, extra) {
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
     let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
-    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build 24f4c497</div>`;
+    html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto">${b}</div><button class="link" id="cancel">Close</button><div style="font-size:11px;opacity:.6">build b5480544</div>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
   card.innerHTML = html; $('ov').hidden = false;
