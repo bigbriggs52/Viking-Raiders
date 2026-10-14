@@ -200,7 +200,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261014-1855",date:"2026-10-14 18:55 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261014-1902",date:"2026-10-14 19:02 UTC"};</script>
 
 
 <div id="app">
@@ -576,7 +576,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.031';
+const BUILD = 'VR1.032';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1560,9 +1560,6 @@ if (window.ResizeObserver) new ResizeObserver(() => resize()).observe(stage); //
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
 resize();
 $('ov').hidden = true;
-startLevel(save.level);
-if (!save.seenHelp) showCard('help'); else showHome();
-requestAnimationFrame(frame);
 // ---------- the Longhouse: merge three alike pieces into the next tier, five into two, and build the hall ----------
 const LH_CHAINS = {
   T: { name: 'Timber', icon: '\u{1F332}', color: '#8d6540', tiers: ['Twig', 'Plank', 'Beam', 'Pillar', 'Carved pillar', 'Roof truss'] },
@@ -1850,6 +1847,10 @@ function hbRender(light) {
 let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() }; // banked while the game was closed; the Harbor screen tells the tale
 
 window.JB = { get S() { return S; }, showHome, playHome, placePending, raiseRune, runeReady, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+// boot last, once every section above (Longhouse, Harbor, home) is defined: the home screen reads them
+startLevel(save.level);
+if (!save.seenHelp) showCard('help'); else showHome();
+requestAnimationFrame(frame);
 })();
 </script>
 
