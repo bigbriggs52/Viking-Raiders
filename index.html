@@ -66,6 +66,7 @@ body {
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 * { touch-action: none; -webkit-tap-highlight-color: transparent; }
 .saga, .hblist, .scroll, .saga *, .hblist *, .scroll * { touch-action: pan-y; }
+.card, .card * { touch-action: pan-y; } /* the card scrolls by touch; its buttons still take taps */
 .boosters { display: flex; gap: 8px; }
 .boost { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; border-radius: 14px; border: 0; cursor: pointer;
   background: linear-gradient(var(--wood-hi), var(--wood)); color: #f3e9d2; font: 800 15px var(--body); box-shadow: 0 4px 0 #3d2a18; }
@@ -169,7 +170,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261013-2306",date:"2026-10-13 23:06 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261014-1835",date:"2026-10-14 18:35 UTC"};</script>
 
 
 <div id="app">
@@ -533,7 +534,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.028';
+const BUILD = 'VR1.029';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
