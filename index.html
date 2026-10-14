@@ -200,7 +200,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261014-1913",date:"2026-10-14 19:13 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261014-1915",date:"2026-10-14 19:15 UTC"};</script>
 
 
 <div id="app">
@@ -254,7 +254,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 (() => {
 'use strict';
 // ---------- palette ----------
-const PAL = { R:'#d9342f', O:'#f08a2a', Y:'#f2d24b', G:'#5cc96a', B:'#2f6fe0', C:'#63d8e6', P:'#a3246f', V:'#2e2a26', W:'#efe4cf', K:'#6b4a36' };
+const PAL = { R:'#d9342f', O:'#f08a2a', Y:'#f2d24b', G:'#5cc96a', B:'#2f6fe0', C:'#63d8e6', P:'#e23a9e', V:'#2e2a26', W:'#efe4cf', K:'#6b4a36' };
 // every color also has its own shape, so the game works without telling colors apart
 const SYM = { R:'circle', O:'tri', Y:'star', G:'diamond', B:'square', C:'plus', P:'heart', V:'ring', W:'hex', K:'x' };
 const PROC_COLORS = ['R','O','Y','G','B','C','P','V'];
@@ -576,7 +576,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.033';
+const BUILD = 'VR1.034';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
