@@ -63,6 +63,11 @@ body {
 .tabs { display: flex; gap: 6px; } .tabs button { flex: 1; border: 0; border-radius: 10px; padding: 8px 4px; font: 800 14px var(--body); background: #e3d3b0; color: var(--mute); cursor: pointer; } .tabs button.on { background: var(--wood); color: #ffd37a; }
 .reward { background: #e3d3b0; border-radius: 12px; padding: 8px 10px; font-size: 14px; line-height: 1.5; color: var(--cream); }
 .reward .new { color: #2f7a4a; font-weight: 800; }
+.reward .rw { padding: 3px 0; } .reward .rw + .rw { border-top: 1px dashed rgba(0,0,0,.14); }
+.task { display: flex; align-items: center; gap: 8px; background: var(--syrup-hi); border-radius: 12px; padding: 7px 10px; font-size: 14px; text-align: left; }
+.task .tt { flex: 1; min-width: 0; } .task .tt small { display: block; color: var(--mute); font-size: 12px; }
+.task .tb { height: 8px; border-radius: 99px; background: rgba(0,0,0,.15); overflow: hidden; margin-top: 4px; } .task .tb i { display: block; height: 100%; background: linear-gradient(#7ed957, #3f9c2e); }
+.task.done { background: #cfe9c6; } .task .tgo { flex: none; font-size: 13px; padding: 6px 10px; }
 .iconbtn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: var(--wood); color: #f3e9d2; font: 800 15px var(--body); cursor: pointer; flex: none; }
 .stage { flex: 1; min-height: 0; position: relative; }
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
@@ -96,16 +101,16 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 #home .homeplay:active { transform: translateY(4px); box-shadow: 0 3px 0 #2d6e1f, 0 6px 10px rgba(0,0,0,.25), inset 0 3px 0 rgba(255,255,255,.35); }
 #home .homeplay .ban { position: absolute; left: 50%; top: -16px; transform: translateX(-50%); padding: 5px 18px; border-radius: 10px; background: linear-gradient(#8d4f1c, #6b3a12); color: #ffd37a; font-family: var(--display); font-size: 17px; letter-spacing: .04em; box-shadow: 0 3px 0 #3d2a18; white-space: nowrap; }
 #home .homeplay .ban.boss { background: linear-gradient(#b8262a, #7a1419); color: #fff; }
-.tabs { position: relative; display: flex; align-items: flex-end; gap: 6px; padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(#5b7fa6, #3f5f82); box-shadow: 0 -4px 0 #2d4560, 0 -8px 14px rgba(0,0,0,.2); }
-.tab { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 4px; border: 0; border-radius: 16px; background: transparent; color: #e9f0f3; font-weight: 800; font-size: 12px; cursor: pointer; position: relative; }
-.tab .ic { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 16px; background: linear-gradient(#f3e9d2, #d9c3a3); color: #6b4a2e; font-size: 28px; line-height: 1; box-shadow: 0 4px 0 #8d6540; }
-.tab .ic svg { width: 32px; height: 32px; }
-.tab.on { color: #fff; }
-.tab.on .ic { background: linear-gradient(#ffe39a, #e0a24f); box-shadow: 0 4px 0 #a6702a, 0 0 0 3px #fff8ea; transform: translateY(-6px) scale(1.08); }
-.tab:active .ic { transform: translateY(2px); box-shadow: 0 2px 0 #8d6540; }
-.tab .n { position: absolute; top: 2px; right: 10%; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: #d9342f; color: #fff; font-size: 12px; font-weight: 900; line-height: 20px; text-align: center; box-shadow: 0 0 0 2px #fff; }
-@media (max-height: 640px) { #home .ship { width: min(62vw, 240px); } #home .homeplay { min-height: 66px; font-size: 38px; } .tab .ic { width: 44px; height: 44px; font-size: 24px; } }
-#lh .tabs, #hb .tabs { margin: 0 -10px calc(-6px - env(safe-area-inset-bottom, 0px)); }
+.navbar { position: relative; display: flex; align-items: flex-end; gap: 6px; padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(#5b7fa6, #3f5f82); box-shadow: 0 -4px 0 #2d4560, 0 -8px 14px rgba(0,0,0,.2); }
+.nav { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 4px; border: 0; border-radius: 16px; background: transparent; color: #e9f0f3; font-weight: 800; font-size: 12px; cursor: pointer; position: relative; }
+.nav .ic { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 16px; background: linear-gradient(#f3e9d2, #d9c3a3); color: #6b4a2e; font-size: 28px; line-height: 1; box-shadow: 0 4px 0 #8d6540; }
+.nav .ic svg { width: 32px; height: 32px; }
+.nav.on { color: #fff; }
+.nav.on .ic { background: linear-gradient(#ffe39a, #e0a24f); box-shadow: 0 4px 0 #a6702a, 0 0 0 3px #fff8ea; transform: translateY(-6px) scale(1.08); }
+.nav:active .ic { transform: translateY(2px); box-shadow: 0 2px 0 #8d6540; }
+.nav .n { position: absolute; top: 2px; right: 10%; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: #d9342f; color: #fff; font-size: 12px; font-weight: 900; line-height: 20px; text-align: center; box-shadow: 0 0 0 2px #fff; }
+@media (max-height: 640px) { #home .ship { width: min(62vw, 240px); } #home .homeplay { min-height: 66px; font-size: 38px; } .nav .ic { width: 44px; height: 44px; font-size: 24px; } }
+#lh .navbar, #hb .navbar { margin: 0 -10px calc(-6px - env(safe-area-inset-bottom, 0px)); }
 @media (max-height: 720px) { .lhorder .perk { display: none; } .lhshelf .boost small { display: none; } .lhbar { height: 48px; } }
 .boosters { display: flex; gap: 8px; align-items: flex-end; justify-content: center; padding: 10px 10px calc(8px + env(safe-area-inset-bottom, 0px)); margin: 4px -10px calc(-6px - env(safe-area-inset-bottom, 0px)); background: linear-gradient(#5b7fa6, #3f5f82); box-shadow: 0 -4px 0 #2d4560, 0 -8px 14px rgba(0,0,0,.2); }
 .boosters .boost { flex: 0 1 120px; flex-direction: column; gap: 1px; padding: 6px 4px 5px; position: relative; background: linear-gradient(#f3e9d2, #d9c3a3); color: #6b4a2e; box-shadow: 0 4px 0 #8d6540; border-radius: 16px; }
@@ -221,7 +226,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-0647",date:"2026-10-15 06:47 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-0700",date:"2026-10-15 07:00 UTC"};</script>
 
 
 <div id="app">
@@ -247,14 +252,14 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="lhgrid" id="lhGrid"></div>
     <div class="lhshelf" id="lhShelf"></div>
     <div class="lhbar" id="lhBar"></div>
-    <div class="tabs" id="lhTabs"></div>
+    <div class="navbar" id="lhTabs"></div>
   </div>
   <div id="hb" hidden>
     <div class="hud"><div class="lvl">Harbor</div><div class="chip" id="hbSilver">0 silver</div><div class="chip" id="hbRunes" hidden></div><button class="iconbtn" id="hbClose" aria-label="Back to the raid">✕</button></div>
     <div class="hbscene" id="hbScene"></div>
     <div class="hblist" id="hbList"></div>
     <div class="hbtapwrap"><div class="hbtap" id="hbBarrel"><div class="fish">🐟</div><div class="txt"><b id="hbTap">+1 silver</b><small id="hbCombo">Tap the barrel</small></div></div><div class="floats" id="hbFloats"></div></div>
-    <div class="tabs" id="hbTabs"></div>
+    <div class="navbar" id="hbTabs"></div>
   </div>
   <div id="home" hidden>
     <svg class="scene" viewBox="0 0 390 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -297,11 +302,11 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
       <div class="prog"><div class="bar"><i id="homeBar"></i></div><small id="homeProg"></small></div>
     </div>
     <div class="playwrap"><button class="homeplay" id="homePlay"><span class="ban" id="homeBan">Raid</span>Play</button></div>
-    <div class="tabs">
-      <button class="tab on" id="hHome"><span class="ic"><svg viewBox="0 0 32 32"><path d="M4 18 L28 18 Q26 26 16 27 Q6 26 4 18 Z" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><rect x="15" y="4" width="2" height="14" fill="#4a3220"/><path d="M9 6 L23 6 L22 15 L10 15 Z" fill="#d9342f" stroke="#4a3220" stroke-width="2"/></svg></span>Raids</button>
-      <button class="tab" id="hLH"><span class="ic"><svg viewBox="0 0 32 32"><path d="M4 15 L16 4 L28 15 Z" fill="#8d4f1c" stroke="#4a3220" stroke-width="2"/><rect x="7" y="15" width="18" height="13" fill="#d9c3a3" stroke="#4a3220" stroke-width="2"/><rect x="13" y="19" width="6" height="9" fill="#4a3220"/></svg></span>Longhouse<span class="n" id="hLHn" hidden></span></button>
-      <button class="tab" id="hHB"><span class="ic"><svg viewBox="0 0 32 32"><rect x="7" y="8" width="18" height="20" rx="4" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><path d="M7 14 L25 14 M7 22 L25 22" stroke="#4a3220" stroke-width="2"/><circle cx="16" cy="6" r="3" fill="#f2d24b" stroke="#4a3220" stroke-width="2"/></svg></span>Harbor</button>
-      <button class="tab" id="hSaga"><span class="ic"><svg viewBox="0 0 32 32"><path d="M8 5 L24 5 L23 15 Q22 21 16 22 Q10 21 9 15 Z" fill="#f2d24b" stroke="#4a3220" stroke-width="2"/><path d="M8 7 Q3 8 5 13 Q7 16 10 15 M24 7 Q29 8 27 13 Q25 16 22 15" fill="none" stroke="#4a3220" stroke-width="2"/><rect x="11" y="24" width="10" height="4" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><text x="16" y="17" font-size="9" text-anchor="middle" fill="#6b4a2e" font-weight="900">&#9733;</text></svg></span>Saga</button>
+    <div class="navbar">
+      <button class="nav on" id="hHome"><span class="ic"><svg viewBox="0 0 32 32"><path d="M4 18 L28 18 Q26 26 16 27 Q6 26 4 18 Z" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><rect x="15" y="4" width="2" height="14" fill="#4a3220"/><path d="M9 6 L23 6 L22 15 L10 15 Z" fill="#d9342f" stroke="#4a3220" stroke-width="2"/></svg></span>Raids</button>
+      <button class="nav" id="hLH"><span class="ic"><svg viewBox="0 0 32 32"><path d="M4 15 L16 4 L28 15 Z" fill="#8d4f1c" stroke="#4a3220" stroke-width="2"/><rect x="7" y="15" width="18" height="13" fill="#d9c3a3" stroke="#4a3220" stroke-width="2"/><rect x="13" y="19" width="6" height="9" fill="#4a3220"/></svg></span>Longhouse<span class="n" id="hLHn" hidden></span></button>
+      <button class="nav" id="hHB"><span class="ic"><svg viewBox="0 0 32 32"><rect x="7" y="8" width="18" height="20" rx="4" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><path d="M7 14 L25 14 M7 22 L25 22" stroke="#4a3220" stroke-width="2"/><circle cx="16" cy="6" r="3" fill="#f2d24b" stroke="#4a3220" stroke-width="2"/></svg></span>Harbor</button>
+      <button class="nav" id="hSaga"><span class="ic"><svg viewBox="0 0 32 32"><path d="M8 5 L24 5 L23 15 Q22 21 16 22 Q10 21 9 15 Z" fill="#f2d24b" stroke="#4a3220" stroke-width="2"/><path d="M8 7 Q3 8 5 13 Q7 16 10 15 M24 7 Q29 8 27 13 Q25 16 22 15" fill="none" stroke="#4a3220" stroke-width="2"/><rect x="11" y="24" width="10" height="4" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><text x="16" y="17" font-size="9" text-anchor="middle" fill="#6b4a2e" font-weight="900">&#9733;</text></svg></span>Saga</button>
     </div>
   </div>
   <div class="overlay" id="ov">
@@ -636,12 +641,12 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.038.10.15.26.0247';
+const BUILD = 'VR1.039.10.15.26.0300';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
 // ---------- the saga: silver, chests, streaks, achievements and stats (2026-10-13) ----------
-const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons', 'runes'];
+const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons', 'runes', 'bestTier', 'chapters', 'tokensBought'];
 if (!save.saga) {
   // first run with the saga: raids already beaten count as won and reached, but never as first-try wins
   const st = {}; STAT_KEYS.forEach(k => st[k] = 0); st.wins = st.reach = Math.max(0, save.level - 1);
@@ -652,19 +657,54 @@ const SAGA = save.saga, STATS = SAGA.stats;
 const HORN_MAX = 3;
 if (!SAGA.lh) SAGA.lh = { board: new Array(48).fill(null), hall: 0, done: {}, tokens: 0 };
 if (!SAGA.lh.pending) SAGA.lh.pending = []; // pieces from opened chests, waiting to be placed
+if (!SAGA.chapter) SAGA.chapter = Math.max(1, Math.ceil(save.level / 10)); // chapters of ten raids; a raider already past a gate keeps what they reached
+if (!SAGA.runeBoons) SAGA.runeBoons = {}; // one boon per runestone, kept forever
+if (!SAGA.boughtTokens) SAGA.boughtTokens = 0;
+SAGA.lh.board.forEach(c => { if (c) STATS.bestTier = Math.max(STATS.bestTier, c.t); });
 const LH = SAGA.lh, LH_COLS = 6, LH_ROWS = 8;
 while (LH.board.length < LH_COLS * LH_ROWS) LH.board.push(null); // boards from before the four corners grow a row
 // four corners, one chain each: timber top left, iron top right, food bottom left, wool bottom right
 const QUAD = ['T', 'I', 'F', 'W'];
 const quadOf = i => QUAD[(Math.floor(i / LH_COLS) < LH_ROWS / 2 ? 0 : 2) + (i % LH_COLS < LH_COLS / 2 ? 0 : 1)];
+// ---------- the saga: chapters of ten raids, each opened by the jarl's tasks in the Longhouse and Harbor (user ask 2026-10-15) ----------
+const CHAP_NAMES = ['The Narrows', 'The Western Isles', 'The Salt Marsh', 'The Frost Coast', "The Monk's Isle", 'The Amber Shore', 'The Whale Road', 'The Burning Hall', 'The Iron Hills', 'The Mist Sound', "The King's Town", 'The Far Skerries', 'The Black Forest', 'The Silver River', 'The Stone Bridge', 'The Long Winter', 'The Great Market', 'The Dragon Strait', 'The Sunken Fort', 'The Ends of the World'];
+const CHAP_BEATS = ['The jarl wants a hearth before the fleet sails.', 'Crews need feeding on the long crossing.', 'Iron for axes, or no raid.', 'Snow closes the passes; the harbor must feed the town.', 'The monks keep silver in their tower. The jarl wants a bigger fleet first.', 'Amber traders pay in gold. Build the market they ask for.', 'The whale road is long. Fill the stores.', 'A rival burned our hall. Raise it taller.', 'Ore in the hills, if the smithy can work it.', 'Fog hides the sound. The lookout must be finished.', 'The king summons us. Bring tribute worth the trip.', 'Skerries guard the far shore. The crews ask for banners.', 'The forest folk trade furs for cloth.', 'Silver flows down the river to whoever holds the bridge.', 'The bridge needs stone and the stone needs carts.', 'A long winter. The town lives on what the harbor earns.', 'The great market opens once a year. Have something to sell.', 'Dragons on the strait, the skalds say. Sharpen everything.', 'A sunken fort, full of old gold, if the ships can reach it.', 'The ends of the world. Everything you built sails with you.'];
+const chapOf = n => Math.ceil(n / 10);
+const chapName = k => k <= 1 ? 'Home Fjord' : CHAP_NAMES[(k - 2) % CHAP_NAMES.length];
+const chapBeat = k => k <= 1 ? "Your father's longship is yours now. Prove it on the home fjord." : CHAP_BEATS[(k - 2) % CHAP_BEATS.length];
+function chapTasks(k) { // what opens chapter k; every count is a counter the game already keeps, so nothing is lost on the way
+  if (k <= 1) return [];
+  const T = [], dl = k === 2 ? 2 : k === 3 ? 6 : 12 + 8 * (k - 4);
+  T.push({ text: `Deliver ${dl} pieces to the Longhouse`, have: STATS.delivered, need: dl, go: 'lh' });
+  if (k === 3 || k >= 5) { const t = Math.min(6, 3 + Math.floor((k - 3) / 3)); T.push({ text: `Merge a piece up to tier ${TIER_NAME[t - 1]}`, have: STATS.bestTier, need: t, go: 'lh' }); }
+  if (k === 4) T.push({ text: 'Finish the Hearth', have: LH.hall, need: 1, go: 'lh' });
+  const hl = k === 2 ? 5 : k === 3 ? 15 : 30 + 20 * (k - 4);
+  T.push({ text: `Reach Harbor level ${hl}`, have: hbLevel(), need: hl, go: 'hb' });
+  if (k === 2 || k >= 6) { const f = k === 2 ? 3 : 3 + 2 * (k - 5); T.push({ text: `Win ${f} raids on the first try`, have: STATS.first, need: f, go: null }); }
+  return T;
+}
+const chapDone = k => chapTasks(k).every(t => t.have >= t.need);
+const raidOpen = n => chapOf(n) <= SAGA.chapter;
+function unlockChapter() {
+  const k = SAGA.chapter + 1; if (!chapDone(k)) return;
+  SAGA.chapter = k; STATS.chapters++; giveChest('silver'); giveSilver(rs(50 * k));
+  sfx('win'); buzz(); persist(); showCard('story', { k });
+}
 const hallsDone = () => LH.hall; // finished halls, in order: Hearth, Feast Hall, Armory, Loft, Lookout, Great Hall
 const hornEvery = () => hallsDone() >= 1 ? 5 : 10;
 const sixthSail = () => SAGA.streak >= 3; // three straight wins: six ships may sail the fjord at once
 const beltCap = () => sixthSail() ? 6 : 5;
 if (!SAGA.runes) SAGA.runes = 0;
 // runestones: the prestige of the Longhouse and Harbor. Each one raised keeps paying a quarter more silver from everything, for good
-const RUNE_HB = 100; // harbor level needed, together with a finished longhouse
+const RUNE_HB = 60; // harbor level needed, together with a finished longhouse
 const runeMult = () => 1 + .25 * SAGA.runes;
+const RUNE_BOONS = [
+  { id: 'lore', name: 'Longship Lore', what: 'Every chest gives one more token' },
+  { id: 'harbor', name: 'Deep Harbor', what: 'Away earnings run at full rate for 8 hours, not half rate for 4' },
+  { id: 'wall', name: 'Shield Wall', what: 'One extra hammer in every raid' },
+  { id: 'trade', name: 'Trade Winds', what: 'Longhouse tokens cost half' },
+];
+const boonOn = id => !!SAGA.runeBoons[id];
 const rs = n => Math.round(n * runeMult());
 const CHEST_NAME = { wood: 'wooden chest', iron: 'iron chest', silver: 'silver chest', gold: 'gold chest' };
 // every achievement has a shape badge, so tiers never rely on color alone
@@ -720,10 +760,11 @@ function renderHome() {
   $('homeBuild').textContent = BUILD;
   $('homeN').textContent = n;
   const tr = $('homeTries'); tr.hidden = !f; tr.textContent = f ? `try ${f + 1}` : '';
-  const ban = $('homeBan'); ban.textContent = boss ? 'Great raid' : sixthSail() ? 'Sixth Sail' : SAGA.streak ? `Streak ${SAGA.streak}` : 'Raid'; ban.classList.toggle('boss', boss);
+  const locked = !raidOpen(n), ban = $('homeBan'); ban.textContent = locked ? `Chapter ${chapOf(n)}: the jarl's tasks` : boss ? 'Great raid' : sixthSail() ? 'Sixth Sail' : SAGA.streak ? `Streak ${SAGA.streak}` : chapName(chapOf(n)); ban.classList.toggle('boss', boss && !locked);
+  if (locked) { tr.hidden = false; tr.textContent = 'locked'; }
   const won = Math.max(0, n - 1);
   $('homeBar').style.width = Math.min(100, won / MAX_LEVEL * 100) + '%';
-  $('homeProg').textContent = `${won} of ${MAX_LEVEL} raids won`;
+  $('homeProg').textContent = `Chapter ${chapOf(n)}, ${chapName(chapOf(n))} \u00b7 ${won} of ${MAX_LEVEL} raids won`;
   $('homeSilverN').textContent = fmtN(SAGA.silver);
   $('homeHornsN').textContent = SAGA.horns; $('homeHornsS').textContent = `of ${HORN_MAX} horns`;
   const ch = chestCount(), nb = $('hLHn'); nb.hidden = !ch; nb.textContent = ch;
@@ -735,6 +776,7 @@ function showHome() {
 function playHome() {
   $('home').hidden = true;
   if (S && S.mode === 'home' && S.launched && S.n === save.level) { S.mode = S.homeResume || 'play'; S.resumeMode = null; hud(); }
+  else if (!raidOpen(save.level)) { $('home').hidden = false; showCard('chapter'); }
   else startLevel(save.level);
 }
 const byId = id => document.getElementById(id); // wired before the $ helper below is defined
@@ -747,13 +789,14 @@ byId('hRaids').onclick = () => showCard('levels');
 byId('hSet').onclick = () => showCard('settings');
 
 function startLevel(n) {
+  if (!raidOpen(n)) { showHome(); showCard('chapter'); return; } // the jarl's tasks come first
   $('home').hidden = true;
   const L = buildLevel(n, save.fails[n] || 0, sixthSail());
   let total = 0; L.grid.forEach(r => r.forEach(c => { if (c) total++; }));
   S = { n, name: L.name, grid: L.grid, ice: L.ice, reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
     cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
     tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
-    bombs: L.bombs + (hallsDone() >= 4 && n % 3 === 0 ? 1 : 0), slotBoosts: LH.tokens > 0 ? 1 : 0, catapults: 1 + (hallsDone() >= 3 && n % 3 === 0 ? 1 : 0), total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1,
+    bombs: L.bombs + (hallsDone() >= 4 && n % 3 === 0 ? 1 : 0) + (boonOn('wall') ? 1 : 0), slotBoosts: LH.tokens > 0 ? 1 : 0, catapults: 1 + (hallsDone() >= 3 && n % 3 === 0 ? 1 : 0), total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1,
     boon: SAGA.boons ? { h: SAGA.boons.hammer || 0, c: SAGA.boons.cata || 0 } : { h: 0, c: 0 },
     t: 0, par: L.cols.flat().length * 5 + 15 /* a swift star for a brisk raid, with room for a young raider to think */, usedH: 0, usedC: 0, dockSails: 0, pairs: L.cols.flat().filter(j => j.link).length / 2 };
   if (S.boon.h || S.boon.c) { S.bombs += S.boon.h; S.catapults += S.boon.c; SAGA.boons = { hammer: 0, cata: 0 }; }
@@ -1033,6 +1076,7 @@ function win() {
   if (S.dockSails >= 5) STATS.fullHold++;
   if (!S.dockSails) STATS.straight++;
   if (S.pairs >= 3) STATS.lashedWins++;
+  if (n % 10 === 0 && n < MAX_LEVEL && SAGA.chapter === chapOf(n)) R.chapter = chapOf(n) + 1; // the chapter is won; the jarl's next tasks open
   // streaks count first tries only; a horn is banked every ten straight wins
   if (first) { SAGA.streak++; SAGA.sinceHorn++; STATS.best = Math.max(STATS.best, SAGA.streak); R.streak = SAGA.streak;
     if (SAGA.sinceHorn >= hornEvery()) { SAGA.sinceHorn = 0; if (SAGA.horns < HORN_MAX) { SAGA.horns++; STATS.hornsEarned++; R.horn = true; } }
@@ -1400,9 +1444,10 @@ function rewardHtml(R) {
   if (!R) return '';
   const l = [`+${R.silver} silver, +1 ${CHEST_NAME[R.chest]}${R.swift ? ' \u00b7 <span class="new">\u2605 under par</span>' : ''}${R.ownBest ? ' \u00b7 <span class="new">own best</span>' : ''}`];
   if (R.token) l.push('<span class="new">Dock token from the Great Hall</span>');
+  if (R.chapter) l.push(`<span class="new">Chapter ${R.chapter - 1} complete!</span> The jarl has tasks before ${chapName(R.chapter)} opens.`);
   if (R.streak) l.push(`Streak: ${R.streak} in a row${R.sixth ? ' \u00b7 <span class="new">Sixth Sail hoisted: 6 ships may sail</span>' : ''}${R.horn ? ' \u00b7 <span class="new">Mead Horn earned</span>' : ''}`);
   R.ach.forEach(x => l.push(`<span class="new">${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}</span> \u00b7 ${x.chest ? CHEST_NAME[x.chest] : x.silver + ' silver'}`));
-  return `<div class="reward">${l.join('<br>')}</div>`;
+  return `<div class="reward">${l.map(x => `<div class="rw">${x}</div>`).join('')}</div>`;
 }
 let toastT = 0;
 function toast(msg) { const el = $('toast'); el.textContent = msg; el.hidden = false; el.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => { el.style.opacity = 0; setTimeout(() => el.hidden = true, 400); }, 3200); }
@@ -1425,7 +1470,7 @@ function showCard(kind, extra) {
         <li><span>4</span><div><b>The docks</b> are the five empty spaces above the boats. A boat that comes back with axes left over parks there. Tap it to send it out again. If a boat comes back and all five docks are full, the raid is lost, so send boats in a smart order.</div></li>
         <li><span>5</span><div><b>Hammer button:</b> tap it, then tap the wall, and a 3-by-3 square of shields is smashed. One per raid.</div></li>
         <li><span>6</span><div><b>Catapult button:</b> tap it, then tap a boat, and that boat is flung away for good, taking that many of its shields with it. One per raid.</div></li>
-        <li><span>7</span><div><b>The menu</b> (top right) has two side games you unlock by winning: the Longhouse, a merge puzzle, and the Harbor, a tap-to-earn silver game. Lose a raid and it gets a little easier next time.</div></li>
+        <li><span>7</span><div><b>Chapters:</b> raids come in tens. Before each new chapter the jarl sets tasks in the Longhouse (merge puzzle) and Harbor (tap for silver), both on the home bar. Silver buys Longhouse tokens. Lose a raid and it gets a little easier next time.</div></li>
       </ul>
       ${kind === 'help' ? `<button class="cta" id="go">Begin raid ${n}</button>` : `<button class="cta" id="cancel">Back to the raid</button>`}`;
     if (kind === 'help') save.seenHelp = true;
@@ -1504,7 +1549,7 @@ function showCard(kind, extra) {
       <button class="cta" id="hbOk">To the harbor</button>`;
     setTimeout(() => { const b = $('hbOk'); if (b) b.onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'saga') {
-    const tab = (extra && extra.tab) || 'ach';
+    const tab = (extra && extra.tab) || 'chap';
     let body = '';
     if (tab === 'ach') {
       body = ACH.map(a => { const t = SAGA.ach[a.id] || 0, done = t >= a.tiers.length, next = done ? null : a.tiers[t], v = STATS[a.key] || 0;
@@ -1521,8 +1566,12 @@ function showCard(kind, extra) {
         ${rec ? `<h3>Raid ${S.n}</h3>${r('Tries', rec.t)}${r('Wins', rec.w)}${r('Best time', rec.b ? fmtT(rec.b) : '\u2014')}${r('Par', fmtT(S.par))}${r('Under par', rec.s ? 'Yes \u2605' : 'Not yet')}${r('Hammers / catapults used', rec.h + ' / ' + rec.c)}` : ''}
         <p style="font-size:12px;margin-top:6px">Counting since ${SAGA.since}. Raids won before then count as wins, not as first tries.</p>`;
     }
-    html = `<h2>Saga</h2><div class="tabs"><button id="tabA" class="${tab === 'ach' ? 'on' : ''}">Achievements</button><button id="tabS" class="${tab === 'stats' ? 'on' : ''}">Stats</button></div><div class="saga">${body}</div><button class="link" id="cancel">Close</button>`;
-    setTimeout(() => { $('tabA').onclick = () => showCard('saga', { tab: 'ach' }); $('tabS').onclick = () => showCard('saga', { tab: 'stats' }); });
+    if (tab === 'chap') {
+      body = ''; for (let k = 1; k <= SAGA.chapter + 1 && k <= Math.ceil(MAX_LEVEL / 10); k++) { const open = k <= SAGA.chapter, T = chapTasks(k);
+        body += `<div class="ach${open ? ' done' : ''}"><div class="sym">${open ? '\u2713' : '\u2691'}</div><div><b>Chapter ${k}: ${chapName(k)}</b><small>${chapBeat(k)}${open ? '' : ' \u00b7 ' + T.map(t => `${t.text} (${Math.min(t.have, t.need)}/${t.need})`).join('; ')}</small></div></div>`; }
+    }
+    html = `<h2>Saga</h2><div class="tabs"><button id="tabC" class="${tab === 'chap' ? 'on' : ''}">Chapters</button><button id="tabA" class="${tab === 'ach' ? 'on' : ''}">Achievements</button><button id="tabS" class="${tab === 'stats' ? 'on' : ''}">Stats</button></div><div class="saga">${body}</div><button class="link" id="cancel">Close</button>`;
+    setTimeout(() => { $('tabC').onclick = () => showCard('saga', { tab: 'chap' }); $('tabA').onclick = () => showCard('saga', { tab: 'ach' }); $('tabS').onclick = () => showCard('saga', { tab: 'stats' }); });
   } else if (kind === 'restart') {
     html = `<h2>Retreat and retry?</h2><p>${S.launched ? 'This counts as a try, so the raid will ease up a little.' : 'You have not launched a ship yet.'}</p>
       <button class="cta" id="go">Retreat</button><button class="link" id="cancel">Keep raiding</button>`;
@@ -1533,9 +1582,24 @@ function showCard(kind, extra) {
       reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'] };
     html = `<h2>New on raid ${n}</h2><ul>${extra.map(k => `<li><span>!</span><div><b>${txt[k][0]}.</b> ${txt[k][1]}</div></li>`).join('')}</ul><button class="cta" id="go">Got it</button>`;
     extra.forEach(k => { save.seen[k] = true; }); persist();
+  } else if (kind === 'chapter') {
+    const k = SAGA.chapter + 1, T = chapTasks(k), done = chapDone(k);
+    html = `<h2>Chapter ${k}: ${chapName(k)}</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px;font-style:italic">${chapBeat(k)}</p><p style="margin:0 0 8px;font-size:14px">The jarl's tasks before raids ${(k - 1) * 10 + 1} to ${k * 10} open:</p>
+      ${T.map((t, i) => `<div class="task${t.have >= t.need ? ' done' : ''}"><div class="tt">${t.have >= t.need ? '\u2713 ' : ''}${t.text}<small>${Math.min(t.have, t.need)} of ${t.need}</small><div class="tb"><i style="width:${Math.min(100, t.have / t.need * 100)}%"></i></div></div>${t.go && t.have < t.need ? `<button class="boost tgo" data-go="${t.go}">${t.go === 'lh' ? 'Longhouse' : 'Harbor'}</button>` : ''}</div>`).join('')}
+      <p style="margin:6px 0 0;font-size:13px;color:var(--mute)">Reward: a silver chest and ${rs(50 * k)} silver. Tap the barrel in the Harbor for silver, and buy Longhouse tokens with it.</p>
+      <button class="cta" id="sail" ${done ? '' : 'disabled'} style="${done ? '' : 'opacity:.5'}">${done ? 'Set sail' : 'Tasks remain'}</button><button class="link" id="cancel">Back</button>`;
+    setTimeout(() => { card.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { $('ov').hidden = true; $('home').hidden = true; homeOpen = true; if (b.dataset.go === 'lh') openLH('home'); else openHB(); }); const sb = $('sail'); if (sb) sb.onclick = () => { if (chapDone(k)) unlockChapter(); }; });
+  } else if (kind === 'story') {
+    const k = extra.k;
+    html = `<h2>${chapName(k)}</h2><p style="font-style:italic">${chapBeat(k)}</p><div class="reward"><div class="rw"><span class="new">Chapter ${k} opens:</span> raids ${(k - 1) * 10 + 1} to ${k * 10}</div><div class="rw">+1 silver chest, +${rs(50 * k)} silver</div></div><button class="cta" id="storyGo">Raid ${(k - 1) * 10 + 1}</button>`;
+    setTimeout(() => { $('storyGo').onclick = () => { $('ov').hidden = true; startLevel(Math.max(save.level, (k - 1) * 10 + 1)); }; });
+  } else if (kind === 'runePick') {
+    const left = RUNE_BOONS.filter(b => !boonOn(b.id));
+    html = `<h2>Choose a rune boon</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">Runestone ${SAGA.runes} grants one boon, forever:</p>${left.map(b => `<button class="link" data-rb="${b.id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:15px;line-height:1.3"><b>\u16B1 ${b.name}</b><br><small style="opacity:.85">${b.what}</small></button>`).join('')}`;
+    setTimeout(() => { card.querySelectorAll('[data-rb]').forEach(b => b.onclick = () => { SAGA.runeBoons[b.dataset.rb] = true; persist(); $('ov').hidden = true; toast(`${RUNE_BOONS.find(x => x.id === b.dataset.rb).name} is yours, for good.`); if (!$('lh').hidden) lhRender(); if (hbLive()) hbRender(); }); });
   } else if (kind === 'levels') {
     const page = Math.max(0, Math.min(Math.floor(((extra && extra.page != null ? extra.page : (save.level - 1) / 50))), Math.floor((MAX_LEVEL - 1) / 50)));
-    let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level; b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
+    let b = ''; for (let i = page * 50 + 1; i <= Math.min(MAX_LEVEL, page * 50 + 50); i++) { const open = i <= save.level && raidOpen(i); b += `<button class="link" data-l="${i}" ${open ? '' : 'disabled'} style="font-family:var(--display);font-size:15px;color:${open ? '#f3e9d2' : '#b9a98f'};background:${open ? 'var(--wood)' : '#e6dcc6'};border-radius:10px;padding:7px 0">${i}</button>`; }
     html = `<h2>Saga ${page + 1}: raids ${page * 50 + 1} to ${page * 50 + 50}</h2><div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px"><button class="link" id="pgPrev" ${page ? '' : 'disabled'}>&larr; Earlier</button><button class="link" id="pgNext" ${page < Math.floor((MAX_LEVEL - 1) / 50) ? '' : 'disabled'}>Later &rarr;</button></div><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-height:46vh;overflow:auto" class="scroll">${b}</div><button class="link" id="cancel">Close</button>`;
     setTimeout(() => { const pv = $('pgPrev'), nx = $('pgNext'); if (pv) pv.onclick = () => showCard('levels', { page: page - 1 }); if (nx) nx.onclick = () => showCard('levels', { page: page + 1 }); });
   }
@@ -1630,6 +1694,14 @@ const HALLS = [
 const SELL = [2, 6, 15, 40, 100, 250];
 const TOKEN_RANGE = { wood: [1, 3], iron: [2, 5], silver: [4, 8], gold: [7, 12] }; // a chest gives a random count of tokens in its range; a token becomes a level I piece of any kind
 const tokRange = k => `${TOKEN_RANGE[k][0]} to ${TOKEN_RANGE[k][1]} tokens`;
+// silver buys tokens, so tapping the barrel is always a way forward when a task needs merging
+const tokenCost = () => Math.round(60 * Math.pow(1.05, SAGA.boughtTokens) * priceMult() * (boonOn('trade') ? .5 : 1));
+function buyToken() {
+  const c = tokenCost(); if (SAGA.silver < c) { buzz(); return; }
+  SAGA.silver -= c; SAGA.boughtTokens++; STATS.tokensBought++; LH.pending.push({ ch: null, t: 1 }); sfx('pop'); persist();
+  if (!$('lh').hidden) lhRender(); if (hbLive()) hbRender();
+  toast(`A token for ${c} silver. ${!$('lh').hidden ? 'Tap an empty cell to place it.' : 'It waits in the Longhouse.'}`);
+}
 const chestCount = () => Object.values(SAGA.chests).reduce((a, b) => a + b, 0);
 const pieceName = (ch, t) => LH_CHAINS[ch].tiers[t - 1];
 let lhFrom = null, lhSel = -1, lhDrag = null, lhAnim = {}, lhKind = null; // lhKind: the kind the next token becomes // lhAnim: cell index -> { k: 'pop' | 'merge', d: delay ms } for the next render
@@ -1657,7 +1729,7 @@ $('lhClose').onclick = closeLH;
 // a chest gives a random handful of tokens; they wait in the queue until a kind is picked and an empty cell is tapped
 function openChest(kind) {
   if (!SAGA.chests[kind]) return;
-  const [lo, hi] = TOKEN_RANGE[kind], n = lo + Math.floor(Math.random() * (hi - lo + 1));
+  const [lo, hi] = TOKEN_RANGE[kind], n = lo + Math.floor(Math.random() * (hi - lo + 1)) + (boonOn('lore') ? 1 : 0);
   SAGA.chests[kind]--; STATS.chestsOpened++;
   for (let k = 0; k < n; k++) LH.pending.push({ ch: null, t: 1 });
   sfx('crack'); lhSel = -1; persist(); lhRender();
@@ -1680,7 +1752,7 @@ function lhDrop(a, b) {
   if (!q) { LH.board[b] = p; LH.board[a] = null; return true; }
   if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); if (q.ch === p.ch && q.t === p.t) toast(`${pieceName(p.ch, p.t)} is the best of its kind: deliver or sell it.`); return true; } // different pieces swap places
   // two alike pieces become one of the next tier (the user's rule, 2026-10-13)
-  LH.board[a] = null; LH.board[b] = { ch: p.ch, t: p.t + 1 }; STATS.merges3++; lhAnim[b] = { k: 'merge', d: 0 };
+  LH.board[a] = null; LH.board[b] = { ch: p.ch, t: p.t + 1 }; STATS.bestTier = Math.max(STATS.bestTier, p.t + 1); STATS.merges3++; lhAnim[b] = { k: 'merge', d: 0 };
   sfx('pop'); if (p.t + 1 >= 6) { STATS.merges5++; sfx('win'); }
   const np = LH.board[b], hall = HALLS[LH.hall], wantsNow = hall && hall.wants.some(([ch, t, n]) => ch === np.ch && t === np.t && (LH.done[ch + t] || 0) < n), later = !wantsNow && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === np.ch && t === np.t));
   toast(`Two ${pieceName(p.ch, p.t).toLowerCase()}s became a ${pieceName(np.ch, np.t).toLowerCase()} (${TIER_NAME[np.t - 1]}).` + (wantsNow ? ` The ${hall.name} wants it: tap it, then Deliver.` : np.t >= 6 ? ' Top tier: tap it for a tribute.' : later ? ` The ${later.name} will want it later.` : ''));
@@ -1712,10 +1784,11 @@ function raiseRune() {
   SAGA.runes++; STATS.runes++;
   LH.board.fill(null); LH.hall = 0; LH.done = {};
   HB.b = HB.b.map(() => 0); HB.tap = 0; HB.ms = 0; SAGA.bought = {}; HB.last = Date.now(); hbAcc = 0; combo = 0; tapLog = [];
-  SAGA.silver = 0; lhSel = -1;
+  SAGA.silver = 0; SAGA.boughtTokens = 0; lhSel = -1;
   checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`));
   sfx('win'); buzz(); persist(); $('ov').hidden = true; lhRender(); if (hbLive()) hbRender();
   toast(`Runestone ${SAGA.runes} raised! Everything pays x${runeMult().toFixed(2)} silver from now on. The longhouse and harbor start anew.`);
+  if (RUNE_BOONS.some(b => !boonOn(b.id))) setTimeout(() => showCard('runePick'), 400);
 }
 const runeRow = () => `<div class="hbrow"><div class="ic">\u16B1</div><div class="txt"><b>Runestone${SAGA.runes ? ` <span style="color:var(--mute);font-weight:500">${SAGA.runes} raised</span>` : ''}</b><small>${runeReady() ? 'Ready! Start the longhouse and harbor over and earn a quarter more silver from everything, forever' : runeText()}</small></div><button class="boost" id="runeBtn" ${runeReady() ? '' : 'disabled'}>Raise<small>${runeReady() ? 'prestige' : 'not yet'}</small></button></div>`;
 const runeChip = el => { el.hidden = !SAGA.runes; el.textContent = `\u16B1 ${SAGA.runes} · silver x${runeMult().toFixed(2)}`; };
@@ -1743,7 +1816,7 @@ function lhRender() {
   // the action bar
   const p = lhSel >= 0 ? LH.board[lhSel] : null, bar = $('lhBar');
   if (!p && LH.pending.length) bar.innerHTML = `<div class="hint"><b>${LH.pending.length} token${LH.pending.length > 1 ? 's' : ''} waiting.</b> Tap any empty cell: the token becomes that corner's kind (${QUAD.map(c => LH_CHAINS[c].icon).join(' ')}).</div>`;
-  else if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest for tokens. 2. Tap an empty cell in a corner. 3. Drag a piece onto its twin.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
+  else if (!p) { bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest for tokens. 2. Tap an empty cell in a corner. 3. Drag a piece onto its twin.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids for chests, or buy a token with silver.'}</div>${lhEmpties().length ? `<button class="boost" id="lhBuyTok" ${SAGA.silver < tokenCost() ? 'disabled' : ''}>Buy token<small>${fmtN(tokenCost())} silver</small></button>` : ''}`; const bt = $('lhBuyTok'); if (bt) bt.onclick = buyToken; }
   else {
     const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n), later = !can && p.t < 6 && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === p.ch && t === p.t));
     bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})${can ? `<br>The ${hall.name} wants this: +${p.t * 10} silver` : p.t >= 6 ? '<br>Finest work: tribute pays a dock token + 200 silver' : later ? `<br>Not needed now; the ${later.name} will want it` : hall ? `<br>Merge two to make a ${pieceName(p.ch, p.t + 1)}` : ''}</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : p.t >= 6 ? `<button class="boost" id="lhTribute">Tribute</button>` : ''}<button class="boost" id="lhSell">Sell <b>${rs(SELL[p.t - 1])}</b></button>`;
@@ -1780,7 +1853,7 @@ function lhRender() {
 
 // ---------- the Harbor: an idle clicker that earns silver while the phone is in your pocket ----------
 if (!SAGA.hb) SAGA.hb = { b: [0, 0, 0, 0, 0], tap: 0, last: Date.now() };
-const HB = SAGA.hb, HB_MAX = 100, HB_OFFLINE_CAP = 4 * 3600e3, HB_AWAY = .5; // every 25th level doubles a building's output; away time pays half for up to four hours
+const HB = SAGA.hb, HB_MAX = 100, HB_OFFLINE_CAP = 4 * 3600e3, HB_AWAY = .5, hbCap = () => boonOn('harbor') ? 8 * 3600e3 : HB_OFFLINE_CAP, hbAway = () => boonOn('harbor') ? 1 : HB_AWAY; // every 25th level doubles a building's output; away time pays half for up to four hours
 const HB_B = [
   { name: 'Fish Rack', ic: '\u{1F41F}', base: 1, cost: 50, what: 'Dried cod for the market' },
   { name: 'Smithy', ic: '⚒', base: 5, cost: 400, what: 'Nails, hinges and axe heads' },
@@ -1789,7 +1862,7 @@ const HB_B = [
   { name: 'Toll Bridge', ic: '\u{1F309}', base: 600, cost: 150000, what: 'Every cart pays a coin' },
 ];
 const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(n < 1e7 ? 2 : 1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(n < 1e5 ? 1 : 0) + 'k' : String(Math.floor(n));
-const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 25)) * runeMult() : 0; }; // silver per minute; every 25th level doubles it
+const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 25)) * runeMult() * (1 + .1 * hallsDone()) : 0; }; // every finished hall adds a tenth // silver per minute; every 25th level doubles it
 const hbCost = i => Math.round(HB_B[i].cost * Math.pow(1.15, HB.b[i]));
 const hbRate = () => HB_B.reduce((a, _, i) => a + hbOut(i), 0);
 const tapGain = () => Math.round((1 + HB.tap) * Math.pow(2, Math.floor(HB.tap / 25)) * runeMult());
@@ -1797,8 +1870,8 @@ const tapCost = () => Math.round(20 * Math.pow(1.18, HB.tap));
 let hbAcc = 0; // fractions of silver carried between settles
 // bank what the buildings earned since the last settle; away time counts up to eight hours
 function hbSettle() {
-  const now = Date.now(), dt = Math.min(HB_OFFLINE_CAP, Math.max(0, now - (HB.last || now))); HB.last = now;
-  const rate = hbRate() * (hbLive() ? (comboMult() > 1 ? 2 : 1) : HB_AWAY); if (!rate || !dt) return 0; // a catch streak sets the whole harbor rowing: buildings work double; away from the harbor they row at half
+  const now = Date.now(), dt = Math.min(hbCap(), Math.max(0, now - (HB.last || now))); HB.last = now;
+  const rate = hbRate() * (hbLive() ? (comboMult() > 1 ? 2 : 1) : hbAway()); if (!rate || !dt) return 0; // a catch streak sets the whole harbor rowing: buildings work double; away from the harbor they row at half
   hbAcc += rate * dt / 60000; const got = Math.floor(hbAcc); hbAcc -= got;
   if (got) giveSilver(got);
   return got;
@@ -1832,7 +1905,7 @@ function openHB() {
   $('ov').hidden = true;
   if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused' && S.mode !== 'home') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   const away = Math.max(hbPending.away, Date.now() - (HB.last || Date.now())), got = hbSettle() + hbPending.got; hbPending = { away: 0, got: 0 };
-  if (got > 0 && away > 60e3) { STATS.haul = Math.max(STATS.haul, got); toast(away >= HB_OFFLINE_CAP ? `The hold was full: the harbor earned ${fmtN(got)} silver while you were away.` : `While you were raiding, the harbor earned ${fmtN(got)} silver.`); sfx('win'); }
+  if (got > 0 && away > 60e3) { STATS.haul = Math.max(STATS.haul, got); toast(away >= hbCap() ? `The hold was full: the harbor earned ${fmtN(got)} silver while you were away.` : `While you were raiding, the harbor earned ${fmtN(got)} silver.`); sfx('win'); }
   buildTabs($('hbTabs'), 'hb'); $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } if (combo && Date.now() - comboT > 1200) combo = 0; hbSettle(); hbRender(true); }, 250);
   if (!save.seen.hb) { save.seen.hb = true; persist(); showCard('hbHelp'); }
 }
@@ -1880,13 +1953,15 @@ function hbRender(light) {
   }
   $('hbScene').innerHTML = `<div class="town">${HB_B.map((b, i) => `<div class="bld${HB.b[i] ? '' : ' off'}">${b.ic}<i>${HB.b[i] ? 'lv ' + HB.b[i] : '—'}</i></div>`).join('')}</div>
     <div class="rates" id="hbRates">${rates()}</div>
-    <div class="inc"><span>${r ? `${fmtN(r)} a minute here, ${fmtN(r * HB_AWAY)} while away, a catch streak doubles it` : 'Build a Fish Rack to start earning'}</span><span>Level ${lvl}</span></div>
+    <div class="inc"><span>${r ? `${fmtN(r)} a minute here, ${fmtN(r * hbAway())} while away${hallsDone() ? `, halls +${hallsDone() * 10}%` : ''}` : 'Build a Fish Rack to start earning'}</span><span>Level ${lvl}</span></div>
     ${next ? `<div class="ms"><i style="width:${Math.round(100 * (lvl - prev) / (next[0] - prev))}%"></i></div><div class="msl">Next reward at level ${next[0]}: ${next[2]}</div>` : '<div class="msl">Every harbor reward claimed</div>'}`;
   const row = (ic, name, what, lvl, out, i, cost, maxed) => `<div class="hbrow"><div class="ic">${ic}</div><div class="txt"><b>${name}${lvl ? ` <span style="color:var(--mute);font-weight:500">level ${lvl}</span>` : ''}</b><small>${what}${out}</small></div><button class="boost" data-b="${i}" ${maxed || SAGA.silver < cost ? 'disabled' : ''}>${maxed ? 'Finished' : lvl ? 'Upgrade' : 'Build'}<small>${maxed ? 'level ' + HB_MAX : fmtN(cost) + ' silver'}</small></button></div>`;
   $('hbList').innerHTML = `<h3>Buildings</h3>` + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtN(hbOut(i))} a minute` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('')
     + row('\u{1F6E2}', 'Bigger barrel', 'More silver for every tap', HB.tap, HB.tap ? ` · +${fmtN(tapGain())} a tap` : '', -1, tapCost(), HB.tap >= HB_MAX)
     + `<h3>For the next raid</h3>` + BOONS.map(b => `<div class="hbrow"><div class="ic">${b.ic}</div><div class="txt"><b>${b.name}${b.id === 'hammer' && SAGA.boons.hammer ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.hammer} ready</span>` : b.id === 'cata' && SAGA.boons.cata ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.cata} ready</span>` : b.id === 'horn' ? ` <span style="color:var(--mute);font-weight:500">${SAGA.horns} of ${HORN_MAX}</span>` : b.id === 'token' ? ` <span style="color:var(--mute);font-weight:500">${LH.tokens} held</span>` : ''}</b><small>${b.what}</small></div><button class="boost" data-boon="${b.id}" ${SAGA.silver < boonCost(b) ? 'disabled' : ''}>Buy<small>${fmtN(boonCost(b))} silver</small></button></div>`).join('')
-    + `<h3>Runestone</h3>` + runeRow() + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${tokRange(k)}</small></div><button class="boost" data-k="${k}" ${SAGA.silver < keyCost(k) ? 'disabled' : ''}>Buy<small>${fmtN(keyCost(k))} silver</small></button></div>`).join('');
+    + `<h3>Runestone</h3>` + runeRow() + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${tokRange(k)}</small></div><button class="boost" data-k="${k}" ${SAGA.silver < keyCost(k) ? 'disabled' : ''}>Buy<small>${fmtN(keyCost(k))} silver</small></button></div>`).join('')
+    + `<div class="hbrow"><div class="ic">\u25C6</div><div class="txt"><b>Longhouse token <span style="color:var(--mute);font-weight:500">${LH.pending.length} waiting</span></b><small>One piece for any corner of the board${boonOn('trade') ? ' \u00b7 Trade Winds: half price' : ''}</small></div><button class="boost" id="hbTok" ${SAGA.silver < tokenCost() ? 'disabled' : ''}>Buy<small>${fmtN(tokenCost())} silver</small></button></div>`;
+  const ht = $('hbTok'); if (ht) ht.onclick = buyToken;
   $('hbList').querySelectorAll('[data-b]').forEach(b => b.onclick = () => +b.dataset.b < 0 ? hbTapUp() : hbBuy(+b.dataset.b));
   $('hbList').querySelectorAll('[data-k]').forEach(b => b.onclick = () => hbKey(b.dataset.k));
   $('hbList').querySelectorAll('[data-boon]').forEach(b => b.onclick = () => hbBoon(b.dataset.boon));
@@ -1899,7 +1974,7 @@ window.JB = { get S() { return S; }, showHome, playHome, placePending, raiseRune
 function buildTabs(host, active) {
   host.innerHTML = '';
   [['raids', 'hHome', 'Raids'], ['lh', 'hLH', 'Longhouse'], ['hb', 'hHB', 'Harbor'], ['saga', 'hSaga', 'Saga']].forEach(([k, id, label]) => {
-    const b = document.createElement('button'); b.className = 'tab' + (k === active ? ' on' : ''); b.dataset.k = k;
+    const b = document.createElement('button'); b.className = 'nav' + (k === active ? ' on' : ''); b.dataset.k = k;
     b.innerHTML = `<span class="ic">${$(id).querySelector('.ic').innerHTML}</span>${label}` + (k === 'lh' && chestCount() ? `<span class="n">${chestCount()}</span>` : '');
     b.onclick = () => tabGo(k, active); host.appendChild(b);
   });
