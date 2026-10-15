@@ -226,7 +226,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-0700",date:"2026-10-15 07:00 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-1318",date:"2026-10-15 13:18 UTC"};</script>
 
 
 <div id="app">
@@ -284,20 +284,31 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="build" id="homeBuild"></div>
     <div class="mid">
       <button class="badge" id="hRaids"><small>RAID</small><b id="homeN">1</b><i id="homeTries" hidden></i></button>
-      <svg class="ship" viewBox="0 0 330 150" aria-hidden="true">
-      <defs><linearGradient id="sailG" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9342f"/><stop offset=".5" stop-color="#f3e9d2"/><stop offset="1" stop-color="#d9342f"/></linearGradient></defs>
-      <ellipse cx="165" cy="140" rx="150" ry="7" fill="rgba(20,60,90,.25)"/>
-      <path d="M22 96 Q10 60 30 40 Q34 70 60 96 Z" fill="#6b4a2e"/><path d="M308 96 Q320 60 300 40 Q296 70 270 96 Z" fill="#6b4a2e"/>
-      <path d="M40 96 L290 96 Q270 130 165 132 Q60 130 40 96 Z" fill="#8d6540" stroke="#4a3220" stroke-width="3"/>
-      <path d="M44 104 L286 104" stroke="#4a3220" stroke-width="2"/><path d="M52 114 L278 114" stroke="#4a3220" stroke-width="2"/>
+      <svg class="ship" viewBox="0 0 330 160" aria-hidden="true">
+      <ellipse cx="165" cy="148" rx="150" ry="7" fill="rgba(20,60,90,.25)"/>
+      <g stroke="#3a2614" stroke-width="3" stroke-linecap="round" fill="#5a3d22"><path d="M90 100 L72 140"/><ellipse cx="71" cy="141" rx="7" ry="3.5" transform="rotate(-65 71 141)"/><path d="M135 103 L117 143"/><ellipse cx="116" cy="144" rx="7" ry="3.5" transform="rotate(-65 116 144)"/><path d="M195 103 L177 143"/><ellipse cx="176" cy="144" rx="7" ry="3.5" transform="rotate(-65 176 144)"/><path d="M240 100 L222 140"/><ellipse cx="221" cy="141" rx="7" ry="3.5" transform="rotate(-65 221 141)"/></g>
+      <path d="M165 10 L28 52 M165 10 L296 60" stroke="rgba(40,25,12,.75)" stroke-width="2"/>
+      <path d="M44 96 Q18 88 24 60 Q28 42 44 40 Q36 50 40 60" fill="none" stroke="#3a2614" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 46 L4 44 L22 58 Z" fill="#3a2614"/><circle cx="31" cy="48" r="2.5" fill="#f3e9d2"/>
+      <path d="M286 96 Q312 86 304 62" fill="none" stroke="#3a2614" stroke-width="9" stroke-linecap="round"/>
+      <defs><clipPath id="hullClip"><path d="M40 96 Q165 108 290 96 Q292 120 268 128 Q165 150 62 128 Q38 120 40 96 Z"/></clipPath></defs>
+      <path d="M40 96 Q165 108 290 96 Q292 120 268 128 Q165 150 62 128 Q38 120 40 96 Z" fill="#7a5433"/>
+      <g clip-path="url(#hullClip)" fill="none"><path d="M30 100 Q165 120 300 100" stroke="#a37548" stroke-width="10"/><path d="M30 106 Q165 126 300 106" stroke="#4a3220" stroke-width="2"/><path d="M30 118 Q165 138 300 118" stroke="#a37548" stroke-width="10"/><path d="M30 124 Q165 144 300 124" stroke="#4a3220" stroke-width="2"/><path d="M30 136 Q165 156 300 136" stroke="#4a3220" stroke-width="2"/></g>
+      <g fill="#3a2614"><circle cx="90" cy="101" r="3"/><circle cx="135" cy="104" r="3"/><circle cx="195" cy="104" r="3"/><circle cx="240" cy="101" r="3"/></g>
+      <path d="M40 96 Q165 108 290 96 Q292 120 268 128 Q165 150 62 128 Q38 120 40 96 Z" fill="none" stroke="#3a2614" stroke-width="3"/>
       <g stroke="#2b2118" stroke-width="2">
-        <circle cx="75" cy="96" r="11" fill="#d9342f"/><circle cx="105" cy="96" r="11" fill="#2f6fe0"/><circle cx="135" cy="96" r="11" fill="#f2d24b"/><circle cx="165" cy="96" r="11" fill="#5cc96a"/><circle cx="195" cy="96" r="11" fill="#f08a2a"/><circle cx="225" cy="96" r="11" fill="#e23a9e"/><circle cx="255" cy="96" r="11" fill="#63d8e6"/>
+        <circle cx="75" cy="98" r="13" fill="#d9342f"/><circle cx="105" cy="100" r="13" fill="#2f6fe0"/><circle cx="135" cy="101" r="13" fill="#f2d24b"/><circle cx="165" cy="102" r="13" fill="#5cc96a"/><circle cx="195" cy="101" r="13" fill="#f08a2a"/><circle cx="225" cy="100" r="13" fill="#e23a9e"/><circle cx="255" cy="98" r="13" fill="#63d8e6"/>
       </g>
-      <g fill="#fff" font-size="11" font-weight="900" text-anchor="middle" font-family="sans-serif"><text x="75" y="100">&#9679;</text><text x="105" y="100">&#9632;</text><text x="135" y="100">&#9733;</text><text x="165" y="100">&#9670;</text><text x="195" y="100">&#9650;</text><text x="225" y="100">&#9829;</text><text x="255" y="100">+</text></g>
-      <rect x="162" y="8" width="6" height="90" fill="#4a3220"/>
-      <path d="M95 18 L235 18 Q230 50 235 78 L95 78 Q100 50 95 18 Z" fill="url(#sailG)" stroke="#4a3220" stroke-width="3"/>
-      <path d="M90 14 L240 14" stroke="#4a3220" stroke-width="5" stroke-linecap="round"/>
-      <path d="M30 42 Q22 24 40 20 Q50 18 48 30 Q44 38 36 36 Q40 30 36 30" fill="none" stroke="#2b2118" stroke-width="4" stroke-linecap="round"/>
+      <g fill="none" stroke="#f3e9d2" stroke-width="2.5"><circle cx="75" cy="98" r="9.5"/><circle cx="105" cy="100" r="9.5"/><circle cx="135" cy="101" r="9.5"/><circle cx="165" cy="102" r="9.5"/><circle cx="195" cy="101" r="9.5"/><circle cx="225" cy="100" r="9.5"/><circle cx="255" cy="98" r="9.5"/></g>
+      <g fill="#2b2118"><circle cx="75" cy="98" r="3.5"/><circle cx="105" cy="100" r="3.5"/><circle cx="135" cy="101" r="3.5"/><circle cx="165" cy="102" r="3.5"/><circle cx="195" cy="101" r="3.5"/><circle cx="225" cy="100" r="3.5"/><circle cx="255" cy="98" r="3.5"/></g>
+      <rect x="162" y="6" width="6" height="96" fill="#3a2614"/>
+      <defs><clipPath id="sailClip"><path d="M95 18 L235 18 Q242 50 232 80 Q165 88 98 80 Q88 50 95 18 Z"/></clipPath></defs>
+      <path d="M95 18 L235 18 Q242 50 232 80 Q165 88 98 80 Q88 50 95 18 Z" fill="#d9342f"/>
+      <g clip-path="url(#sailClip)"><rect x="95" y="10" width="28" height="90" fill="#f3e9d2"/><rect x="151" y="10" width="28" height="90" fill="#f3e9d2"/><rect x="207" y="10" width="28" height="90" fill="#f3e9d2"/><rect x="90" y="74" width="150" height="20" fill="rgba(0,0,0,.14)"/><path d="M123 10 V100 M151 10 V100 M179 10 V100 M207 10 V100" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/></g>
+      <path d="M95 18 L235 18 Q242 50 232 80 Q165 88 98 80 Q88 50 95 18 Z" fill="none" stroke="#4a3220" stroke-width="3"/>
+      <path d="M98 80 L62 96 M232 80 L268 96" stroke="rgba(40,25,12,.75)" stroke-width="2"/>
+      <path d="M88 14 L242 14" stroke="#3a2614" stroke-width="5" stroke-linecap="round"/>
+      <path d="M165 4 L190 10 L165 16 Z" fill="#f3e9d2"/>
     </svg>
       <div class="prog"><div class="bar"><i id="homeBar"></i></div><small id="homeProg"></small></div>
     </div>
@@ -641,7 +652,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.039.10.15.26.0300';
+const BUILD = 'VR1.040.10.15.26.0918';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1180,37 +1191,54 @@ function drawShip(x, y, size, ch, ammo, opt = {}) {
   const tilt = opt.still ? 0 : Math.sin(t * 2.6 + (opt.seed || 0) + 1) * .03;
   ctx.save(); ctx.globalAlpha = opt.alpha ?? 1;
   ctx.translate(x, y + size * .28 + bob); ctx.rotate(tilt);
-  const S_ = size;
-  // hull
-  ctx.beginPath(); ctx.moveTo(-.64 * S_, -.24 * S_); ctx.quadraticCurveTo(-.6 * S_, .02 * S_, -.48 * S_, .08 * S_);
-  ctx.quadraticCurveTo(0, .5 * S_, .48 * S_, .08 * S_); ctx.quadraticCurveTo(.6 * S_, .02 * S_, .64 * S_, -.24 * S_);
-  ctx.quadraticCurveTo(0, .14 * S_, -.64 * S_, -.24 * S_); ctx.closePath();
-  const hg = ctx.createLinearGradient(0, -.2 * S_, 0, .4 * S_);
-  if (opt.chain) { hg.addColorStop(0, '#7b8794'); hg.addColorStop(1, '#2e3540'); } else { hg.addColorStop(0, shade(col, .05)); hg.addColorStop(1, shade(col, -.5)); } // the hull wears the ship's color too (user ask 2026-10-15)
-  ctx.fillStyle = hg; ctx.fill();
-  ctx.lineWidth = Math.max(1, S_ * .04); ctx.strokeStyle = opt.chain ? '#161a20' : shade(col, -.7); ctx.stroke();
+  const S_ = size, big = S_ > 30;
+  const dark = opt.chain ? '#161a20' : shade(col, -.72), hullC = opt.chain ? '#5b6672' : shade(col, -.14), hullL = opt.chain ? '#8a95a3' : shade(col, .1), cream = '#f3e9d2';
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  // oars: four on the near side, dipped into the water
+  if (big) { ctx.strokeStyle = '#3a2614'; ctx.lineWidth = Math.max(1, S_ * .03); for (const k of [-.34, -.12, .1, .32]) { ctx.beginPath(); ctx.moveTo(k * S_, .06 * S_); ctx.lineTo((k - .12) * S_, .5 * S_); ctx.stroke(); ctx.fillStyle = '#5a3d22'; ctx.beginPath(); ctx.ellipse((k - .125) * S_, .5 * S_, S_ * .035, S_ * .018, -1.2, 0, 6.3); ctx.fill(); } }
+  // rigging from the mast head to prow and stern
+  if (big) { ctx.strokeStyle = 'rgba(40,25,12,.75)'; ctx.lineWidth = Math.max(.8, S_ * .018); ctx.beginPath(); ctx.moveTo(0, -.98 * S_); ctx.lineTo(-.66 * S_, -.5 * S_); ctx.moveTo(0, -.98 * S_); ctx.lineTo(.6 * S_, -.42 * S_); ctx.stroke(); }
+  // stern post (right) and the high dragon prow (left)
+  ctx.strokeStyle = dark; ctx.lineWidth = Math.max(2, S_ * .085);
+  ctx.beginPath(); ctx.moveTo(.54 * S_, -.2 * S_); ctx.quadraticCurveTo(.74 * S_, -.26 * S_, .66 * S_, -.46 * S_); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-.54 * S_, -.2 * S_); ctx.quadraticCurveTo(-.78 * S_, -.3 * S_, -.7 * S_, -.56 * S_); ctx.quadraticCurveTo(-.66 * S_, -.7 * S_, -.54 * S_, -.64 * S_); ctx.stroke();
+  if (big) { // the dragon's head: a jaw and an eye
+    ctx.fillStyle = dark; ctx.beginPath(); ctx.moveTo(-.72 * S_, -.6 * S_); ctx.lineTo(-.86 * S_, -.62 * S_); ctx.lineTo(-.72 * S_, -.5 * S_); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = cream; ctx.beginPath(); ctx.arc(-.68 * S_, -.6 * S_, S_ * .025, 0, 6.3); ctx.fill();
+  }
+  // hull of overlapping planks (clinker built)
+  const hullPath = () => { ctx.beginPath(); ctx.moveTo(-.62 * S_, -.24 * S_); ctx.quadraticCurveTo(0, -.1 * S_, .62 * S_, -.24 * S_); ctx.quadraticCurveTo(.62 * S_, .04 * S_, .46 * S_, .12 * S_); ctx.quadraticCurveTo(0, .46 * S_, -.46 * S_, .12 * S_); ctx.quadraticCurveTo(-.62 * S_, .04 * S_, -.62 * S_, -.24 * S_); ctx.closePath(); };
+  hullPath(); ctx.fillStyle = hullC; ctx.fill();
+  ctx.save(); hullPath(); ctx.clip();
+  for (let k = 0; k < 3; k++) { // each strake a shade lighter than the one below, with a shadow line under its edge
+    const y0 = -.16 * S_ + k * .16 * S_;
+    ctx.strokeStyle = k % 2 ? hullC : hullL; ctx.lineWidth = S_ * .09; ctx.beginPath(); ctx.moveTo(-.7 * S_, y0); ctx.quadraticCurveTo(0, y0 + .2 * S_, .7 * S_, y0); ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = Math.max(.8, S_ * .022); ctx.beginPath(); ctx.moveTo(-.7 * S_, y0 + .05 * S_); ctx.quadraticCurveTo(0, y0 + .25 * S_, .7 * S_, y0 + .05 * S_); ctx.stroke();
+  }
+  if (big) { if (S_ > 90) { ctx.fillStyle = 'rgba(0,0,0,.35)'; for (const k of [-.34, -.12, .1, .32]) { ctx.beginPath(); ctx.arc(k * S_, .06 * S_, S_ * .025, 0, 6.3); ctx.fill(); } } } // oar ports
+  ctx.restore();
+  hullPath(); ctx.lineWidth = Math.max(1.2, S_ * .045); ctx.strokeStyle = dark; ctx.stroke();
   if (opt.chain) { // an iron-bound hull: a chain runs along the rail, link by link
     ctx.strokeStyle = '#d7dde5'; ctx.lineWidth = Math.max(1.2, S_ * .035);
     for (let k = -5; k <= 5; k++) { const lx = k * S_ * .1, ly = -.16 * S_ + Math.abs(k) * S_ * .012; ctx.beginPath(); ctx.ellipse(lx, ly, S_ * .05, S_ * .03, 0, 0, 6.3); ctx.stroke(); }
   }
-  // planks
-  ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = Math.max(1, S_ * .025);
-  ctx.beginPath(); ctx.moveTo(-.5 * S_, .1 * S_); ctx.quadraticCurveTo(0, .32 * S_, .5 * S_, .1 * S_); ctx.stroke();
-  // shields on the rail
-  if (S_ > 30 && !hidden) { ctx.fillStyle = col; for (const sx of [-.26, 0, .26]) { ctx.beginPath(); ctx.arc(sx * S_, .02 * S_, S_ * .075, 0, 6.3); ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,.4)'; ctx.stroke(); } }
-  // mast and yard
-  ctx.strokeStyle = '#3a2614'; ctx.lineWidth = Math.max(1.5, S_ * .05); ctx.beginPath(); ctx.moveTo(0, .06 * S_); ctx.lineTo(0, -.98 * S_); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-.44 * S_, -.92 * S_); ctx.lineTo(.44 * S_, -.92 * S_); ctx.stroke();
-  // sail
+  // a row of round shields hung on the rail, each with a cream rim and an iron boss
+  if (big && !hidden) { for (const sx of (S_ > 90 ? [-.4, -.2, 0, .2, .4] : [-.3, 0, .3])) { const sy = -.08 * S_ + Math.abs(sx) * S_ * .05, r_ = S_ * .085; ctx.beginPath(); ctx.arc(sx * S_, sy, r_, 0, 6.3); ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = Math.max(1, S_ * .03); ctx.strokeStyle = cream; ctx.stroke(); ctx.lineWidth = Math.max(.8, S_ * .015); ctx.strokeStyle = dark; ctx.stroke(); ctx.fillStyle = '#2b2118'; ctx.beginPath(); ctx.arc(sx * S_, sy, r_ * .3, 0, 6.3); ctx.fill(); } }
+  // mast, yard and a pennant
+  ctx.strokeStyle = '#3a2614'; ctx.lineWidth = Math.max(1.5, S_ * .05); ctx.beginPath(); ctx.moveTo(0, -.12 * S_); ctx.lineTo(0, -1.0 * S_); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-.46 * S_, -.92 * S_); ctx.lineTo(.46 * S_, -.92 * S_); ctx.stroke();
+  if (big) { ctx.fillStyle = cream; ctx.beginPath(); ctx.moveTo(0, -1.02 * S_); ctx.lineTo(.16 * S_, -.98 * S_); ctx.lineTo(0, -.94 * S_); ctx.closePath(); ctx.fill(); }
+  // sail: a square sail of woven strips, bellied by the wind
   const sl = -.4 * S_, st = -.9 * S_, sw = .8 * S_, sh = .66 * S_;
-  ctx.beginPath(); ctx.moveTo(sl, st); ctx.lineTo(sl + sw, st); ctx.quadraticCurveTo(sl + sw + S_ * .04, st + sh * .5, sl + sw, st + sh);
-  ctx.quadraticCurveTo(sl + sw / 2, st + sh + S_ * .07, sl, st + sh); ctx.quadraticCurveTo(sl - S_ * .04, st + sh * .5, sl, st); ctx.closePath();
-  const sg = ctx.createLinearGradient(sl, 0, sl + sw, 0); sg.addColorStop(0, shade(col, -.2)); sg.addColorStop(.5, shade(col, .12)); sg.addColorStop(1, shade(col, -.15));
-  ctx.fillStyle = sg; ctx.fill();
-  ctx.lineWidth = Math.max(1.2, S_ * .04); ctx.strokeStyle = shade(col, -.5); ctx.stroke();
-  ctx.save(); ctx.clip();
-  ctx.fillStyle = 'rgba(255,255,255,.14)'; for (let i = 1; i < 4; i += 2) ctx.fillRect(sl + sw * i / 4 - sw * .06, st, sw * .12, sh);
+  const sailPath = () => { ctx.beginPath(); ctx.moveTo(sl, st); ctx.lineTo(sl + sw, st); ctx.quadraticCurveTo(sl + sw + S_ * .05, st + sh * .5, sl + sw - S_ * .02, st + sh); ctx.quadraticCurveTo(sl + sw / 2, st + sh + S_ * .09, sl + S_ * .02, st + sh); ctx.quadraticCurveTo(sl - S_ * .05, st + sh * .5, sl, st); ctx.closePath(); };
+  sailPath(); ctx.fillStyle = col; ctx.fill();
+  ctx.save(); sailPath(); ctx.clip();
+  ctx.fillStyle = shade(col, .28); for (let i = 0; i < 5; i += 2) ctx.fillRect(sl + sw * i / 5, st, sw / 5, sh + S_ * .1); // every other strip a lighter weave
+  ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = Math.max(.8, S_ * .015); for (let i = 1; i < 5; i++) { ctx.beginPath(); ctx.moveTo(sl + sw * i / 5, st); ctx.lineTo(sl + sw * i / 5, st + sh + S_ * .1); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.fillRect(sl, st + sh - S_ * .05, sw, S_ * .15); // shade along the foot
   ctx.restore();
+  sailPath(); ctx.lineWidth = Math.max(1.2, S_ * .04); ctx.strokeStyle = shade(col, -.55); ctx.stroke();
+  if (big) { ctx.strokeStyle = 'rgba(40,25,12,.75)'; ctx.lineWidth = Math.max(.8, S_ * .018); ctx.beginPath(); ctx.moveTo(sl + S_ * .02, st + sh); ctx.lineTo(-.5 * S_, -.22 * S_); ctx.moveTo(sl + sw - S_ * .02, st + sh); ctx.lineTo(.5 * S_, -.22 * S_); ctx.stroke(); } // sheets to the rail
   const my = st + sh * .52;
   if (hidden) {
     ctx.font = `${Math.round(S_ * .4)}px ${DISPLAY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
