@@ -96,16 +96,24 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 #home .homeplay:active { transform: translateY(4px); box-shadow: 0 3px 0 #2d6e1f, 0 6px 10px rgba(0,0,0,.25), inset 0 3px 0 rgba(255,255,255,.35); }
 #home .homeplay .ban { position: absolute; left: 50%; top: -16px; transform: translateX(-50%); padding: 5px 18px; border-radius: 10px; background: linear-gradient(#8d4f1c, #6b3a12); color: #ffd37a; font-family: var(--display); font-size: 17px; letter-spacing: .04em; box-shadow: 0 3px 0 #3d2a18; white-space: nowrap; }
 #home .homeplay .ban.boss { background: linear-gradient(#b8262a, #7a1419); color: #fff; }
-#home .tabs { position: relative; display: flex; align-items: flex-end; gap: 6px; padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(#5b7fa6, #3f5f82); box-shadow: 0 -4px 0 #2d4560, 0 -8px 14px rgba(0,0,0,.2); }
-#home .tab { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 4px; border: 0; border-radius: 16px; background: transparent; color: #e9f0f3; font-weight: 800; font-size: 12px; cursor: pointer; position: relative; }
-#home .tab .ic { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 16px; background: linear-gradient(#f3e9d2, #d9c3a3); color: #6b4a2e; font-size: 28px; line-height: 1; box-shadow: 0 4px 0 #8d6540; }
-#home .tab .ic svg { width: 32px; height: 32px; }
-#home .tab.on { color: #fff; }
-#home .tab.on .ic { background: linear-gradient(#ffe39a, #e0a24f); box-shadow: 0 4px 0 #a6702a, 0 0 0 3px #fff8ea; transform: translateY(-6px) scale(1.08); }
-#home .tab:active .ic { transform: translateY(2px); box-shadow: 0 2px 0 #8d6540; }
-#home .tab .n { position: absolute; top: 2px; right: 10%; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: #d9342f; color: #fff; font-size: 12px; font-weight: 900; line-height: 20px; text-align: center; box-shadow: 0 0 0 2px #fff; }
-@media (max-height: 640px) { #home .ship { width: min(62vw, 240px); } #home .homeplay { min-height: 66px; font-size: 38px; } #home .tab .ic { width: 44px; height: 44px; font-size: 24px; } }
-.boosters { display: flex; gap: 8px; }
+.tabs { position: relative; display: flex; align-items: flex-end; gap: 6px; padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(#5b7fa6, #3f5f82); box-shadow: 0 -4px 0 #2d4560, 0 -8px 14px rgba(0,0,0,.2); }
+.tab { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 4px; border: 0; border-radius: 16px; background: transparent; color: #e9f0f3; font-weight: 800; font-size: 12px; cursor: pointer; position: relative; }
+.tab .ic { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 16px; background: linear-gradient(#f3e9d2, #d9c3a3); color: #6b4a2e; font-size: 28px; line-height: 1; box-shadow: 0 4px 0 #8d6540; }
+.tab .ic svg { width: 32px; height: 32px; }
+.tab.on { color: #fff; }
+.tab.on .ic { background: linear-gradient(#ffe39a, #e0a24f); box-shadow: 0 4px 0 #a6702a, 0 0 0 3px #fff8ea; transform: translateY(-6px) scale(1.08); }
+.tab:active .ic { transform: translateY(2px); box-shadow: 0 2px 0 #8d6540; }
+.tab .n { position: absolute; top: 2px; right: 10%; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 99px; background: #d9342f; color: #fff; font-size: 12px; font-weight: 900; line-height: 20px; text-align: center; box-shadow: 0 0 0 2px #fff; }
+@media (max-height: 640px) { #home .ship { width: min(62vw, 240px); } #home .homeplay { min-height: 66px; font-size: 38px; } .tab .ic { width: 44px; height: 44px; font-size: 24px; } }
+#lh .tabs, #hb .tabs { margin: 0 -10px calc(-6px - env(safe-area-inset-bottom, 0px)); }
+@media (max-height: 720px) { .lhorder .perk { display: none; } .lhshelf .boost small { display: none; } .lhbar { height: 48px; } }
+.boosters { display: flex; gap: 8px; align-items: flex-end; justify-content: center; padding: 10px 10px calc(8px + env(safe-area-inset-bottom, 0px)); margin: 4px -10px calc(-6px - env(safe-area-inset-bottom, 0px)); background: linear-gradient(#5b7fa6, #3f5f82); box-shadow: 0 -4px 0 #2d4560, 0 -8px 14px rgba(0,0,0,.2); }
+.boosters .boost { flex: 0 1 120px; flex-direction: column; gap: 1px; padding: 6px 4px 5px; position: relative; background: linear-gradient(#f3e9d2, #d9c3a3); color: #6b4a2e; box-shadow: 0 4px 0 #8d6540; border-radius: 16px; }
+.boosters .boost:active { box-shadow: 0 2px 0 #8d6540; }
+.boosters .boost:disabled { opacity: .45; filter: grayscale(.6); }
+.boosters .pi { font-size: 26px; line-height: 1; }
+.boosters .pl { font-size: 12px; font-weight: 800; }
+.boosters .boost b { position: absolute; top: -7px; right: 6px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 99px; background: #d9342f; color: #fff; font: 900 13px/22px var(--body); text-align: center; box-shadow: 0 0 0 2px #fff; }
 .boost { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; border-radius: 14px; border: 0; cursor: pointer;
   background: linear-gradient(var(--wood-hi), var(--wood)); color: #f3e9d2; font: 800 15px var(--body); box-shadow: 0 4px 0 #3d2a18; }
 .boost:active { transform: translateY(2px); box-shadow: 0 2px 0 #3d2a18; }
@@ -213,7 +221,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-0631",date:"2026-10-15 06:31 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-0640",date:"2026-10-15 06:40 UTC"};</script>
 
 
 <div id="app">
@@ -224,14 +232,14 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="chip clock" id="clock" hidden>0:00</div>
     <button class="iconbtn" id="menu" aria-label="Menu">☰</button>
   </div>
-  <div class="boosters">
-    <button class="boost" id="bBomb">Hammer <b id="nBomb">1</b></button>
-    <button class="boost" id="bSlot" hidden>+1 Dock <b id="nSlot">1</b></button>
-    <button class="boost" id="bCata">Catapult <b id="nCata">1</b></button>
-  </div>
   <div class="stage" id="stage">
     <canvas id="cv"></canvas>
     <div class="toast" id="toast" hidden></div>
+  </div>
+  <div class="boosters">
+    <button class="boost" id="bBomb"><span class="pi">&#x1F528;</span><span class="pl">Hammer</span><b id="nBomb">1</b></button>
+    <button class="boost" id="bSlot" hidden><span class="pi">&#x2693;</span><span class="pl">+1 Dock</span><b id="nSlot">1</b></button>
+    <button class="boost" id="bCata"><span class="pi">&#x1F3F9;</span><span class="pl">Catapult</span><b id="nCata">1</b></button>
   </div>
   <div id="lh" hidden>
     <div class="hud"><div class="lvl">Longhouse</div><div class="chip" id="lhSilver">0 silver</div><div class="chip" id="lhTokens" hidden>0 dock tokens</div><div class="chip" id="lhRunes" hidden></div><button class="iconbtn" id="lhClose" aria-label="Back to the raid">✕</button></div>
@@ -239,12 +247,14 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="lhgrid" id="lhGrid"></div>
     <div class="lhshelf" id="lhShelf"></div>
     <div class="lhbar" id="lhBar"></div>
+    <div class="tabs" id="lhTabs"></div>
   </div>
   <div id="hb" hidden>
     <div class="hud"><div class="lvl">Harbor</div><div class="chip" id="hbSilver">0 silver</div><div class="chip" id="hbRunes" hidden></div><button class="iconbtn" id="hbClose" aria-label="Back to the raid">✕</button></div>
     <div class="hbscene" id="hbScene"></div>
     <div class="hblist" id="hbList"></div>
     <div class="hbtapwrap"><div class="hbtap" id="hbBarrel"><div class="fish">🐟</div><div class="txt"><b id="hbTap">+1 silver</b><small id="hbCombo">Tap the barrel</small></div></div><div class="floats" id="hbFloats"></div></div>
+    <div class="tabs" id="hbTabs"></div>
   </div>
   <div id="home" hidden>
     <svg class="scene" viewBox="0 0 390 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -539,11 +549,12 @@ function difficulty(n) {
     colors: n < 3 ? 2 : Math.min(8, 3 + Math.floor(Math.sqrt(n) / 1.4)),
     // raids 1-10: a small wall of big shields; from raid 11 the pictures are drawn at twice the detail on a wider wall
     // from raid 11 the wall is wider than tall, so it fills the phone from edge to edge and several pictures stand side by side
-    width: n < 11 ? 10 : n < 150 ? 24 : n < 300 ? 26 : 28,
-    height: (n < 11 ? Math.round(10 * (1 + n / 50)) : n < 150 ? 16 : n < 300 ? 17 : 18) + (boss ? 1 : 0),
-    scale: n < 11 ? 1 : 2,
-    minAmmo: n > 10 ? 10 : 5,
-    maxAmmo: n > 10 ? Math.min(40, 14 + Math.round(n * .25)) : 9, // bigger ships on later raids: harder to send at the right moment
+    // from raid 11 (2026-10-15): small shields, so one big picture at three times the detail fills a 36-wide wall; ships carry more axes to match
+    width: n < 11 ? 10 : 36,
+    height: (n < 11 ? Math.round(10 * (1 + n / 50)) : n < 150 ? 25 : n < 300 ? 26 : 27) + (boss ? 1 : 0),
+    scale: n < 11 ? 1 : 3,
+    minAmmo: n > 10 ? 12 : 5,
+    maxAmmo: n > 10 ? Math.min(50, 18 + Math.round(n * .3)) : 9, // bigger ships on later raids: harder to send at the right moment
     lines: Math.min(6, 4 + Math.floor(n / 20)),
     ice: Math.min(.35, (.04 + t * .3) * m),
     mystery: Math.min(.7, (.12 + t * .5) * m),
@@ -578,11 +589,11 @@ function buildLevel(n, fails, tight) {
   // Scramble the helpful order; each failure scrambles it less. A scramble is only kept if a careful
   // raider can still finish. If no scramble works, relief steps thin the ice and finally shrink the ships.
   let ice, order, cols, attempts = 0, solved = false, need = 0;
-  for (let relief = 0; relief < 4 && !solved; relief++) {
-    const iceN = n >= 6 ? Math.round(cells.length * D.ice * obsScale * [1, .5, 0, 0][relief]) : 0;
+  for (let relief = 0; relief < 5 && !solved; relief++) {
+    const iceN = n >= 6 ? Math.round(cells.length * D.ice * obsScale * [1, .5, 0, 0, 0][relief]) : 0;
     ice = new Set(cells.slice(0, iceN));
     order = null;
-    for (let seed = 0; seed < 6 && !order; seed++) order = planShips(grid, ice, relief === 3 ? 5 : D.minAmmo, rngFrom(n * 9973 + 17 + relief * 11 + seed), relief === 3 ? 99 : docks, relief === 3 ? 9 : D.maxAmmo);
+    for (let seed = 0; seed < 6 && !order; seed++) order = planShips(grid, ice, relief >= 3 ? (relief === 3 ? 10 : 5) : D.minAmmo, rngFrom(n * 9973 + 17 + relief * 11 + seed), relief >= 3 ? 99 : docks, relief >= 3 ? (relief === 3 ? 20 : 9) : D.maxAmmo); // last resorts: ships of 10-20, then the tiny 5-9 ships
     if (!order) continue;
     let frac = D.scramble * Math.max(0, 1 - ease / 4);
     for (let attempt = 0; attempt < 12; attempt++, frac *= .6, attempts++) {
@@ -625,7 +636,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.036.10.15.26.0230';
+const BUILD = 'VR1.037.10.15.26.0240';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -775,7 +786,7 @@ function layout() {
 function layoutOnce() {
   const { R, C } = S, P = layoutPad;
   const boardH = Math.min(H * .62, H - 270); // the harbor always keeps room for three readable rows
-  const cell = Math.max(8, Math.min(56, (W - 76) / C, boardH / (R + 2.4))); // the wall takes the width, but the fjord keeps room for a whole ship on each side
+  const cell = Math.max(7, Math.min(56, (W - 76) / C, boardH / (R + 2.4))); // the wall takes the width, but the fjord keeps room for a whole ship on each side
   const gap = Math.max(14, cell * .7);
   const bw = C * cell, bh = R * cell;
   // ships on the fjord stay readable on wide walls: never smaller than about 42px, and the wall sits low enough for their sails
@@ -1103,6 +1114,7 @@ function drawSym(x, y, r, ch, fill, stroke) {
   symPath(x, y, r, SYM[ch]); ctx.fillStyle = fill; ctx.fill('evenodd');
   if (stroke) { ctx.lineWidth = Math.max(1, r * .18); ctx.strokeStyle = stroke; ctx.lineJoin = 'round'; ctx.stroke(); }
 }
+const symOn = () => save.symbols === true; // shield symbols: the raider turned them off on 2026-10-15, the colors alone read fine now
 function drawShield(x, y, s, ch, scale = 1, frozen = false) {
   const col = PAL[ch], r = s * .46 * scale, cx = x + s / 2, cy = y + s / 2;
   ctx.beginPath(); ctx.arc(cx, cy + r * .12, r, 0, 6.3); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fill();
@@ -1110,7 +1122,7 @@ function drawShield(x, y, s, ch, scale = 1, frozen = false) {
   ctx.beginPath(); ctx.arc(cx, cy, r * .84, 0, 6.3); ctx.fillStyle = col; ctx.fill();
   ctx.beginPath(); ctx.arc(cx, cy, r * .84, Math.PI * 1.1, Math.PI * 1.75); ctx.lineWidth = r * .18; ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.stroke();
   if (r > 9) { ctx.fillStyle = 'rgba(255,240,200,.35)'; for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2; ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r * .92, cy + Math.sin(a) * r * .92, r * .07, 0, 6.3); ctx.fill(); } }
-  drawSym(cx, cy, r * .5, ch, 'rgba(20,10,5,.62)', 'rgba(255,240,200,.4)');
+  if (symOn()) drawSym(cx, cy, r * .5, ch, 'rgba(20,10,5,.62)', 'rgba(255,240,200,.4)');
   if (frozen) {
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.3); ctx.fillStyle = 'rgba(210,245,255,.5)'; ctx.fill();
     ctx.lineWidth = Math.max(1.5, r * .16); ctx.strokeStyle = '#eafbff'; ctx.stroke();
@@ -1130,9 +1142,9 @@ function drawShip(x, y, size, ch, ammo, opt = {}) {
   ctx.quadraticCurveTo(0, .5 * S_, .48 * S_, .08 * S_); ctx.quadraticCurveTo(.6 * S_, .02 * S_, .64 * S_, -.24 * S_);
   ctx.quadraticCurveTo(0, .14 * S_, -.64 * S_, -.24 * S_); ctx.closePath();
   const hg = ctx.createLinearGradient(0, -.2 * S_, 0, .4 * S_);
-  if (opt.chain) { hg.addColorStop(0, '#7b8794'); hg.addColorStop(1, '#2e3540'); } else { hg.addColorStop(0, '#7a5435'); hg.addColorStop(1, '#3a2614'); }
+  if (opt.chain) { hg.addColorStop(0, '#7b8794'); hg.addColorStop(1, '#2e3540'); } else { hg.addColorStop(0, shade(col, .05)); hg.addColorStop(1, shade(col, -.5)); } // the hull wears the ship's color too (user ask 2026-10-15)
   ctx.fillStyle = hg; ctx.fill();
-  ctx.lineWidth = Math.max(1, S_ * .04); ctx.strokeStyle = opt.chain ? '#161a20' : '#2a1a0e'; ctx.stroke();
+  ctx.lineWidth = Math.max(1, S_ * .04); ctx.strokeStyle = opt.chain ? '#161a20' : shade(col, -.7); ctx.stroke();
   if (opt.chain) { // an iron-bound hull: a chain runs along the rail, link by link
     ctx.strokeStyle = '#d7dde5'; ctx.lineWidth = Math.max(1.2, S_ * .035);
     for (let k = -5; k <= 5; k++) { const lx = k * S_ * .1, ly = -.16 * S_ + Math.abs(k) * S_ * .012; ctx.beginPath(); ctx.ellipse(lx, ly, S_ * .05, S_ * .03, 0, 0, 6.3); ctx.stroke(); }
@@ -1169,9 +1181,9 @@ function drawShip(x, y, size, ch, ammo, opt = {}) {
     ctx.font = `${Math.round(S_ * .38)}px ${DISPLAY_FONT}`;
     ctx.strokeText(ammo, -.06 * S_, my); ctx.fillStyle = '#fff'; ctx.fillText(ammo, -.06 * S_, my);
     const bx_ = sl + sw - .02 * S_, by_ = st + sh - .02 * S_, br = S_ * (opt.board ? .2 : .17);
-    ctx.beginPath(); ctx.arc(bx_, by_, br, 0, 6.3); ctx.fillStyle = '#1d2a3a'; ctx.fill(); ctx.lineWidth = Math.max(1.2, S_ * .035); ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
-    drawSym(bx_, by_, br * .62, ch, '#fff', null);
-  } else if (!opt.plain) {
+    ctx.beginPath(); ctx.arc(bx_, by_, br, 0, 6.3); ctx.fillStyle = symOn() ? '#1d2a3a' : PAL[ch]; ctx.fill(); ctx.lineWidth = Math.max(1.2, S_ * .035); ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+    if (symOn()) drawSym(bx_, by_, br * .62, ch, '#fff', null);
+  } else if (!opt.plain && symOn()) {
     drawSym(0, my, S_ * .15, ch, '#fff', 'rgba(13,23,38,.8)');
   }
   if (opt.chain) { // chained across two lines: a grey chain round the sail, link by link
@@ -1433,26 +1445,12 @@ function showCard(kind, extra) {
   } else if (kind === 'menu') {
     const sw = (on) => `<b style="float:right;font-family:var(--display);color:${on ? '#ffd37a' : '#b9a98f'}">${on ? 'On' : 'Off'}</b>`;
     const row = (id, label, on) => `<button class="link" id="${id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">${label}${sw(on)}</button>`;
-    html = `<h2>Viking Raiders</h2>${row('tMusic', 'Music', save.music)}${row('tSound', 'Sound effects', !save.muted)}${row('tVibe', 'Vibration', save.vibe)}${row('tClock', 'Hourglass (from raid 11)', save.clock !== false)}
-      <button class="link" id="tLH" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Longhouse: a merge puzzle<b style="float:right;font-family:var(--display);color:#ffd37a">${chestCount()} chest${chestCount() === 1 ? '' : 's'}</b></button>
-      <button class="link" id="tHB" style="display:block;width:100%;text-align:left;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Harbor: tap to earn silver<b style="float:right;font-family:var(--display);color:#ffd37a">${fmtN(hbRate())}/min</b></button>
-      <button class="link" id="tSaga" style="display:block;width:100%;text-align:left;background:var(--lemon);color:#2b2118;border-radius:12px;padding:10px 14px;font-size:16px">Saga: your achievements and stats<b style="float:right;font-family:var(--display)">${SAGA.silver} silver</b></button>
-      <button class="link" id="retreat" style="color:#f3e9d2;background:#8d4f1c;border-radius:12px;padding:10px 14px;font-size:16px">Retreat from raid ${n}</button>
-      <button class="link" id="tHow" style="display:block;width:100%;text-align:center;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">How to play</button>
-      <button class="link" id="tHome" style="display:block;width:100%;text-align:center;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">Back to home</button>
-      <button class="link" id="tWipe" style="color:#f3e9d2;background:#8e2a1e;border-radius:12px;padding:8px 14px;font-size:14px">Erase all progress and start over</button>
+    const btn = (id, label, bg, fg) => `<button class="link" id="${id}" style="display:block;width:100%;text-align:center;background:${bg};color:${fg};border-radius:12px;padding:12px 14px;font-size:16px">${label}</button>`;
+    html = `<h2>Raid ${n}</h2>${btn('retreat', `Retreat from raid ${n}`, '#8d4f1c', '#f3e9d2')}${btn('tHome', 'Home', 'var(--wood-hi)', '#f3e9d2')}${btn('tSet', 'Settings', 'var(--wood)', '#f3e9d2')}
       <p style="margin:4px 0 0;font-size:12px;opacity:.65;line-height:1.5">Version ${BUILD}${window.VR_UPDATE ? ` · Update ${window.VR_UPDATE.id}` : ' · Claude page'}<br>${matchMedia('(display-mode: standalone)').matches || navigator.standalone ? 'Installed app' : 'In the browser'}<span id="upd"></span></p><button class="cta" id="cancel">Back to the raid</button>`;
     setTimeout(() => {
-      $('tMusic').onclick = () => { save.music = !save.music; persist(); music(); showCard('menu'); };
-      $('tSound').onclick = () => { save.muted = !save.muted; persist(); showCard('menu'); };
-      $('tVibe').onclick = () => { save.vibe = !save.vibe; persist(); if (save.vibe) buzz(); showCard('menu'); };
-      $('tClock').onclick = () => { save.clock = save.clock === false ? null : false; persist(); showCard('menu'); };
-      $('tSaga').onclick = () => showCard('saga');
-      $('tLH').onclick = () => openLH('menu');
-      $('tHB').onclick = () => openHB();
       $('retreat').onclick = () => showCard('restart');
-      $('tWipe').onclick = () => showCard('wipe');
-      $('tHow').onclick = () => showCard('howto');
+      $('tSet').onclick = () => showCard('settings');
       $('tHome').onclick = () => showHome();
       // the installed app asks the web host which version is current
       if (window.VR_UPDATE) fetch('version.json', { cache: 'no-store' }).then(r => r.json()).then(v => { const el = $('upd'); if (!el) return;
@@ -1460,7 +1458,7 @@ function showCard(kind, extra) {
     });
   } else if (kind === 'lhHelp') {
     html = `<h2>The Longhouse</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">A merge puzzle. Winning raids gives you chests of pieces. Merge pieces to make better ones, deliver them to build halls, and each hall gives your raids a bonus.</p><ul>
-      <li><span>1</span><div><b>Tap a chest for tokens.</b> Each chest gives a random number: wooden 1 to 3, iron 2 to 5, silver 4 to 8, gold 7 to 12. Pick a kind (timber, iron, food or wool) at the bottom, then tap any empty dashed cell to place each token. A token keeps its kind until you sell or deliver it.</div></li>
+      <li><span>1</span><div><b>Tap a chest for tokens.</b> Each chest gives a random number: wooden 1 to 3, iron 2 to 5, silver 4 to 8, gold 7 to 12. Tap any empty dashed cell to place each token: it becomes that corner's kind (timber, iron, food or wool) and keeps it until you sell or deliver it.</div></li>
       <li><span>2</span><div><b>Drag a piece onto one just like it.</b> The two become one better piece. Dragging onto a different piece swaps them.</div></li>
       <li><span>3</span><div><b>Tap a piece, then Deliver.</b> The hall at the top needs the pieces it shows. Finish a hall and your raids get a reward.</div></li>
       <li><span>4</span><div><b>Glowing pieces</b> are the ones the hall wants right now. A level VI piece is the top: tap it for a tribute (a dock token and silver).</div></li>
@@ -1471,11 +1469,12 @@ function showCard(kind, extra) {
   } else if (kind === 'settings') {
     const sw2 = on => `<b style="float:right;font-family:var(--display);color:${on ? '#ffd37a' : '#b9a98f'}">${on ? 'On' : 'Off'}</b>`;
     const row2 = (id, label, on) => `<button class="link" id="${id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">${label}${sw2(on)}</button>`;
-    html = `<h2>Settings</h2>${row2('sMusic', 'Music', save.music)}${row2('sSound', 'Sound effects', !save.muted)}${row2('sVibe', 'Vibration', save.vibe)}${row2('sClock', 'Hourglass (from raid 11)', save.clock !== false)}
+    html = `<h2>Settings</h2>${row2('sSym', 'Shield symbols', save.symbols === true)}${row2('sMusic', 'Music', save.music)}${row2('sSound', 'Sound effects', !save.muted)}${row2('sVibe', 'Vibration', save.vibe)}${row2('sClock', 'Hourglass (from raid 11)', save.clock !== false)}
       <button class="link" id="sHow" style="display:block;width:100%;text-align:center;background:var(--wood-hi);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:16px">How to play</button>
       <button class="link" id="sWipe" style="color:#f3e9d2;background:#8e2a1e;border-radius:12px;padding:8px 14px;font-size:14px">Erase all progress and start over</button>
       <p style="margin:4px 0 0;font-size:12px;opacity:.65;line-height:1.5">Version ${BUILD}</p><button class="cta" id="cancel">Back</button>`;
     setTimeout(() => {
+      $('sSym').onclick = () => { save.symbols = save.symbols !== true; persist(); showCard('settings'); };
       $('sMusic').onclick = () => { save.music = !save.music; persist(); music(); showCard('settings'); };
       $('sSound').onclick = () => { save.muted = !save.muted; persist(); showCard('settings'); };
       $('sVibe').onclick = () => { save.vibe = !save.vibe; persist(); if (save.vibe) buzz(); showCard('settings'); };
@@ -1638,13 +1637,13 @@ const lhEmpties = () => LH.board.map((p, i) => p ? -1 : i).filter(i => i >= 0);
 // cells sized so all six columns and eight rows fit, whatever the phone; measured with the bar at its fixed height
 function lhFit() {
   const grid = $('lhGrid'), gr = grid.getBoundingClientRect();
-  if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(28, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
+  if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(20, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
 }
 window.addEventListener('resize', () => { if (!$('lh').hidden) { lhFit(); } });
 function openLH(from) {
   lhFrom = from; lhSel = -1; lhKind = null; $('ov').hidden = true; $('lhGrid').style.removeProperty('--c');
   if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused' && S.mode !== 'home') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
-  $('lh').hidden = false; lhRender();
+  buildTabs($('lhTabs'), 'lh'); $('lh').hidden = false; lhRender();
   if (!save.seen.lh) { save.seen.lh = true; persist(); showCard('lhHelp'); }
 }
 function closeLH() {
@@ -1662,13 +1661,12 @@ function openChest(kind) {
   SAGA.chests[kind]--; STATS.chestsOpened++;
   for (let k = 0; k < n; k++) LH.pending.push({ ch: null, t: 1 });
   sfx('crack'); lhSel = -1; persist(); lhRender();
-  toast(`The ${CHEST_NAME[kind]} gave ${n} token${n > 1 ? 's' : ''}. Pick a kind, then tap an empty cell for each one.`);
+  toast(`The ${CHEST_NAME[kind]} gave ${n} token${n > 1 ? 's' : ''}. Tap an empty cell for each one; the corner sets its kind.`);
 }
 // place the next waiting piece on an empty cell of its own corner
 function placePending(i) {
   const pc = LH.pending[0]; if (!pc) return false;
-  const ch = pc.ch || lhKind; // a token takes the kind picked for it, and keeps it until sold or delivered
-  if (!ch) { toast('Pick a kind first: timber, iron, food or wool, at the bottom.'); return true; }
+  const ch = pc.ch || quadOf(i); // a token becomes the kind of the corner it lands in (user rule 2026-10-15), and keeps it until sold or delivered
   LH.board[i] = { ch, t: pc.t || 1 }; LH.pending.shift(); lhAnim[i] = { k: 'pop', d: 0 };
   sfx('pop'); persist(); lhRender();
   if (LH.pending.length) toast(`${LH.pending.length} still waiting.`); else toast('All pieces placed.');
@@ -1727,7 +1725,6 @@ function lhRender() {
   const tk = $('lhTokens'); tk.hidden = !LH.tokens; tk.textContent = `${LH.tokens} dock token${LH.tokens === 1 ? '' : 's'}`;
   // the order
   const hall = HALLS[LH.hall];
-  if (LH.pending.length && !lhKind) { const w = hall && hall.wants.find(([ch, t, n]) => (LH.done[ch + t] || 0) < n); lhKind = w ? w[0] : 'T'; } // suggest a kind the hall still needs
   $('lhOrder').innerHTML = hall
     ? `<b class="h">Build the ${hall.name}</b> <span style="color:var(--mute)">${LH.hall + 1} of ${HALLS.length}</span><div class="wants">${hall.wants.map(([ch, t, n]) => `<span class="want${(LH.done[ch + t] || 0) >= n ? ' met' : ''}">${LH_CHAINS[ch].icon} ${pieceName(ch, t)} ${TIER_NAME[t - 1]} \u00b7 ${Math.min(n, LH.done[ch + t] || 0)}/${n}</span>`).join('')}</div><div class="perk">Finish it for: ${hall.perk.toLowerCase()}, plus a dock token, a gold chest and ${rs(250 * (LH.hall + 1))} silver. Each piece delivered pays silver too.</div>`
     : `<b class="h">The longhouse is complete!</b><div class="perk">Every hall is built and every reward stays on.</div>${runeRow()}`;
@@ -1744,11 +1741,8 @@ function lhRender() {
   $('lhShelf').querySelectorAll('[data-chest]').forEach(b => b.onclick = () => openChest(b.dataset.chest));
   // the action bar
   const p = lhSel >= 0 ? LH.board[lhSel] : null, bar = $('lhBar');
-  if (!p && LH.pending.length) {
-    bar.innerHTML = `<div class="tokbar"><div class="hint"><b>${LH.pending.length} token${LH.pending.length > 1 ? 's' : ''} waiting.</b> ${lhKind ? `Tap an empty cell to make it ${LH_CHAINS[lhKind].name.toLowerCase()}.` : 'Pick a kind, then tap an empty cell.'}</div><div class="lhkinds">${QUAD.map(c => `<button class="boost${lhKind === c ? ' on' : ''}" data-kind="${c}">${lhKind === c ? '\u2713 ' : ''}${LH_CHAINS[c].icon} ${LH_CHAINS[c].name}</button>`).join('')}</div></div>`;
-    bar.querySelectorAll('[data-kind]').forEach(b => b.onclick = () => { lhKind = b.dataset.kind; lhRender(); });
-  }
-  else if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest for tokens. 2. Pick a kind, tap an empty cell. 3. Drag a piece onto its twin.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
+  if (!p && LH.pending.length) bar.innerHTML = `<div class="hint"><b>${LH.pending.length} token${LH.pending.length > 1 ? 's' : ''} waiting.</b> Tap any empty cell: the token becomes that corner's kind (${QUAD.map(c => LH_CHAINS[c].icon).join(' ')}).</div>`;
+  else if (!p) bar.innerHTML = `<div class="hint">${chestCount() ? '1. Tap a chest for tokens. 2. Tap an empty cell in a corner. 3. Drag a piece onto its twin.' : lhEmpties().length === 0 ? 'Board full. Drag a piece onto another to swap them, or tap one to Deliver or Sell.' : LH.board.some(Boolean) ? 'Drag a piece onto its twin to merge. Tap a piece, then Deliver or Sell.' : 'Win raids to earn chests. Chests bring pieces.'}</div>`;
   else {
     const can = hall && hall.wants.some(([ch, t, n]) => ch === p.ch && t === p.t && (LH.done[ch + t] || 0) < n), later = !can && p.t < 6 && HALLS.slice(LH.hall + 1).find(h => h.wants.some(([ch, t]) => ch === p.ch && t === p.t));
     bar.innerHTML = `<div class="hint"><b>${pieceName(p.ch, p.t)}</b> (${LH_CHAINS[p.ch].name} ${TIER_NAME[p.t - 1]})${can ? `<br>The ${hall.name} wants this: +${p.t * 10} silver` : p.t >= 6 ? '<br>Finest work: tribute pays a dock token + 200 silver' : later ? `<br>Not needed now; the ${later.name} will want it` : hall ? `<br>Merge two to make a ${pieceName(p.ch, p.t + 1)}` : ''}</div>${can ? `<button class="boost" id="lhDeliver">Deliver</button>` : p.t >= 6 ? `<button class="boost" id="lhTribute">Tribute</button>` : ''}<button class="boost" id="lhSell">Sell <b>${rs(SELL[p.t - 1])}</b></button>`;
@@ -1838,7 +1832,7 @@ function openHB() {
   if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused' && S.mode !== 'home') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   const away = Math.max(hbPending.away, Date.now() - (HB.last || Date.now())), got = hbSettle() + hbPending.got; hbPending = { away: 0, got: 0 };
   if (got > 0 && away > 60e3) { STATS.haul = Math.max(STATS.haul, got); toast(away >= HB_OFFLINE_CAP ? `The hold was full: the harbor earned ${fmtN(got)} silver while you were away.` : `While you were raiding, the harbor earned ${fmtN(got)} silver.`); sfx('win'); }
-  $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } if (combo && Date.now() - comboT > 1200) combo = 0; hbSettle(); hbRender(true); }, 250);
+  buildTabs($('hbTabs'), 'hb'); $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } if (combo && Date.now() - comboT > 1200) combo = 0; hbSettle(); hbRender(true); }, 250);
   if (!save.seen.hb) { save.seen.hb = true; persist(); showCard('hbHelp'); }
 }
 function closeHB() { hbSettle(); persist(); clearInterval(hbTimer); $('hb').hidden = true; if (homeOpen) { homeOpen = false; showHome(); return; } if (S && S.mode === 'paused') { S.mode = S.resumeMode || 'play'; S.resumeMode = null; } if (S) { S.slotBoosts = LH.tokens > 0 && S.tray.length < 6 ? 1 : 0; hud(); } }
@@ -1900,6 +1894,25 @@ function hbRender(light) {
 let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() }; // banked while the game was closed; the Harbor screen tells the tale
 
 window.JB = { get S() { return S; }, showHome, playHome, placePending, raiseRune, runeReady, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+// the same four-tab bar as the home screen, on the Longhouse and Harbor; built fresh on each open so the chest count is current
+function buildTabs(host, active) {
+  host.innerHTML = '';
+  [['raids', 'hHome', 'Raids'], ['lh', 'hLH', 'Longhouse'], ['hb', 'hHB', 'Harbor'], ['saga', 'hSaga', 'Saga']].forEach(([k, id, label]) => {
+    const b = document.createElement('button'); b.className = 'tab' + (k === active ? ' on' : ''); b.dataset.k = k;
+    b.innerHTML = `<span class="ic">${$(id).querySelector('.ic').innerHTML}</span>${label}` + (k === 'lh' && chestCount() ? `<span class="n">${chestCount()}</span>` : '');
+    b.onclick = () => tabGo(k, active); host.appendChild(b);
+  });
+}
+function tabGo(k, from) {
+  if (k === from) return;
+  if (k === 'saga') { showCard('saga'); return; }
+  if (from === 'lh') { $('lh').hidden = true; persist(); if (S) { S.slotBoosts = LH.tokens > 0 && S.tray.length < 6 ? 1 : 0; hud(); } }
+  if (from === 'hb') { hbSettle(); persist(); clearInterval(hbTimer); $('hb').hidden = true; }
+  lhFrom = null; homeOpen = false;
+  if (k === 'raids') showHome();
+  else if (k === 'lh') { homeOpen = true; openLH('home'); }
+  else if (k === 'hb') { homeOpen = true; openHB(); }
+}
 // boot last, once every section above (Longhouse, Harbor, home) is defined: the home screen reads them
 startLevel(save.level);
 if (!save.seenHelp) showCard('help'); else showHome();
