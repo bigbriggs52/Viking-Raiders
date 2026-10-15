@@ -28,6 +28,8 @@
   --mute: #6b5a48;       /* secondary text */
   --lemon: #c9922a;      /* gold accent */
   --danger: #c0392b;
+  --scene: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 390 760%22 preserveAspectRatio=%22xMidYMid slice%22 %3E %3Cdefs%3E%3ClinearGradient id=%22skyG%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%236fb3e6%22/%3E%3Cstop offset=%221%22 stop-color=%22%23d7ecf7%22/%3E%3C/linearGradient%3E %3ClinearGradient id=%22seaG%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%235fb0d8%22/%3E%3Cstop offset=%221%22 stop-color=%22%232f7fb0%22/%3E%3C/linearGradient%3E%3C/defs%3E %3Crect width=%22390%22 height=%22760%22 fill=%22url(%23skyG)%22/%3E %3Ccircle cx=%22310%22 cy=%22110%22 r=%2234%22 fill=%22%23fff5c2%22 opacity=%22.9%22/%3E %3Cg fill=%22%23fff%22 opacity=%22.85%22%3E%3Cellipse cx=%2280%22 cy=%22120%22 rx=%2246%22 ry=%2216%22/%3E%3Cellipse cx=%22110%22 cy=%22112%22 rx=%2230%22 ry=%2218%22/%3E%3Cellipse cx=%22250%22 cy=%2270%22 rx=%2238%22 ry=%2213%22/%3E%3Cellipse cx=%22270%22 cy=%2262%22 rx=%2224%22 ry=%2215%22/%3E%3C/g%3E %3Cpath d=%22M-20 330 L60 200 L120 290 L180 180 L250 300 L300 230 L360 310 L420 250 L420 400 L-20 400 Z%22 fill=%22%236f8fb0%22/%3E %3Cpath d=%22M60 200 L80 232 L100 214 L120 290 Z M180 180 L200 214 L220 200 L250 300 Z M300 230 L316 256 L334 246 L360 310 Z%22 fill=%22%23f3f7fa%22 opacity=%22.9%22/%3E %3Cpath d=%22M-20 380 L40 300 L110 360 L170 310 L240 370 L320 320 L420 380 L420 440 L-20 440 Z%22 fill=%22%234e7f5a%22/%3E %3Cpath d=%22M-20 420 L420 420 L420 760 L-20 760 Z%22 fill=%22url(%23seaG)%22/%3E %3Cg stroke=%22%23fff%22 stroke-opacity=%22.35%22 stroke-width=%223%22 stroke-linecap=%22round%22 fill=%22none%22%3E%3Cpath d=%22M40 470 q20 -8 40 0%22/%3E%3Cpath d=%22M250 500 q20 -8 40 0%22/%3E%3Cpath d=%22M120 560 q20 -8 40 0%22/%3E%3Cpath d=%22M300 610 q20 -8 40 0%22/%3E%3Cpath d=%22M60 650 q20 -8 40 0%22/%3E%3C/g%3E %3Cpath d=%22M-20 690 Q120 650 260 690 T420 690 L420 760 L-20 760 Z%22 fill=%22%235fa05a%22/%3E %3Cpath d=%22M-20 720 Q140 690 300 722 T420 715 L420 760 L-20 760 Z%22 fill=%22%233d7a3f%22/%3E %3C/svg%3E");   /* the fjord: sky, mountains, water and a green shore, behind every screen */
+  --planks: repeating-linear-gradient(90deg, #7a5234 0 46px, #6b4529 46px 48px), linear-gradient(#8d6540, #5a3b22);
   --display: 'Metamorphous', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
   --body: 'Alegreya Sans', 'Trebuchet MS', system-ui, sans-serif;
   color-scheme: light;
@@ -35,13 +37,13 @@
 html, body { height: 100%; }
 @supports (height: 100dvh) { html, body { height: 100dvh; } }
 body {
-  background: var(--ink); color: var(--cream); font-family: var(--body);
+  background: #2f7fb0 var(--scene) center / cover no-repeat; color: var(--cream); font-family: var(--body);
   overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
 }
 #app { position: fixed; inset: 0; max-width: 560px; margin: 0 auto; padding-inline: 10px; padding-block: 6px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; }
 .hud { display: flex; align-items: center; gap: 10px; }
-.lvl { font-family: var(--display); font-size: 19px; letter-spacing: .02em; white-space: nowrap; color: var(--lemon); }
+.lvl { font-family: var(--display); font-size: 19px; letter-spacing: .02em; white-space: nowrap; color: #ffd37a; text-shadow: 0 2px 0 #4a3220, 0 0 6px rgba(0,0,0,.35); }
 .bar { flex: 1; min-width: 0; height: 12px; background: #b9cbd6; border-radius: 99px; overflow: hidden; box-shadow: inset 0 2px 0 rgba(0,0,0,.15); }
 .bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #8d6540, var(--lemon)); border-radius: 99px; transition: width .25s; }
 .chip { font-size: 13px; font-weight: 800; padding: 4px 9px; border-radius: 99px; background: var(--wood); color: #f3e9d2; white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -124,7 +126,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .link { background: none; border: 0; color: var(--mute); font: 800 14px var(--body); cursor: pointer; padding: 4px; }
 .toast { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); background: #2f7a4a; color: #f1fff3; font-weight: 800; font-size: 13px; padding: 8px 14px; border-radius: 12px; max-width: calc(100% - 20px); text-align: center; z-index: 4; transition: opacity .4s; pointer-events: none; box-sizing: border-box; }
 /* the Longhouse: a merge board on its own screen */
-#lh { touch-action: none; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#lh { touch-action: none; position: absolute; inset: 0; z-index: 6; background: var(--planks); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #lh .hud .lvl { flex: 1; }
 .lhorder { background: var(--syrup); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 8px 10px; font-size: 13px; line-height: 1.35; }
 .lhorder b.h { font-family: var(--display); font-weight: 400; font-size: 17px; color: var(--wood); }
@@ -167,7 +169,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .lhkinds .boost { flex: 1; font-size: 12px; padding: 6px 2px; min-width: 0; }
 .lhkinds .on { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #3a2a18; }
 /* the Harbor: an idle clicker */
-#hb { touch-action: none; position: absolute; inset: 0; z-index: 6; background: var(--ink); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#hb { touch-action: none; position: absolute; inset: 0; z-index: 6; background: #2f7fb0 var(--scene) center / cover no-repeat; display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #hb .hud .lvl { flex: 1; }
 .hbscene { background: linear-gradient(#bfe0ee 0, #bfe0ee 58%, #4aa3cf 58%, #2d6f8f 100%); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 6px 8px 4px; }
 .hbscene .town { display: flex; justify-content: space-around; align-items: flex-end; height: 54px; }
@@ -183,7 +185,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .hbscene .ms { height: 8px; background: rgba(0,0,0,.25); border-radius: 99px; overflow: hidden; margin-top: 3px; }
 .hbscene .ms i { display: block; height: 100%; background: #ffd37a; }
 .hbscene .msl { color: #f3e9d2; font-size: 11px; font-weight: 800; margin-top: 2px; text-shadow: 0 1px 0 rgba(0,0,0,.35); }
-.hblist h3 { margin: 4px 2px 0; font-family: var(--display); font-weight: 400; font-size: 15px; color: var(--wood); }
+.hblist h3 { margin: 4px 2px 0; font-family: var(--display); font-weight: 400; font-size: 15px; color: #ffd37a; text-shadow: 0 2px 0 #4a3220; }
 .hbtapwrap { position: relative; }
 .hbtap { display: flex; align-items: center; justify-content: center; gap: 14px; min-height: 84px; background: linear-gradient(#8d6540, #6b4a2e); border: 0; border-radius: 20px; box-shadow: 0 6px 0 #3d2a18; color: #f3e9d2; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; transition: transform .05s; }
 .hbtap:active, .hbtap.hit { transform: translateY(4px); box-shadow: 0 2px 0 #3d2a18; }
@@ -211,7 +213,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-0628",date:"2026-10-15 06:28 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-0631",date:"2026-10-15 06:31 UTC"};</script>
 
 
 <div id="app">
@@ -623,7 +625,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.035';
+const BUILD = 'VR1.036.10.15.26.0230';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1208,7 +1210,7 @@ function draw() {
   // start marker
   ctx.fillStyle = '#c9922a'; ctx.beginPath(); ctx.moveTo(L0 - cell * .2, B0 - cell * .25); ctx.lineTo(L0 + cell * .25, B0); ctx.lineTo(L0 - cell * .2, B0 + cell * .25); ctx.fill();
   // board
-  rr(bx - cell * .2, by - cell * .2, bw + cell * .4, bh + cell * .4, cell * .35); ctx.fillStyle = '#b7c6cf'; ctx.fill();
+  rr(bx - cell * .2, by - cell * .2, bw + cell * .4, bh + cell * .4, cell * .35); ctx.fillStyle = '#8d6540'; ctx.fill(); ctx.lineWidth = Math.max(2, cell * .12); ctx.strokeStyle = '#ffd37a'; ctx.stroke(); ctx.lineWidth = Math.max(1, cell * .05); ctx.strokeStyle = '#4a3220'; ctx.stroke();
   ctx.lineWidth = Math.max(2, cell * .08); ctx.strokeStyle = '#8d6540'; ctx.stroke();
   for (let r = 0; r < S.R; r++) for (let c = 0; c < S.C; c++) {
     const x = bx + c * cell, y = by + r * cell;
