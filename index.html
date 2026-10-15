@@ -188,6 +188,26 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 /* the Harbor: an idle clicker */
 #hb { touch-action: none; position: absolute; inset: 0; z-index: 6; background: #2f7fb0 var(--scene) center / cover no-repeat; display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #hb .hud .lvl { flex: 1; }
+#mn { touch-action: none; position: absolute; inset: 0; z-index: 6; background: #3b2a1e linear-gradient(#6d8fb3 0, #6d8fb3 90px, #5a4030 90px, #3b2a1e 100%); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#mn .hud .lvl { flex: 1; }
+.mnlist { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+.mnlist h3 { margin: 4px 2px 0; font-family: var(--display); font-weight: 400; font-size: 15px; color: #ffd37a; text-shadow: 0 2px 0 #2b2118; }
+.mnrow { display: flex; align-items: center; gap: 8px; background: var(--syrup); border-radius: 12px; padding: 6px 8px; font-size: 13px; line-height: 1.3; border-left: 6px solid #8d6540; }
+.mnrow.shaft { border-left-color: #4a3220; }
+.mnrow .ic { font-size: 26px; width: 34px; text-align: center; flex: none; }
+.mnrow .txt { flex: 1; min-width: 0; }
+.mnrow .txt b span { color: var(--mute); font-weight: 500; }
+.mnrow .txt > small { display: block; color: var(--mute); }
+.mnbtns { display: flex; gap: 5px; margin-top: 4px; }
+.mnbtns .boost { flex: 1; font-size: 12px; padding: 5px 4px; flex-direction: column; gap: 0; }
+.mnbtns .boost small { font-weight: 500; font-size: 11px; opacity: .85; }
+.mntap { flex: none; width: 82px; min-height: 58px; font-size: 15px; flex-direction: column; gap: 1px; background: linear-gradient(#f3e9d2, #d9c3a3); color: #6b4a2e; box-shadow: 0 4px 0 #8d6540; border-radius: 14px; }
+.mntap small { font-weight: 700; font-size: 11px; color: #8d4f1c; }
+.mntap.auto { background: linear-gradient(#d9ecd9, #a9d3a9); box-shadow: 0 4px 0 #3f7a4a; color: #1f4a2a; }
+.mntap.hit { transform: translateY(3px); box-shadow: 0 1px 0 #8d6540; }
+.mnsum { background: rgba(243, 233, 210, .94); border-radius: 12px; padding: 6px 10px; font-size: 13px; color: #2b2118; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.mnsum b { font-family: var(--display); font-weight: 400; font-size: 18px; color: #6b4a2e; }
+.mnbar { height: 8px; background: rgba(0,0,0,.15); border-radius: 99px; overflow: hidden; margin-top: 4px; } .mnbar i { display: block; height: 100%; background: #c9922a; }
 .hbscene { background: linear-gradient(#bfe0ee 0, #bfe0ee 58%, #4aa3cf 58%, #2d6f8f 100%); border: 2px solid var(--wood-hi); border-radius: 14px; padding: 6px 8px 4px; }
 .hbscene .town { display: flex; justify-content: space-around; align-items: flex-end; height: 54px; }
 .hbscene .bld { display: grid; justify-items: center; gap: 1px; font-size: 30px; line-height: 1; position: relative; }
@@ -230,7 +250,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-1333",date:"2026-10-15 13:33 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-1558",date:"2026-10-15 15:58 UTC"};</script>
 
 
 <div id="app">
@@ -264,6 +284,11 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <div class="hblist" id="hbList"></div>
     <div class="hbtapwrap"><div class="hbtap" id="hbBarrel"><div class="fish">🐟</div><div class="txt"><b id="hbTap">+1 silver</b><small id="hbCombo">Tap the barrel</small></div></div><div class="floats" id="hbFloats"></div></div>
     <div class="navbar" id="hbTabs"></div>
+  </div>
+  <div id="mn" hidden>
+    <div class="hud"><div class="lvl">Silver Mine</div><div class="chip" id="mnSilver">0 silver</div><div class="chip" id="mnDeeds" hidden style="background:#ffd37a;color:#2b2118"></div><button class="iconbtn" id="mnClose" aria-label="Back">✕</button></div>
+    <div class="mnlist" id="mnList"></div>
+    <div class="navbar" id="mnTabs"></div>
   </div>
   <div id="home" hidden>
     <svg class="scene" viewBox="0 0 390 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -321,6 +346,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
       <button class="nav on" id="hHome"><span class="ic"><svg viewBox="0 0 32 32"><path d="M4 18 L28 18 Q26 26 16 27 Q6 26 4 18 Z" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><rect x="15" y="4" width="2" height="14" fill="#4a3220"/><path d="M9 6 L23 6 L22 15 L10 15 Z" fill="#d9342f" stroke="#4a3220" stroke-width="2"/></svg></span>Raids</button>
       <button class="nav" id="hLH"><span class="ic"><svg viewBox="0 0 32 32"><path d="M4 15 L16 4 L28 15 Z" fill="#8d4f1c" stroke="#4a3220" stroke-width="2"/><rect x="7" y="15" width="18" height="13" fill="#d9c3a3" stroke="#4a3220" stroke-width="2"/><rect x="13" y="19" width="6" height="9" fill="#4a3220"/></svg></span>Longhouse<span class="n" id="hLHn" hidden></span></button>
       <button class="nav" id="hHB"><span class="ic"><svg viewBox="0 0 32 32"><rect x="7" y="8" width="18" height="20" rx="4" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><path d="M7 14 L25 14 M7 22 L25 22" stroke="#4a3220" stroke-width="2"/><circle cx="16" cy="6" r="3" fill="#f2d24b" stroke="#4a3220" stroke-width="2"/></svg></span>Harbor</button>
+      <button class="nav" id="hMN"><span class="ic"><svg viewBox="0 0 32 32"><path d="M6 27 L20 11" stroke="#4a3220" stroke-width="4" stroke-linecap="round"/><path d="M14 6 Q22 2 28 10 Q22 8 17 12 Q24 15 26 22 Q20 14 14 6 Z" fill="#9aa5b1" stroke="#4a3220" stroke-width="2" stroke-linejoin="round"/><circle cx="8" cy="25" r="3" fill="#ffd37a" stroke="#4a3220" stroke-width="1.5"/></svg></span>Mine</button>
       <button class="nav" id="hSaga"><span class="ic"><svg viewBox="0 0 32 32"><path d="M8 5 L24 5 L23 15 Q22 21 16 22 Q10 21 9 15 Z" fill="#f2d24b" stroke="#4a3220" stroke-width="2"/><path d="M8 7 Q3 8 5 13 Q7 16 10 15 M24 7 Q29 8 27 13 Q25 16 22 15" fill="none" stroke="#4a3220" stroke-width="2"/><rect x="11" y="24" width="10" height="4" fill="#8d6540" stroke="#4a3220" stroke-width="2"/><text x="16" y="17" font-size="9" text-anchor="middle" fill="#6b4a2e" font-weight="900">&#9733;</text></svg></span>Saga</button>
     </div>
   </div>
@@ -397,9 +423,15 @@ function exposed(g) {
 // that show at the same time, so a ship sent at the right moment always spends everything.
 // One lap of the fjord, exactly as the game plays it: the ship passes every lane once, in belt order,
 // and throws at the first shield in each lane when it carries its color. Returns the hits in order.
-function lapHits(g0, ice0, color, ammo, apply) {
+// glaciers: ice sheets over part of the wall. Axes cannot reach a covered shield until enough shields of the
+// glacier's color have fallen anywhere on the wall; then it calves away. gl = { cover: Map idx->i, color: [], left: [] }
+const glCopy = gl => gl ? { cover: gl.cover, color: gl.color, left: gl.left.slice() } : null;
+const glBlocked = (gl, idx) => !!gl && gl.cover.has(idx) && gl.left[gl.cover.get(idx)] > 0;
+const glCount = (gl, color) => { if (gl) gl.color.forEach((ch, i) => { if (ch === color && gl.left[i] > 0) gl.left[i]--; }); };
+function mkGl(list, C) { const gl = { cover: new Map(), color: [], left: [] }; (list || []).forEach((q, i) => { gl.color.push(q.color); gl.left.push(q.need); for (let r = q.r0; r <= q.r1; r++) for (let c = q.c0; c <= q.c1; c++) gl.cover.set(r * C + c, i); }); return gl; }
+function lapHits(g0, ice0, color, ammo, apply, gl0) {
   // a corner shield is first in two lanes, so even a dry run must remove what it hits: work on copies
-  const g = apply ? g0 : g0.map(r => r.slice()), ice = apply ? ice0 : new Set(ice0);
+  const g = apply ? g0 : g0.map(r => r.slice()), ice = apply ? ice0 : new Set(ice0), gl = apply ? gl0 : glCopy(gl0);
   const R = g.length, C = g[0].length, lanes = [];
   for (let c = 0; c < C; c++) lanes.push(['b', c]);
   for (let r = R - 1; r >= 0; r--) lanes.push(['r', r]);
@@ -415,28 +447,28 @@ function lapHits(g0, ice0, color, ammo, apply) {
   const hits = []; let axes = ammo;
   for (const lane of lanes) {
     if (axes <= 0) break;
-    const idx = first(lane); if (idx < 0 || g[Math.floor(idx / C)][idx % C] !== color) continue;
+    const idx = first(lane); if (idx < 0 || glBlocked(gl, idx) || g[Math.floor(idx / C)][idx % C] !== color) continue;
     if (ice.has(idx)) { axes--; hits.push({ idx, crack: true }); ice.delete(idx); if (axes <= 0) break; }
-    axes--; hits.push({ idx }); g[Math.floor(idx / C)][idx % C] = null;
+    axes--; hits.push({ idx }); g[Math.floor(idx / C)][idx % C] = null; glCount(gl, color);
   }
   return hits;
 }
 // Plan the harbor: ships are cut so that, sent in the planned order, each one spends everything in a single
 // lap. When no color can fill a whole ship, the planned ship comes home once and sails again later (a dock use).
-function planShips(grid, ice0, minAmmo, rng, docks, maxAmmo) {
+function planShips(grid, ice0, minAmmo, rng, docks, maxAmmo, gl0) {
   maxAmmo = Math.max(minAmmo + 4, maxAmmo || 0);
-  const g = grid.map(r => r.slice()), ice = new Set(ice0), C = g[0].length, list = [], waiting = [];
+  const g = grid.map(r => r.slice()), ice = new Set(ice0), gl = glCopy(gl0), C = g[0].length, list = [], waiting = [];
   const count = () => { let k = 0; g.forEach(r => r.forEach(v => { if (v) k++; })); return k; };
   const totalOf = ch => { let k = 0; g.forEach((row, r) => row.forEach((v, c) => { if (v === ch) k += ice.has(r * C + c) ? 2 : 1; })); return k; };
-  const send = (color, ammo) => { const hits = lapHits(g, ice, color, ammo, true); return hits.length; };
+  const send = (color, ammo) => { const hits = lapHits(g, ice, color, ammo, true, gl); return hits.length; };
   for (let guard = 0; count() > 0; guard++) {
     if (guard > 500) return null;
     const owed = {}; waiting.forEach(j => { owed[j.color] = (owed[j.color] || 0) + j.ammo; });
     // a docked ship sails again as soon as it can spend everything
-    const wi = waiting.findIndex(j => lapHits(g, ice, j.color, j.ammo).length >= j.ammo);
+    const wi = waiting.findIndex(j => lapHits(g, ice, j.color, j.ammo, false, gl).length >= j.ammo);
     if (wi >= 0) { const j = waiting.splice(wi, 1)[0]; send(j.color, j.ammo); continue; }
     const colors = [...new Set(g.flat().filter(Boolean))];
-    const opts = colors.map(color => ({ color, hits: lapHits(g, ice, color, 99).length, avail: totalOf(color) - (owed[color] || 0) })).filter(o => o.avail >= minAmmo);
+    const opts = colors.map(color => ({ color, hits: lapHits(g, ice, color, 99, false, gl).length, avail: totalOf(color) - (owed[color] || 0) })).filter(o => o.avail >= minAmmo);
     const cut = o => { let ammo = Math.min(o.avail, ri(rng, minAmmo, maxAmmo)); if (o.avail - ammo < minAmmo) ammo = o.avail; return ammo; };
     const full = opts.filter(o => o.hits >= minAmmo);
     if (full.length) {
@@ -447,7 +479,7 @@ function planShips(grid, ice0, minAmmo, rng, docks, maxAmmo) {
       continue;
     }
     // nothing can sail full: a docked ship with some targets goes round once more, else a new ship takes what it can
-    const partial = waiting.map((j, i) => ({ i, hits: lapHits(g, ice, j.color, j.ammo).length })).filter(x => x.hits > 0).sort((a, b) => b.hits - a.hits)[0];
+    const partial = waiting.map((j, i) => ({ i, hits: lapHits(g, ice, j.color, j.ammo, false, gl).length })).filter(x => x.hits > 0).sort((a, b) => b.hits - a.hits)[0];
     if (partial) { const j = waiting[partial.i]; j.ammo -= send(j.color, j.ammo); if (j.ammo <= 0) waiting.splice(partial.i, 1); continue; }
     const o = opts.filter(x => x.hits > 0).sort((a, b) => b.hits - a.hits)[0];
     if (!o) return null;
@@ -529,16 +561,16 @@ function composeScene(n, rng, W, H, colorsWanted, minAmmo, scale) {
 }
 
 // Can a careful raider finish? Sends any front ship whose color shows at least as many hits as it has axes.
-function solvable(grid, ice, cols, docks, maxTrips) {
+function solvable(grid, ice, cols, docks, maxTrips, gl0) {
   // a careful raider: sends a ship (from the harbor or a dock) only when every axe it carries can land,
   // and otherwise the one that lands the most, docking what is left. Fails if the docks overflow.
-  const g = grid.map(r => r.slice()), C = g[0].length, q = cols.map(c => c.slice()), iceLeft = new Set(ice), tray = [];
+  const g = grid.map(r => r.slice()), C = g[0].length, q = cols.map(c => c.slice()), iceLeft = new Set(ice), tray = [], gl = glCopy(gl0);
   let left = 0, trips = 0; g.forEach(r => r.forEach(ch => { if (ch) left++; }));
   const fire = ships => { for (const j of ships) {
-    const hits = lapHits(g, iceLeft, j.color, j.ammo, true); left -= hits.filter(h => !h.crack).length;
+    const hits = lapHits(g, iceLeft, j.color, j.ammo, true, gl); left -= hits.filter(h => !h.crack).length;
     j.ammo -= hits.length; if (j.ammo > 0) tray.push(j); } };
   while (left > 0) {
-    const hits = {}; [...new Set(g.flat().filter(Boolean))].forEach(ch => { hits[ch] = lapHits(g, iceLeft, ch, 99).length; });
+    const hits = {}; [...new Set(g.flat().filter(Boolean))].forEach(ch => { hits[ch] = lapHits(g, iceLeft, ch, 99, false, gl).length; });
     const opts = [];
     tray.forEach((j, t) => opts.push({ ships: [j], t, ammo: j.ammo, color: j.color }));
     q.forEach((col, k) => { if (!col.length) return; const j = col[0];
@@ -566,7 +598,7 @@ function difficulty(n) {
   const t = Math.min(1, n / 400), breather = n > 15 && n % 7 === 0, boss = n % 25 === 0;
   const m = boss ? 1.3 : breather ? .5 : 1;
   return {
-    colors: n < 3 ? 2 : Math.min(8, 3 + Math.floor(Math.sqrt(n) / 1.4)),
+    colors: n < 3 ? 2 : Math.min(8, 3 + Math.floor(Math.sqrt(n) / 1.1)), // more colors sooner (user: too easy, 2026-10-15)
     // raids 1-10: a small wall of big shields; from raid 11 the pictures are drawn at twice the detail on a wider wall
     // from raid 11 the wall is wider than tall, so it fills the phone from edge to edge and several pictures stand side by side
     // from raid 11 (2026-10-15): small shields, so one big picture at three times the detail fills a 36-wide wall; ships carry more axes to match
@@ -574,11 +606,12 @@ function difficulty(n) {
     height: (n < 11 ? Math.round(10 * (1 + n / 50)) : n < 150 ? 25 : n < 300 ? 26 : 27) + (boss ? 1 : 0),
     scale: n < 11 ? 1 : 3,
     minAmmo: n > 10 ? 12 : 5,
-    maxAmmo: n > 10 ? Math.min(50, 18 + Math.round(n * .3)) : 9, // bigger ships on later raids: harder to send at the right moment
+    maxAmmo: n > 10 ? Math.min(60, 20 + Math.round(n * .4)) : 9, // bigger ships on later raids: harder to send at the right moment
     lines: Math.min(6, 4 + Math.floor(n / 20)),
-    ice: Math.min(.35, (.04 + t * .3) * m),
-    mystery: Math.min(.7, (.12 + t * .5) * m),
-    links: Math.min(8, (1 + n * .05) * m),
+    ice: Math.min(.4, (.06 + t * .34) * m),
+    mystery: Math.min(.8, (.2 + t * .6) * m),
+    links: Math.min(10, (2 + n * .07) * m),
+    glaciers: n < 20 ? 0 : n < 60 ? 1 : n < 150 ? 2 : 3, // ice sheets over the wall, each held shut by a count of one color
     tide: Math.max(4, Math.round(9 - t * 4 - (boss ? 1 : 0))),
     scramble: Math.min(4, 1.5 + n * .15),
     breather, boss
@@ -609,11 +642,15 @@ function buildLevel(n, fails, tight) {
   // Scramble the helpful order; each failure scrambles it less. A scramble is only kept if a careful
   // raider can still finish. If no scramble works, relief steps thin the ice and finally shrink the ships.
   let ice, order, cols, attempts = 0, solved = false, need = 0;
-  for (let relief = 0; relief < 5 && !solved; relief++) {
-    const iceN = n >= 6 ? Math.round(cells.length * D.ice * obsScale * [1, .5, 0, 0, 0][relief]) : 0;
+  for (let relief = 0; relief < 7 && !solved; relief++) {
+    if (relief === 3 || relief === 4) { // fewer colors before smaller ships: the rarest color melts into the commonest, so every ship still carries a full load
+      const cnt = {}; grid.forEach(r => r.forEach(ch => { if (ch) cnt[ch] = (cnt[ch] || 0) + 1; })); const ks = Object.keys(cnt).sort((a, b) => cnt[a] - cnt[b]);
+      if (ks.length > 2) grid = grid.map(r => r.map(ch => ch === ks[0] ? ks[ks.length - 1] : ch));
+    }
+    const iceN = n >= 6 ? Math.round(cells.length * D.ice * obsScale * [1, .5, 0, 0, 0, 0, 0][relief]) : 0, tiny = relief >= 5;
     ice = new Set(cells.slice(0, iceN));
     order = null;
-    for (let seed = 0; seed < 6 && !order; seed++) order = planShips(grid, ice, relief >= 3 ? (relief === 3 ? 10 : 5) : D.minAmmo, rngFrom(n * 9973 + 17 + relief * 11 + seed), relief >= 3 ? 99 : docks, relief >= 3 ? (relief === 3 ? 20 : 9) : D.maxAmmo); // last resorts: ships of 10-20, then the tiny 5-9 ships
+    for (let seed = 0; seed < (relief >= 3 ? 16 : 6) && !order; seed++) order = planShips(grid, ice, tiny ? (relief === 5 ? 10 : 5) : D.minAmmo, rngFrom(n * 9973 + 17 + relief * 11 + seed), tiny ? 99 : docks, tiny ? (relief === 5 ? 20 : 9) : relief >= 3 ? D.minAmmo + 8 : D.maxAmmo); // with fewer colors, smaller full ships pack better // last resorts: ships of 10-20, then the tiny 5-9 ships
     if (!order) continue;
     let frac = D.scramble * Math.max(0, 1 - ease / 4);
     for (let attempt = 0; attempt < 12; attempt++, frac *= .6, attempts++) {
@@ -627,6 +664,21 @@ function buildLevel(n, fails, tight) {
       if ((need = solvable(grid, ice, cols, docks))) { solved = true; break; }
     }
   }
+  // glaciers: from raid 20, an ice sheet over part of the picture that only calves away once enough shields of its color have fallen
+  const glaciers = [], R_ = grid.length, glN = Math.round(D.glaciers * obsScale);
+  for (let tries = 0; tries < 40 && glaciers.length < glN; tries++) {
+    const h = ri(orng, 4, 7), w = ri(orng, 6, 10), r0 = ri(orng, 0, R_ - h), c0 = ri(orng, 0, C - w), r1 = r0 + h - 1, c1 = c0 + w - 1;
+    if (glaciers.some(q => !(r1 < q.r0 - 1 || r0 > q.r1 + 1 || c1 < q.c0 - 1 || c0 > q.c1 + 1))) continue;
+    let filled = 0; for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (grid[r][c]) filled++;
+    if (filled < w * h * .6) continue;
+    const q = { r0, c0, r1, c1 }, inside = idx => glaciers.concat([q]).some(o => { const r = Math.floor(idx / C), c = idx % C; return r >= o.r0 && r <= o.r1 && c >= o.c0 && c <= o.c1; });
+    const outside = {}; grid.forEach((row, r) => row.forEach((ch, c) => { if (ch && !inside(r * C + c)) outside[ch] = (outside[ch] || 0) + 1; }));
+    const key = Object.keys(outside).sort((a, b) => outside[b] - outside[a])[0]; if (!key || outside[key] < 30) continue;
+    q.color = key; q.need = Math.max(12, Math.min(60, Math.round(outside[key] * .3)));
+    const test = glaciers.concat([q]), n2 = solvable(grid, ice, cols, docks, null, mkGl(test, C));
+    if (n2) { glaciers.push(q); need = n2; }
+  }
+  const gl = mkGl(glaciers, C);
   // mystery jellies: from level 9, color hidden until launched
   const mysteryN = n >= 9 ? Math.round(Math.max(0, order.length - K) * D.mystery * obsScale) : 0;
   const deep = order.slice(K).sort(() => orng() - .5);
@@ -634,7 +686,7 @@ function buildLevel(n, fails, tight) {
   // linked jellies: from level 12, two in a row that must launch together
   const linkN = n >= 12 ? Math.round(D.links * obsScale) : 0;
   let linkId = 1;
-  for (let tries = 0; tries < 120 && linkId <= linkN; tries++) {
+  for (let tries = 0; tries < 300 && linkId <= linkN; tries++) {
     const col = cols[ri(orng, 0, K - 1)]; if (col.length < 2) continue;
     if (n >= 18 && K > 1 && orng() < .5) { // lashed across two lines: the partner may sit deeper in its line, so that line must be worked first
       const k2 = (cols.indexOf(col) + ri(orng, 1, K - 1)) % K, col2 = cols[k2]; if (!col2.length) continue;
@@ -646,22 +698,27 @@ function buildLevel(n, fails, tight) {
     if (col[i].link || col[i + 1].link || col[i].color !== col[i + 1].color || col[i].hidden || col[i + 1].hidden) continue;
     col[i].link = col[i + 1].link = linkId++;
   }
-  if (linkId > 1) { const n2 = solvable(grid, ice, cols, docks); if (!n2) cols.forEach(c => c.forEach(j => { j.link = null; j.cross = false; })); else need = n2; }
+  if (linkId > 1) { // keep as many lashed pairs as a careful raider can still beat, dropping the last-made pair at a time
+    for (let n2; !(n2 = solvable(grid, ice, cols, docks, null, gl)) || (need = n2, false);) {
+      const ids = cols.flat().map(j => j.link).filter(Boolean); if (!ids.length) break;
+      const drop = Math.max(...ids); cols.forEach(c => c.forEach(j => { if (j.link === drop) { j.link = null; j.cross = false; } }));
+    }
+  }
   const notes = [];
   if (ease && n >= 6) notes.push(obsScale ? 'fewer obstacles' : 'no obstacles');
   if (ease) notes.push(ease >= 4 ? 'ships lined up in the best order' : 'a friendlier ship order');
   const bombs = 1 + Math.min(ease, 3), slotBoosts = 0;
   if (ease) notes.push(`${bombs} free hammers`);
-  return { n, name: art.name, grid, ice, cols, reinf, attempts, traySlots: docks, bombs, slotBoosts, notes, ease };
+  return { n, name: art.name, grid, ice, cols, reinf, attempts, traySlots: docks, bombs, slotBoosts, notes, ease, glaciers };
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.041.10.15.26.0933';
+const BUILD = 'VR1.042.10.15.26.1158';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
 // ---------- the saga: silver, chests, streaks, achievements and stats (2026-10-13) ----------
-const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons', 'runes', 'bestTier', 'chapters', 'tokensBought'];
+const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons', 'runes', 'bestTier', 'chapters', 'tokensBought', 'shafts', 'deeds', 'ore'];
 if (!save.saga) {
   // first run with the saga: raids already beaten count as won and reached, but never as first-try wins
   const st = {}; STAT_KEYS.forEach(k => st[k] = 0); st.wins = st.reach = Math.max(0, save.level - 1);
@@ -739,6 +796,8 @@ const ACH = [
   { id: 'builder', name: 'Master Builder', sym: '\u2302', desc: 'Halls of the longhouse finished', tiers: [1, 2, 3, 4, 5, 6], key: 'halls', silver: [100, 200, 400, 800, 1600, 5000] },
   { id: 'fisher', name: 'Barrel Thumper', sym: '\u25cb', desc: 'Barrel taps in the Harbor', tiers: [100, 1000, 10000], key: 'taps', silver: [50, 500, 5000] },
   { id: 'harbor', name: 'Harbor Master', sym: '\u2393', desc: 'Harbor upgrades bought', tiers: [10, 50, 150], key: 'harbor', chest: ['iron', 'silver', 'gold'] },
+  { id: 'delver', name: 'Deep Delver', sym: '\u2693', desc: 'Mine shafts dug', tiers: [3, 6, 10], key: 'shafts', chest: ['iron', 'silver', 'gold'] },
+  { id: 'deeds', name: 'Mine Deeds', sym: '\u2756', desc: 'Mines sold for a deed', tiers: [1, 3, 10], key: 'deeds', chest: ['silver', 'gold', 'gold'] },
   { id: 'rich', name: 'Rich Harbor', sym: '\u25c9', desc: 'Silver earned', tiers: [10000, 100000, 1000000], key: 'silverAll', chest: ['silver', 'gold', 'gold'] },
 ];
 const TIER_NAME = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
@@ -799,6 +858,7 @@ byId('homePlay').onclick = () => { unlockAudio(); playHome(); };
 byId('hHome').onclick = () => { unlockAudio(); playHome(); };
 byId('hLH').onclick = () => { homeOpen = true; byId('home').hidden = true; openLH('home'); };
 byId('hHB').onclick = () => { homeOpen = true; byId('home').hidden = true; openHB(); };
+byId('hMN').onclick = () => { homeOpen = true; byId('home').hidden = true; openMN(); };
 byId('hSaga').onclick = () => showCard('saga');
 byId('hRaids').onclick = () => showCard('levels');
 byId('hSet').onclick = () => showCard('settings');
@@ -808,7 +868,7 @@ function startLevel(n) {
   $('home').hidden = true;
   const L = buildLevel(n, save.fails[n] || 0, sixthSail());
   let total = 0; L.grid.forEach(r => r.forEach(c => { if (c) total++; }));
-  S = { n, name: L.name, grid: L.grid, ice: L.ice, reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
+  S = { n, name: L.name, grid: L.grid, ice: L.ice, glacList: L.glaciers, glac: mkGl(L.glaciers, L.grid[0].length), melts: [], reinf: L.reinf, R: L.grid.length, C: L.grid[0].length,
     cols: L.cols.map(col => col.map(j => ({ ...j, id: uid++, s: 0 }))),
     tray: new Array(L.traySlots).fill(null), belt: [], shots: [], parts: [], dying: [],
     bombs: L.bombs + (hallsDone() >= 4 && n % 3 === 0 ? 1 : 0) + (boonOn('wall') ? 1 : 0), slotBoosts: LH.tokens > 0 ? 1 : 0, catapults: 1 + (hallsDone() >= 3 && n % 3 === 0 ? 1 : 0), total, left: total, mode: 'play', launched: 0, ease: L.ease, endT: 0, fast: 1,
@@ -820,6 +880,7 @@ function startLevel(n) {
   toast((L.notes.length ? 'Easier this time: ' + L.notes.join(', ') : `${difficulty(n).boss ? 'Great raid' : 'Raid'} ${n}: the ${L.name}`) + (sixthSail() ? ' \u00b7 Sixth Sail: 6 ships may sail' : '') + (S.boon.h || S.boon.c ? ' \u00b7 Harbor boon: ' + [S.boon.h ? `+${S.boon.h} hammer` : '', S.boon.c ? `+${S.boon.c} catapult` : ''].filter(Boolean).join(', ') : ''));
   const fresh = [];
   if (L.ice.size && !save.seen.ice) fresh.push('ice');
+  if (L.glaciers.length && !save.seen.glacier) fresh.push('glacier');
   if (L.cols.flat().some(j => j.hidden) && !save.seen.mystery) fresh.push('mystery');
   if (L.cols.flat().some(j => j.link) && !save.seen.link) fresh.push('link');
   if (fresh.length && save.seenHelp) { S.mode = 'paused'; showCard('intro', fresh); }
@@ -888,6 +949,9 @@ function queueItemPos(k, i) {
 }
 
 // ---------- gameplay ----------
+// a shield of this color fell: every glacier held shut by that color loosens, and calves away at zero
+function fell(color) { if (!S.glac || !S.glac.color.length) return; glCount(S.glac, color); checkMelt(); }
+function checkMelt() { if (!S.glac) return; S.glac.left.forEach((l, i) => { if (l <= 0 && !S.melts.some(m => m.i === i) && !S.glacList[i].gone) { S.glacList[i].gone = true; S.melts.push({ i, t: 0 }); sfx('crack'); buzz(); toast('The glacier calves away!'); } }); }
 function firstInLane(lane) {
   const { grid, R, C } = S;
   if (lane.side === 'b') { for (let r = R - 1; r >= 0; r--) if (grid[r][lane.i]) return [r, lane.i]; }
@@ -942,7 +1006,7 @@ function packTray() {
 }
 const SPENT = { spent: true }; // a dock that has been used once is wrecked for the rest of the raid
 const trayShips = () => S.tray.filter(j => j && !j.spent);
-const showing = (color, need) => lapHits(S.grid, S.ice, color, need).length >= need; // one lap, exactly as the ship would sail it
+const showing = (color, need) => lapHits(S.grid, S.ice, color, need, false, S.glac).length >= need; // one lap, exactly as the ship would sail it
 function tapTray(i) {
   const j = S.tray[i]; if (!j || j.spent || j.park) return;
   // a docked ship can always sail again (the user's rule, 2026-10-13, replacing the full-load rule)
@@ -974,9 +1038,9 @@ function hitCube(j, r, c) {
     // frozen shield: the first axe shatters the ice, and a second axe (if the ship has one) follows at once
     S.ice.delete(idx); sfx('crack');
     for (let i = 0; i < 8; i++) { const a = Math.random() * 6.28, v = 40 + Math.random() * 100; S.parts.push({ x: tx, y: ty, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, life: .45, color: '#d8f6ff', size: 2 + Math.random() * 3 }); }
-    if (j.ammo > 0) { S.shots.push({ fx, fy, tx, ty, t: -.3, color }); j.ammo--; S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: -.3 }); setTimeout(() => sfx('pop'), 300); STATS.axes++; STATS.shields++; }
+    if (j.ammo > 0) { S.shots.push({ fx, fy, tx, ty, t: -.3, color }); j.ammo--; S.grid[r][c] = null; S.left--; fell(color); S.dying.push({ r, c, color, t: -.3 }); setTimeout(() => sfx('pop'), 300); STATS.axes++; STATS.shields++; }
   } else {
-    S.grid[r][c] = null; S.left--; STATS.shields++;
+    S.grid[r][c] = null; S.left--; STATS.shields++; fell(color);
     S.dying.push({ r, c, color, t: 0 });
     sfx('pop');
   }
@@ -1020,7 +1084,7 @@ function bomb(r0, c0) {
   for (let r = r0 - 1; r <= r0 + 1; r++) for (let c = c0 - 1; c <= c0 + 1; c++) {
     if (r < 0 || c < 0 || r >= S.R || c >= S.C || !S.grid[r][c]) continue;
     const color = S.grid[r][c], idx = r * S.C + c; hit[color] = (hit[color] || 0) + (S.ice.has(idx) ? 2 : 1);
-    S.ice.delete(idx); S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: 0 });
+    S.ice.delete(idx); S.grid[r][c] = null; S.left--; S.dying.push({ r, c, color, t: 0 }); fell(color);
   }
   if (!Object.keys(hit).length) return false;
   for (const k in hit) removeAmmo(k, hit[k]);
@@ -1036,11 +1100,11 @@ function catapult(j) {
   const inTray = S.tray.indexOf(j), col = S.cols.find(c => c.includes(j));
   if (lk) { if (inTray >= 0) { const m = S.tray.find(o => o && o !== j && o.link === lk); if (m) ships.push(m); } else if (col) { const m = S.cols.flat().find(o => o !== j && o.link === lk); if (m) ships.push(m); } }
   let n = ships.reduce((a, o) => a + o.ammo, 0);
-  const hits = lapHits(S.grid, S.ice, j.color, n, true); // outermost shields of that color go first (ice counts two)
+  const hits = lapHits(S.grid, S.ice, j.color, n, true, S.glac); // outermost shields of that color go first (ice counts two)
   const gone = new Set();
-  hits.forEach(h => { if (!h.crack) { const r = Math.floor(h.idx / S.C), c = h.idx % S.C; gone.add(h.idx); S.dying.push({ r, c, color: j.color, t: 0 }); } });
+  hits.forEach(h => { if (!h.crack) { const r = Math.floor(h.idx / S.C), c = h.idx % S.C; gone.add(h.idx); S.dying.push({ r, c, color: j.color, t: 0 }); } }); checkMelt();
   n -= hits.length;
-  for (let r = 0; r < S.R && n > 0; r++) for (let c = 0; c < S.C && n > 0; c++) { const idx = r * S.C + c; if (S.grid[r][c] === j.color && !gone.has(idx)) { n -= S.ice.has(idx) ? 2 : 1; S.ice.delete(idx); S.grid[r][c] = null; gone.add(idx); S.dying.push({ r, c, color: j.color, t: 0 }); } }
+  for (let r = 0; r < S.R && n > 0; r++) for (let c = 0; c < S.C && n > 0; c++) { const idx = r * S.C + c; if (S.grid[r][c] === j.color && !gone.has(idx)) { n -= S.ice.has(idx) ? 2 : 1; S.ice.delete(idx); S.grid[r][c] = null; gone.add(idx); S.dying.push({ r, c, color: j.color, t: 0 }); fell(j.color); } }
   S.left -= gone.size;
   ships.forEach(o => { const ti = S.tray.indexOf(o); if (ti >= 0) S.tray[ti] = null; else { const c = S.cols.find(c => c.includes(o)); if (c) { c.splice(c.indexOf(o), 1); c.slide = (c.slide || 0) + 1; } } });
   if (!col) packTray();
@@ -1120,7 +1184,7 @@ function update(dt) {
       for (const lane of G.lanes) {
         if (lane.s <= prev || lane.s > j.s) continue;
         const hit = firstInLane(lane);
-        if (hit && j.ammo > 0 && S.grid[hit[0]][hit[1]] === j.color) { hitCube(j, hit[0], hit[1]); if (j.done) break; }
+        if (hit && j.ammo > 0 && S.grid[hit[0]][hit[1]] === j.color && !glBlocked(S.glac, hit[0] * S.C + hit[1])) { hitCube(j, hit[0], hit[1]); if (j.done) break; }
       }
       if (!j.done && j.s >= G.len) finishLap(j);
       if (S.mode === 'lost') break;
@@ -1138,6 +1202,7 @@ function update(dt) {
       for (let i = 0; i < 7; i++) { const a = Math.random() * 6.28, v = 40 + Math.random() * 120; S.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 40, life: .5, color: PAL[d.color], size: 2 + Math.random() * 3 }); } }
     return d.t < .3;
   });
+  S.melts = S.melts.filter(m => (m.t += dt) < .7);
   S.parts = S.parts.filter(p => { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt; return p.life > 0; });
   if (playing && S.left === 0 && !S.shots.length) win();
   else if (S.mode === 'play') checkStuck();
@@ -1306,6 +1371,21 @@ function draw() {
     else { ctx.fillStyle = 'rgba(0,0,0,.08)'; ctx.beginPath(); ctx.arc(x + cell / 2, y + cell / 2, cell * .1, 0, 6.3); ctx.fill(); }
   }
   for (const d of S.dying) { const k = Math.max(0, 1 - Math.max(0, d.t) / .3); drawShield(bx + d.c * cell, by + d.r * cell, cell, d.color, .4 + k * .7); }
+  // glaciers: an ice sheet with a badge saying which color, and how many, still hold it
+  S.glacList.forEach((q, i) => {
+    const left = S.glac.left[i], melt = S.melts.find(m => m.i === i); if (left <= 0 && !melt) return;
+    const k = melt ? 1 - melt.t / .7 : 1, x0 = bx + q.c0 * cell - cell * .15, y0 = by + q.r0 * cell - cell * .15, w = (q.c1 - q.c0 + 1) * cell + cell * .3, h = (q.r1 - q.r0 + 1) * cell + cell * .3;
+    ctx.save(); ctx.globalAlpha = k; ctx.translate(x0 + w / 2, y0 + h / 2); ctx.scale(1 + (1 - k) * .15, 1 + (1 - k) * .15); ctx.translate(-x0 - w / 2, -y0 - h / 2);
+    rr(x0, y0, w, h, cell * .5); ctx.fillStyle = 'rgba(214,240,255,.86)'; ctx.fill(); ctx.lineWidth = Math.max(2, cell * .22); ctx.strokeStyle = '#eafbff'; ctx.stroke(); ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(80,140,180,.6)'; ctx.stroke();
+    ctx.strokeStyle = 'rgba(90,150,190,.55)'; ctx.lineWidth = Math.max(1, cell * .12); ctx.beginPath();
+    ctx.moveTo(x0 + w * .12, y0 + h * .2); ctx.lineTo(x0 + w * .3, y0 + h * .55); ctx.lineTo(x0 + w * .22, y0 + h * .85); ctx.moveTo(x0 + w * .7, y0 + h * .1); ctx.lineTo(x0 + w * .62, y0 + h * .4); ctx.lineTo(x0 + w * .85, y0 + h * .7); ctx.stroke();
+    const cx = x0 + w / 2, cy = y0 + h / 2, br = Math.min(h * .36, Math.max(13, cell * 1.6)), fs = Math.round(br * .95);
+    ctx.beginPath(); ctx.arc(cx, cy, br, 0, 6.3); ctx.fillStyle = PAL[q.color]; ctx.fill(); ctx.lineWidth = Math.max(2, br * .14); ctx.strokeStyle = '#f3e9d2'; ctx.stroke();
+    if (symOn()) drawSym(cx - br * 1.3, cy, br * .45, q.color, '#fff', 'rgba(13,23,38,.8)');
+    ctx.font = `${fs}px ${DISPLAY_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = Math.max(2, fs * .2); ctx.strokeStyle = 'rgba(13,23,38,.85)'; ctx.lineJoin = 'round';
+    ctx.strokeText(Math.max(0, left), cx, cy + 1); ctx.fillStyle = '#fff'; ctx.fillText(Math.max(0, left), cx, cy + 1);
+    ctx.restore();
+  });
   // bomb targeting hint
   if (S.mode === 'bomb') { ctx.strokeStyle = 'rgba(201,146,42,' + (.6 + Math.sin(t * 8) * .3) + ')'; ctx.lineWidth = 3; rr(bx - cell * .2, by - cell * .2, bw + cell * .4, bh + cell * .4, cell * .35); ctx.stroke(); }
   // shots
@@ -1572,6 +1652,14 @@ function showCard(kind, extra) {
       <li><span>=</span><div><b>Stays:</b> chests, dock tokens, Mead Horns, boons, achievements, stats and your raids.</div></li></ul>
       <button class="cta" id="runeGo">Raise runestone ${SAGA.runes + 1}</button><button class="link" id="runeNo">Not yet</button>`;
     setTimeout(() => { $('runeGo').onclick = raiseRune; $('runeNo').onclick = () => { $('ov').hidden = true; }; });
+  } else if (kind === 'mnHelp') {
+    html = `<h2>The Silver Mine</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">An idle mine. Ore comes up the shafts, the hoist lifts it, the carts sell it for silver.</p><ul>
+      <li><span>1</span><div><b>Tap Dig</b> on a shaft and the miners bring up ore. Tap Haul to lift it, tap Sell to turn it into silver.</div></li>
+      <li><span>2</span><div><b>Hire a foreman</b> for a shaft, the hoist or the carts, and that part runs on its own, even while the app is closed.</div></li>
+      <li><span>3</span><div><b>Upgrade</b> each part so it works faster, and dig new shafts: the deeper ones are richer.</div></li>
+      <li><span>4</span><div><b>Sell the mine</b> once it has earned enough. You get a deed, start a fresh mine, and every deed makes all your mines dig half again as fast, forever.</div></li></ul>
+      <button class="cta" id="mnOk">To the mine</button>`;
+    setTimeout(() => { const b = $('mnOk'); if (b) b.onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'hbHelp') {
     html = `<h2>The Harbor</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">A tap-to-earn game. Silver is the money. Tap the barrel to earn some, build the harbor so it earns on its own, and spend it on help for your raids.</p><ul>
       <li><span>1</span><div><b>Tap the barrel</b> at the bottom for silver. Quick taps build a catch streak: taps pay up to triple and the buildings work double while it lasts.</div></li>
@@ -1594,7 +1682,7 @@ function showCard(kind, extra) {
         <h3>Time</h3>${r('Raids beaten under par', st.swift)}${r('Own bests beaten', st.ownBest)}${r('Time raiding', fmtT(st.time))}
         <h3>Fighting</h3>${r('Axes thrown', st.axes)}${r('Shields broken', st.shields)}${r('Ships sailed', st.sailed)}${r('Lashed pairs sailed', Math.floor(st.lashed / 2))}${r('Full-load dock sailings', st.fullLoad)}${r('Hammers used', st.hammers)}${r('Catapults used', st.catapults)}
         <h3>Treasure</h3>${r('Silver in the purse', SAGA.silver)}${r('Silver earned all time', st.silverAll)}${r('Chests', Object.keys(CHEST_NAME).map(k => `${SAGA.chests[k] || 0} ${k}`).join(', '))}
-        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Runestones raised', st.runes)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}
+        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Runestones raised', st.runes)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}${r('Ore sold', fmtN(st.ore))}${r('Mine deeds', st.deeds)}
         ${rec ? `<h3>Raid ${S.n}</h3>${r('Tries', rec.t)}${r('Wins', rec.w)}${r('Best time', rec.b ? fmtT(rec.b) : '\u2014')}${r('Par', fmtT(S.par))}${r('Under par', rec.s ? 'Yes \u2605' : 'Not yet')}${r('Hammers / catapults used', rec.h + ' / ' + rec.c)}` : ''}
         <p style="font-size:12px;margin-top:6px">Counting since ${SAGA.since}. Raids won before then count as wins, not as first tries.</p>`;
     }
@@ -1611,9 +1699,9 @@ function showCard(kind, extra) {
     const txt = { ice: ['Frozen shields', 'A shield rimed with ice needs one extra axe from its color. The first axe cracks the ice, the next one smashes the shield.'],
       mystery: ['Fogbound ships', 'A ship in fog hides its sail color until it reaches the front of its line, so you cannot plan far ahead around it.'],
       link: ['Lashed ships', 'Two ships roped together always launch as a pair, so the fjord needs room for both. Later the rope can cross two lines: then both ships must be at the front of their lines before either can sail.'],
+      glacier: ['Glaciers', 'An ice sheet covers part of the wall and swallows every axe thrown at it. Break the number of shields shown on it, in its color, anywhere on the wall, and it calves away.'],
       reinf: ['The tide', 'Every eighth ship you send, the tide turns and one harbor line is reshuffled, so the ship you were saving may not be where you left it.'] };
     html = `<h2>New on raid ${n}</h2><ul>${extra.map(k => `<li><span>!</span><div><b>${txt[k][0]}.</b> ${txt[k][1]}</div></li>`).join('')}</ul><button class="cta" id="go">Got it</button>`;
-    extra.forEach(k => { save.seen[k] = true; }); persist();
   } else if (kind === 'chapter') {
     const k = SAGA.chapter + 1, T = chapTasks(k), done = chapDone(k);
     html = `<h2>Chapter ${k}: ${chapName(k)}</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px;font-style:italic">${chapBeat(k)}</p><p style="margin:0 0 8px;font-size:14px">The jarl's tasks before raids ${(k - 1) * 10 + 1} to ${k * 10} open:</p>
@@ -1639,7 +1727,7 @@ function showCard(kind, extra) {
   const go = $('go'), again = $('again'), cancel = $('cancel');
   if (go) go.onclick = () => {
     unlockAudio(); $('ov').hidden = true; save.seenHelp = true; persist();
-    if (kind === 'intro') { S.mode = 'play'; return; }
+    if (kind === 'intro') { (extra || []).forEach(k => { save.seen[k] = true; }); persist(); S.mode = 'play'; return; } // seen only once read, so the card is not lost behind the home screen at boot
     if (kind === 'win') startLevel(n + 1);
     else if (kind === 'restart') { if (S.launched) { save.fails[n] = (save.fails[n] || 0) + 1; STATS.retreats++; STATS.time += S.t; persist(); } startLevel(n); }
     else startLevel(kind === 'help' && S ? S.n : n);
@@ -2001,11 +2089,87 @@ function hbRender(light) {
 }
 let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() }; // banked while the game was closed; the Harbor screen tells the tale
 
-window.JB = { get S() { return S; }, showHome, playHome, placePending, raiseRune, runeReady, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
+// ---------- the Silver Mine: an idle mine in the mountain. Shafts dig ore, the hoist lifts it, the carts sell it. Foremen run a part on their own; selling the mine earns a deed ----------
+if (!SAGA.mn) SAGA.mn = { s: [{ l: 1, f: false, ore: 0 }], h: { l: 1, f: false }, c: { l: 1, f: false }, sur: 0, deeds: 0, earned: 0, last: Date.now() };
+const MN = SAGA.mn, MN_MAX_SHAFTS = 12;
+const mnMult = () => (1 + .5 * MN.deeds) * runeMult();
+const shaftRate = i => Math.round(.25 * Math.pow(2.2, i) * MN.s[i].l * mnMult() * 100) / 100; // ore a second with a foreman
+const hoistRate = () => Math.round(1 * MN.h.l * mnMult() * 100) / 100;
+const cartRate = () => Math.round(1 * MN.c.l * mnMult() * 100) / 100;
+const shaftUpCost = i => Math.round(30 * Math.pow(2.2, i) * Math.pow(1.14, MN.s[i].l - 1));
+const hoistUpCost = () => Math.round(45 * Math.pow(1.14, MN.h.l - 1) * Math.pow(1.6, MN.s.length - 1));
+const cartUpCost = () => Math.round(45 * Math.pow(1.14, MN.c.l - 1) * Math.pow(1.6, MN.s.length - 1));
+const foremanCost = i => Math.round(i === 'h' ? 600 * Math.pow(1.6, MN.s.length - 1) : i === 'c' ? 600 * Math.pow(1.6, MN.s.length - 1) : 350 * Math.pow(2.2, i));
+const newShaftCost = () => Math.round(250 * Math.pow(3.6, MN.s.length - 1));
+const deedNeed = () => Math.round(20000 * Math.pow(3, MN.deeds));
+let mnAcc = 0, mnTimer = 0, mnTapFx = {};
+const mnLive = () => !$('mn').hidden;
+// one slice of time for the parts that have a foreman; manual taps call the same movers with a fixed load
+const mnDig = (i, amt) => { MN.s[i].ore += amt; };
+function mnHaul(amt) { let left = amt, moved = 0; for (let i = MN.s.length - 1; i >= 0 && left > 0; i--) { const t = Math.min(left, MN.s[i].ore); MN.s[i].ore -= t; MN.sur += t; left -= t; moved += t; } return moved; }
+function mnSell(amt) { const t = Math.min(amt, MN.sur); MN.sur -= t; mnAcc += t; const got = Math.floor(mnAcc); mnAcc -= got; if (got) { giveSilver(got); MN.earned += got; STATS.ore += got; } return got; }
+function mnStep(dt, k = 1) { let got = 0; MN.s.forEach((sh, i) => { if (sh.f) mnDig(i, shaftRate(i) * dt * k); }); if (MN.h.f) mnHaul(hoistRate() * dt * k); if (MN.c.f) got += mnSell(cartRate() * dt * k); return got; }
+// bank what the foremen did since the last settle; away time counts up to the harbor's cap, run in slices so the ore flows shaft to hoist to carts
+function mnSettle() {
+  const now = Date.now(), dt = Math.min(hbCap(), Math.max(0, now - (MN.last || now))) / 1000; MN.last = now; if (!dt) return 0;
+  const slices = dt > 30 ? 60 : 1, k = mnLive() ? 1 : hbAway(); let got = 0; for (let i = 0; i < slices; i++) got += mnStep(dt / slices, k); return got; // away from the mine the foremen work at the harbor's away rate
+}
+let mnPending = { away: Date.now() - (MN.last || Date.now()), got: mnSettle() };
+function openMN() {
+  $('ov').hidden = true;
+  if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused' && S.mode !== 'home') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
+  const away = Math.max(mnPending.away, Date.now() - (MN.last || Date.now())), got = mnSettle() + mnPending.got; mnPending = { away: 0, got: 0 };
+  if (got > 0 && away > 60e3) { toast(`While you were away the carts sold ${fmtN(got)} silver of ore.`); sfx('win'); }
+  buildTabs($('mnTabs'), 'mn'); $('mn').hidden = false; mnRender(); clearInterval(mnTimer); mnTimer = setInterval(() => { if ($('mn').hidden) { clearInterval(mnTimer); return; } mnSettle(); mnRender(true); }, 250);
+  if (!save.seen.mn) { save.seen.mn = true; persist(); showCard('mnHelp'); }
+}
+function closeMN() { mnSettle(); persist(); clearInterval(mnTimer); $('mn').hidden = true; if (homeOpen) { homeOpen = false; showHome(); return; } if (S && S.mode === 'paused') { S.mode = S.resumeMode || 'play'; S.resumeMode = null; } }
+$('mnClose').onclick = closeMN;
+function mnPay(c) { if (SAGA.silver < c) { buzz(); return false; } mnSettle(); SAGA.silver -= c; sfx('launch'); return true; }
+function mnAct(a, i) {
+  if (a === 'dig') { mnDig(i, Math.max(1, shaftRate(i) * 6)); tap(); }
+  else if (a === 'haul') { if (!mnHaul(Math.max(1, hoistRate() * 6))) buzz(); else tap(); }
+  else if (a === 'sell') { if (!mnSell(Math.max(1, cartRate() * 6))) buzz(); else tap(); }
+  else if (a === 'up') { if (mnPay(shaftUpCost(i))) MN.s[i].l++; }
+  else if (a === 'hup') { if (mnPay(hoistUpCost())) MN.h.l++; }
+  else if (a === 'cup') { if (mnPay(cartUpCost())) MN.c.l++; }
+  else if (a === 'fm') { if (mnPay(foremanCost(i))) MN.s[i].f = true; }
+  else if (a === 'hfm') { if (mnPay(foremanCost('h'))) MN.h.f = true; }
+  else if (a === 'cfm') { if (mnPay(foremanCost('c'))) MN.c.f = true; }
+  else if (a === 'new') { if (MN.s.length < MN_MAX_SHAFTS && mnPay(newShaftCost())) { MN.s.push({ l: 1, f: false, ore: 0 }); STATS.shafts = Math.max(STATS.shafts, MN.s.length); } }
+  else if (a === 'deed') { if (MN.earned < deedNeed()) { buzz(); return; } MN.deeds++; STATS.deeds++; giveChest('gold'); SAGA.mn.s = [{ l: 1, f: false, ore: 0 }]; MN.s = SAGA.mn.s; MN.h = { l: 1, f: false }; MN.c = { l: 1, f: false }; MN.sur = 0; MN.earned = 0; SAGA.mn.h = MN.h; SAGA.mn.c = MN.c; sfx('win'); buzz(); toast(`Deed ${MN.deeds}: every mine digs ${50 * MN.deeds}% faster from now on. A gold chest waits in the Longhouse.`); }
+  persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); mnRender();
+}
+function mnRender(light) {
+  $('mnSilver').textContent = `${fmtN(SAGA.silver)} silver`; const dc = $('mnDeeds'); dc.hidden = !MN.deeds; dc.textContent = `❖ ${MN.deeds} deed${MN.deeds > 1 ? 's' : ''} · x${(1 + .5 * MN.deeds).toFixed(1)}`;
+  const f1 = n => n >= 100 ? fmtN(n) : n >= 10 ? n.toFixed(1) : n.toFixed(2);
+  const list = $('mnList');
+  if (light && list.children.length) {
+    list.querySelectorAll('[data-ore]').forEach(e => { const k = e.dataset.ore; e.textContent = fmtN(k === 'sur' ? MN.sur : MN.s[+k].ore); });
+    list.querySelectorAll('[data-cost]').forEach(b => { b.disabled = SAGA.silver < +b.dataset.cost; });
+    const pb = list.querySelector('.mnbar i'); if (pb) pb.style.width = Math.min(100, MN.earned / deedNeed() * 100) + '%';
+    const ps = $('mnProg'); if (ps) ps.textContent = `${fmtN(MN.earned)} of ${fmtN(deedNeed())} silver earned`;
+    const db = $('mnDeed'); if (db) db.disabled = MN.earned < deedNeed();
+    return;
+  }
+  const btn = (a, i, label, cost) => `<button class="boost" data-a="${a}" data-i="${i}" data-cost="${cost}" ${SAGA.silver < cost ? 'disabled' : ''}>${label}<small>${fmtN(cost)} silver</small></button>`;
+  const tapBtn = (a, i, label, auto, sub) => `<button class="boost mntap${auto ? ' auto' : ''}" data-a="${a}" data-i="${i}">${auto ? 'Foreman' : label}<small>${auto ? 'running' : sub}</small></button>`;
+  const rate = MN.c.f ? Math.min(cartRate(), MN.h.f ? Math.min(hoistRate(), MN.s.reduce((a, sh, i) => a + (sh.f ? shaftRate(i) : 0), 0)) + MN.sur : MN.sur) : 0;
+  let h = `<div class="mnsum"><div><b>${f1(Math.max(0, rate))}</b> silver a second on its own<small style="display:block;color:var(--mute)">${MN.deeds ? `${MN.deeds} deed${MN.deeds > 1 ? 's' : ''}: everything x${(1 + .5 * MN.deeds).toFixed(1)}` : `Foremen keep working while the app is closed${hbAway() < 1 ? ', at half pace' : ''}`}</small></div><div style="text-align:right"><b>${MN.s.length}</b> shaft${MN.s.length > 1 ? 's' : ''}</div></div>`;
+  h += `<div class="mnrow"><div class="ic">\u{1F6D2}</div><div class="txt"><b>Ore carts <span>level ${MN.c.l}</span></b><small>Sell ${f1(cartRate())} ore a second · <span data-ore="sur">${fmtN(MN.sur)}</span> ore at the pithead</small><div class="mnbtns">${btn('cup', 0, 'Upgrade', cartUpCost())}${MN.c.f ? '' : btn('cfm', 0, 'Hire foreman', foremanCost('c'))}</div></div>${tapBtn('sell', 0, 'Sell', MN.c.f, '+' + fmtN(Math.max(1, cartRate() * 6)))}</div>`;
+  h += `<div class="mnrow"><div class="ic">\u{1F3D7}</div><div class="txt"><b>Hoist <span>level ${MN.h.l}</span></b><small>Lifts ${f1(hoistRate())} ore a second to the pithead</small><div class="mnbtns">${btn('hup', 0, 'Upgrade', hoistUpCost())}${MN.h.f ? '' : btn('hfm', 0, 'Hire foreman', foremanCost('h'))}</div></div>${tapBtn('haul', 0, 'Haul', MN.h.f, '' + fmtN(Math.max(1, hoistRate() * 6)) + ' ore')}</div>`;
+  h += `<h3>Shafts</h3>` + MN.s.map((sh, i) => `<div class="mnrow shaft"><div class="ic">⛏</div><div class="txt"><b>Shaft ${i + 1} <span>level ${sh.l}</span></b><small>Digs ${f1(shaftRate(i))} ore a second · <span data-ore="${i}">${fmtN(sh.ore)}</span> ore waiting</small><div class="mnbtns">${btn('up', i, 'Upgrade', shaftUpCost(i))}${sh.f ? '' : btn('fm', i, 'Hire foreman', foremanCost(i))}</div></div>${tapBtn('dig', i, 'Dig', sh.f, '+' + fmtN(Math.max(1, shaftRate(i) * 6)))}</div>`).join('');
+  if (MN.s.length < MN_MAX_SHAFTS) h += `<div class="mnrow"><div class="ic">\u{1F6A7}</div><div class="txt"><b>Dig a new shaft</b><small>Shaft ${MN.s.length + 1} is ${Math.round(Math.pow(2.2, MN.s.length) * 10) / 10}x as rich as the first</small></div>${btn('new', 0, 'Dig', newShaftCost())}</div>`;
+  h += `<h3>Sell the mine</h3><div class="mnrow"><div class="ic">❖</div><div class="txt"><b>Deed ${MN.deeds + 1}</b><small id="mnProg">${fmtN(MN.earned)} of ${fmtN(deedNeed())} silver earned</small><div class="mnbar"><i style="width:${Math.min(100, MN.earned / deedNeed() * 100)}%"></i></div><small>Start a fresh mine that digs ${50 * (MN.deeds + 1)}% faster, forever, plus a gold chest</small></div><button class="boost" id="mnDeed" data-a="deed" data-i="0" ${MN.earned < deedNeed() ? 'disabled' : ''}>Sell<small>for a deed</small></button></div>`;
+  list.innerHTML = h;
+  list.querySelectorAll('[data-a]').forEach(b => b.onclick = e => { const el = e.currentTarget; if (el.classList.contains('mntap')) { el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 90); } mnAct(el.dataset.a, +el.dataset.i); });
+}
+
+window.JB = { get S() { return S; }, mkGl, lapHits, MN, openMN, closeMN, mnAct, mnSettle, showHome, playHome, placePending, raiseRune, runeReady, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
 // the same four-tab bar as the home screen, on the Longhouse and Harbor; built fresh on each open so the chest count is current
 function buildTabs(host, active) {
   host.innerHTML = '';
-  [['raids', 'hHome', 'Raids'], ['lh', 'hLH', 'Longhouse'], ['hb', 'hHB', 'Harbor'], ['saga', 'hSaga', 'Saga']].forEach(([k, id, label]) => {
+  [['raids', 'hHome', 'Raids'], ['lh', 'hLH', 'Longhouse'], ['hb', 'hHB', 'Harbor'], ['mn', 'hMN', 'Mine'], ['saga', 'hSaga', 'Saga']].forEach(([k, id, label]) => {
     const b = document.createElement('button'); b.className = 'nav' + (k === active ? ' on' : ''); b.dataset.k = k;
     b.innerHTML = `<span class="ic">${$(id).querySelector('.ic').innerHTML}</span>${label}` + (k === 'lh' && chestCount() ? `<span class="n">${chestCount()}</span>` : '');
     b.onclick = () => tabGo(k, active); host.appendChild(b);
@@ -2016,10 +2180,12 @@ function tabGo(k, from) {
   if (k === 'saga') { showCard('saga'); return; }
   if (from === 'lh') { $('lh').hidden = true; persist(); if (S) { S.slotBoosts = LH.tokens > 0 && S.tray.length < 6 ? 1 : 0; hud(); } }
   if (from === 'hb') { hbSettle(); persist(); clearInterval(hbTimer); $('hb').hidden = true; }
+  if (from === 'mn') { mnSettle(); persist(); clearInterval(mnTimer); $('mn').hidden = true; }
   lhFrom = null; homeOpen = false;
   if (k === 'raids') showHome();
   else if (k === 'lh') { homeOpen = true; openLH('home'); }
   else if (k === 'hb') { homeOpen = true; openHB(); }
+  else if (k === 'mn') { homeOpen = true; openMN(); }
 }
 // boot last, once every section above (Longhouse, Harbor, home) is defined: the home screen reads them
 startLevel(save.level);
