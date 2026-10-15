@@ -72,7 +72,7 @@ body {
 .stage { flex: 1; min-height: 0; position: relative; }
 canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
 * { touch-action: none; -webkit-tap-highlight-color: transparent; }
-.saga, .hblist, .scroll, .saga *, .hblist *, .scroll * { touch-action: pan-y; }
+.saga, .hblist, .mnlist, .scroll, .saga *, .hblist *, .mnlist *, .scroll * { touch-action: pan-y; }
 .card, .card * { touch-action: pan-y; }
 [hidden] { display: none !important; } /* a hidden overlay or home screen must stay hidden even where its own display rule is set */
 #home { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; background: #8ec5e8; overflow: hidden; touch-action: none; font-family: var(--body); }
@@ -147,17 +147,20 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .lhorder .wants { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .want { display: flex; align-items: center; gap: 4px; background: #e3d3b0; border-radius: 9px; padding: 3px 7px; font-weight: 800; font-size: 12px; }
 .want.met { background: #d9ecd9; text-decoration: line-through; }
-.lhgrid { flex: 1; min-height: 0; position: relative; display: grid; grid-template-columns: repeat(6, var(--c, 48px)); grid-auto-rows: var(--c, 48px); gap: 4px; align-content: center; justify-content: center; touch-action: none; }
+.want .wa { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; } .want .wa svg { width: 16px; height: 16px; display: block; }
+.lhgrid { flex: 1; min-height: 0; position: relative; display: grid; grid-template-columns: repeat(12, var(--c, 30px)); grid-auto-rows: var(--c, 30px); gap: 3px; align-content: center; justify-content: center; touch-action: none; }
 .lhcell { position: relative; background: #c9b893; border-radius: 10px; box-shadow: inset 0 2px 0 rgba(0,0,0,.08); }
 .lhcell.drop { box-shadow: inset 0 0 0 3px #ffd37a; animation: dropglow 1.6s ease-in-out infinite; }
 @keyframes dropglow { 50% { box-shadow: inset 0 0 0 3px rgba(255, 211, 122, .35); } }
 .lhcell.qT { background: #d9c3a3; } .lhcell.qI { background: #bfc6cc; } .lhcell.qF { background: #e6cf98; } .lhcell.qW { background: #e4ddd3; }
-.lhcell[data-q]::before { content: attr(data-q); position: absolute; inset: 0; display: grid; place-items: center; font-size: 26px; opacity: .22; }
+.lhcell[data-q]::before { content: attr(data-q); position: absolute; inset: 0; display: grid; place-items: center; font-size: calc(var(--c, 30px) * .6); opacity: .22; }
+.lhcell { border-radius: calc(var(--c, 30px) * .22); }
+.piece svg { width: 78%; height: 78%; display: block; }
 .piece.pop { animation: pop .42s cubic-bezier(.2, 1.4, .4, 1) both; }
 .piece.merge { animation: mergepop .5s ease-out both; }
 @keyframes pop { 0% { transform: scale(0) translateY(-40%); opacity: 0; } 60% { transform: scale(1.2) translateY(0); opacity: 1; } 100% { transform: scale(1); } }
 @keyframes mergepop { 0% { transform: scale(.6); filter: brightness(2); } 50% { transform: scale(1.25); filter: brightness(1.6); } 100% { transform: scale(1); filter: brightness(1); } }
-.piece { position: absolute; inset: 4%; display: grid; place-items: center; font-size: 22px; line-height: 1; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.35); cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
+.piece { position: absolute; inset: 4%; display: grid; place-items: center; font-size: calc(var(--c, 30px) * .5); line-height: 1; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.35); cursor: grab; user-select: none; -webkit-user-select: none; touch-action: none; }
 .piece.sel { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .piece.want { box-shadow: 0 0 0 3px #ffd37a, 0 0 10px 3px rgba(255, 211, 122, .8); }
 .piece.top { box-shadow: 0 0 0 3px #2f7a4a; }
@@ -167,8 +170,8 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .piece.t4 { clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%); }
 .piece.t5 { clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%); }
 .piece.t6 { clip-path: polygon(0 0, 100% 0, 100% 55%, 50% 100%, 0 55%); }
-.piece i { position: absolute; right: 14%; bottom: 10%; font: 800 10px var(--body); font-style: normal; background: rgba(0,0,0,.45); border-radius: 6px; padding: 1px 4px; }
-.piece.t3 i, .piece.t5 i, .piece.t6 i { right: 34%; bottom: 20%; }
+.piece i { position: absolute; right: 2%; bottom: 2%; font: 800 max(8px, calc(var(--c, 30px) * .26)) var(--body); font-style: normal; background: rgba(0,0,0,.55); border-radius: 5px; padding: 0 3px; line-height: 1.3; }
+.piece.t3 i, .piece.t5 i, .piece.t6 i { right: 24%; bottom: 10%; }
 .piece.ghost { position: fixed; z-index: 9; pointer-events: none; inset: auto; width: 56px; height: 56px; opacity: .9; }
 .lhshelf { display: flex; gap: 6px; }
 .lhshelf .boost { font-size: 13px; padding: 7px 4px; flex-direction: column; gap: 2px; }
@@ -188,12 +191,37 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 /* the Harbor: an idle clicker */
 #hb { touch-action: none; position: absolute; inset: 0; z-index: 6; background: #2f7fb0 var(--scene) center / cover no-repeat; display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #hb .hud .lvl { flex: 1; }
-#mn { touch-action: none; position: absolute; inset: 0; z-index: 6; background: #3b2a1e linear-gradient(#6d8fb3 0, #6d8fb3 90px, #5a4030 90px, #3b2a1e 100%); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
+#mn { touch-action: none; position: absolute; inset: 0; z-index: 6; background: #3b2a1e linear-gradient(#8ec5e8 0, #8ec5e8 150px, #6b8f4a 150px, #6b8f4a 166px, #5a4030 166px, #3b2a1e 100%); display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; padding-top: calc(6px + env(safe-area-inset-top, 0px)); padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; max-width: 560px; margin: 0 auto; }
 #mn .hud .lvl { flex: 1; }
 .mnlist { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
 .mnlist h3 { margin: 4px 2px 0; font-family: var(--display); font-weight: 400; font-size: 15px; color: #ffd37a; text-shadow: 0 2px 0 #2b2118; }
 .mnrow { display: flex; align-items: center; gap: 8px; background: var(--syrup); border-radius: 12px; padding: 6px 8px; font-size: 13px; line-height: 1.3; border-left: 6px solid #8d6540; }
-.mnrow.shaft { border-left-color: #4a3220; }
+.mnrow.shaft, .mnrow.hoist, .mnrow.carts { position: relative; overflow: hidden; border-left: 0; padding: 0; background: none; border-radius: 10px; min-height: 92px; }
+.mnrow.shaft .lift, .mnrow.hoist .lift { position: absolute; left: 0; top: 0; bottom: 0; width: 36px; background: #1d140d repeating-linear-gradient(0deg, transparent 0 10px, rgba(255,255,255,.07) 10px 12px); border-right: 3px solid #6b4a2e; }
+.mnrow.shaft .lift::before, .mnrow.hoist .lift::before { content: ''; position: absolute; left: 6px; right: 6px; top: 0; bottom: 0; border-left: 2px dashed #8d6540; border-right: 2px dashed #8d6540; }
+.mnrow .cage { position: absolute; left: 4px; width: 28px; height: 30px; top: 30px; background: linear-gradient(#c9922a, #8d6540); border: 2px solid #2b2118; border-radius: 4px; display: grid; place-items: center; font-size: 15px; transition: top .5s ease; }
+.mnrow.shaft .tunnel, .mnrow.hoist .tunnel, .mnrow.carts .tunnel { flex: 1; min-width: 0; margin-left: 39px; height: 92px; position: relative; background: #5a4030 repeating-radial-gradient(circle at 20% 30%, rgba(0,0,0,.18) 0 6px, transparent 6px 22px); }
+.mnrow.shaft .tunnel::before { content: ''; position: absolute; left: 0; right: 0; top: 14px; bottom: 16px; background: #2b1d12 radial-gradient(ellipse at 50% 100%, rgba(255,210,120,.12), transparent 60%); border-top: 4px solid #8d6540; border-bottom: 4px solid #8d6540; }
+.mnrow.shaft .tunnel::after { content: ''; position: absolute; left: 0; right: 0; bottom: 16px; height: 4px; background: repeating-linear-gradient(90deg, #a37548 0 10px, transparent 10px 16px); }
+.mnrow.carts .tunnel { background: linear-gradient(#8ec5e8 0, #8ec5e8 60%, #6b8f4a 60%, #4f6e36 100%); margin-left: 0; }
+.mnrow.carts .tunnel::after { content: ''; position: absolute; left: 0; right: 0; bottom: 22px; height: 3px; background: repeating-linear-gradient(90deg, #4a3220 0 12px, #8d6540 12px 18px); }
+.mnrow.hoist .tunnel { background: linear-gradient(#6b8f4a 0, #4f6e36 10px, #5a4030 10px); }
+.mnrow .label { position: absolute; left: 8px; top: 6px; z-index: 2; font-size: 12px; color: #f3e9d2; text-shadow: 0 1px 0 #000; }
+.mnrow .label b { font-size: 13px; } .mnrow .label span { color: #ffd37a; }
+.mnrow .ore { position: absolute; right: 8px; top: 6px; z-index: 2; background: rgba(0,0,0,.45); color: #ffd37a; font-weight: 800; font-size: 12px; padding: 1px 7px; border-radius: 99px; }
+.mnrow .miner { position: absolute; bottom: 22px; font-size: 24px; line-height: 1; transform-origin: 50% 100%; }
+.mnrow .miner.go { animation: swing .7s ease-in-out infinite; }
+@keyframes swing { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(10deg) translateY(-2px); } }
+.mnrow .rock { position: absolute; right: 10px; bottom: 24px; font-size: 26px; line-height: 1; }
+.mnrow .cart { position: absolute; bottom: 24px; left: 8px; font-size: 26px; line-height: 1; }
+.mnrow .cart.go { animation: roll 1.6s linear infinite; }
+@keyframes roll { 0% { left: 4px; } 100% { left: calc(100% - 36px); } }
+.mnrow .bldg { position: absolute; right: 10px; bottom: 26px; font-size: 34px; line-height: 1; }
+.mnrow .acts { position: absolute; right: 6px; bottom: 6px; z-index: 2; display: flex; gap: 4px; }
+.mnrow .acts .boost { font-size: 12px; padding: 5px 7px; flex-direction: column; gap: 0; flex: none; min-width: 58px; }
+.mnrow .acts .boost small { font-weight: 500; font-size: 10px; opacity: .85; }
+.mnrow .acts .mntap { min-height: 44px; width: 64px; font-size: 14px; }
+.mnrow .acts .mntap small { font-size: 10px; }
 .mnrow .ic { font-size: 26px; width: 34px; text-align: center; flex: none; }
 .mnrow .txt { flex: 1; min-width: 0; }
 .mnrow .txt b span { color: var(--mute); font-weight: 500; }
@@ -250,7 +278,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-1558",date:"2026-10-15 15:58 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-1607",date:"2026-10-15 16:07 UTC"};</script>
 
 
 <div id="app">
@@ -713,12 +741,12 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.042.10.15.26.1158';
+const BUILD = 'VR1.043.10.15.26.1207';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
 // ---------- the saga: silver, chests, streaks, achievements and stats (2026-10-13) ----------
-const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons', 'runes', 'bestTier', 'chapters', 'tokensBought', 'shafts', 'deeds', 'ore'];
+const STAT_KEYS = ['wins', 'first', 'retry', 'lossShips', 'lossFull', 'retreats', 'axes', 'shields', 'sailed', 'lashed', 'fullLoad', 'hammers', 'catapults', 'time', 'swift', 'ownBest', 'bare', 'fullHold', 'straight', 'lashedWins', 'silverAll', 'reach', 'best', 'hornsEarned', 'hornsUsed', 'chests', 'chestsOpened', 'merges3', 'merges5', 'halls', 'tokensUsed', 'delivered', 'taps', 'haul', 'harbor', 'boons', 'runes', 'bestTier', 'chapters', 'tokensBought', 'shafts', 'deeds', 'ore', 'charters'];
 if (!save.saga) {
   // first run with the saga: raids already beaten count as won and reached, but never as first-try wins
   const st = {}; STAT_KEYS.forEach(k => st[k] = 0); st.wins = st.reach = Math.max(0, save.level - 1);
@@ -733,11 +761,14 @@ if (!SAGA.chapter) SAGA.chapter = Math.max(1, Math.ceil(save.level / 10)); // ch
 if (!SAGA.runeBoons) SAGA.runeBoons = {}; // one boon per runestone, kept forever
 if (!SAGA.boughtTokens) SAGA.boughtTokens = 0;
 SAGA.lh.board.forEach(c => { if (c) STATS.bestTier = Math.max(STATS.bestTier, c.t); });
-const LH = SAGA.lh, LH_COLS = 6, LH_ROWS = 8;
-while (LH.board.length < LH_COLS * LH_ROWS) LH.board.push(null); // boards from before the four corners grow a row
+const LH = SAGA.lh, LH_COLS = 12, LH_ROWS = 8; // four corners of 6 by 4 (user ask 2026-10-15)
+if (LH.board.length === 48) { const nb = new Array(96).fill(null); LH.board.forEach((p, i) => { if (p) { const r = Math.floor(i / 6), c = i % 6; nb[r * 12 + (c < 3 ? c : c + 3)] = p; } }); SAGA.lh.board = nb; LH.board = nb; } // the old 6-wide board keeps its pieces in the same corners
+while (LH.board.length < LH_COLS * LH_ROWS) LH.board.push(null);
 // four corners, one chain each: timber top left, iron top right, food bottom left, wool bottom right
 const QUAD = ['T', 'I', 'F', 'W'];
 const quadOf = i => QUAD[(Math.floor(i / LH_COLS) < LH_ROWS / 2 ? 0 : 2) + (i % LH_COLS < LH_COLS / 2 ? 0 : 1)];
+// every piece belongs in its own corner (user rule 2026-10-15): strays from older boards move home, or are sold if the corner is full
+LH.board.forEach((p, i) => { if (p && quadOf(i) !== p.ch) { const j = LH.board.findIndex((q, k) => !q && quadOf(k) === p.ch); LH.board[i] = null; if (j >= 0) LH.board[j] = p; else SAGA.silver += [2, 6, 15, 40, 100, 250][p.t - 1]; } });
 // ---------- the saga: chapters of ten raids, each opened by the jarl's tasks in the Longhouse and Harbor (user ask 2026-10-15) ----------
 const CHAP_NAMES = ['The Narrows', 'The Western Isles', 'The Salt Marsh', 'The Frost Coast', "The Monk's Isle", 'The Amber Shore', 'The Whale Road', 'The Burning Hall', 'The Iron Hills', 'The Mist Sound', "The King's Town", 'The Far Skerries', 'The Black Forest', 'The Silver River', 'The Stone Bridge', 'The Long Winter', 'The Great Market', 'The Dragon Strait', 'The Sunken Fort', 'The Ends of the World'];
 const CHAP_BEATS = ['The jarl wants a hearth before the fleet sails.', 'Crews need feeding on the long crossing.', 'Iron for axes, or no raid.', 'Snow closes the passes; the harbor must feed the town.', 'The monks keep silver in their tower. The jarl wants a bigger fleet first.', 'Amber traders pay in gold. Build the market they ask for.', 'The whale road is long. Fill the stores.', 'A rival burned our hall. Raise it taller.', 'Ore in the hills, if the smithy can work it.', 'Fog hides the sound. The lookout must be finished.', 'The king summons us. Bring tribute worth the trip.', 'Skerries guard the far shore. The crews ask for banners.', 'The forest folk trade furs for cloth.', 'Silver flows down the river to whoever holds the bridge.', 'The bridge needs stone and the stone needs carts.', 'A long winter. The town lives on what the harbor earns.', 'The great market opens once a year. Have something to sell.', 'Dragons on the strait, the skalds say. Sharpen everything.', 'A sunken fort, full of old gold, if the ships can reach it.', 'The ends of the world. Everything you built sails with you.'];
@@ -763,7 +794,7 @@ function unlockChapter() {
   sfx('win'); buzz(); persist(); showCard('story', { k });
 }
 const hallsDone = () => LH.hall; // finished halls, in order: Hearth, Feast Hall, Armory, Loft, Lookout, Great Hall
-const hornEvery = () => hallsDone() >= 1 ? 5 : 10;
+const hornEvery = () => hallsDone() >= 8 ? 3 : hallsDone() >= 1 ? 5 : 10; // Weaving Hall, then the Hearth
 const sixthSail = () => SAGA.streak >= 3; // three straight wins: six ships may sail the fjord at once
 const beltCap = () => sixthSail() ? 6 : 5;
 if (!SAGA.runes) SAGA.runes = 0;
@@ -798,6 +829,7 @@ const ACH = [
   { id: 'harbor', name: 'Harbor Master', sym: '\u2393', desc: 'Harbor upgrades bought', tiers: [10, 50, 150], key: 'harbor', chest: ['iron', 'silver', 'gold'] },
   { id: 'delver', name: 'Deep Delver', sym: '\u2693', desc: 'Mine shafts dug', tiers: [3, 6, 10], key: 'shafts', chest: ['iron', 'silver', 'gold'] },
   { id: 'deeds', name: 'Mine Deeds', sym: '\u2756', desc: 'Mines sold for a deed', tiers: [1, 3, 10], key: 'deeds', chest: ['silver', 'gold', 'gold'] },
+  { id: 'charter', name: 'Chartered', sym: '\u2691', desc: 'Harbor charters held', tiers: [1, 3, 10], key: 'charters', chest: ['silver', 'gold', 'gold'] },
   { id: 'rich', name: 'Rich Harbor', sym: '\u25c9', desc: 'Silver earned', tiers: [10000, 100000, 1000000], key: 'silverAll', chest: ['silver', 'gold', 'gold'] },
 ];
 const TIER_NAME = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
@@ -1161,9 +1193,10 @@ function win() {
     if (SAGA.sinceHorn >= hornEvery()) { SAGA.sinceHorn = 0; if (SAGA.horns < HORN_MAX) { SAGA.horns++; STATS.hornsEarned++; R.horn = true; } }
     if (SAGA.streak === 3) R.sixth = true; }
   hbSettle();
-  if (hallsDone() >= 2) R.silver = Math.round(R.silver * 1.5); // the Feast Hall
+  if (hallsDone() >= 7) R.silver *= 2; else if (hallsDone() >= 2) R.silver = Math.round(R.silver * 1.5); // the Smithy doubles, the Feast Hall adds half
   R.silver = rs(R.silver); // runestones
   if (hallsDone() >= 6 && STATS.wins % 5 === 0) { LH.tokens++; R.token = true; } // the Great Hall
+  if (hallsDone() >= 9 && STATS.wins % 10 === 0) { giveChest('gold'); R.gold = true; } // the Brewhouse
   giveSilver(R.silver);
   R.ach = checkAch(); S.reward = R; persist(); sfx('win');
   for (let i = 0; i < 60; i++) { const x = Math.random() * W; S.parts.push({ x, y: -10, vx: (Math.random() - .5) * 80, vy: 80 + Math.random() * 220, life: 1.6, color: PAL[PROC_COLORS[i % 8]], size: 3 + Math.random() * 4 }); }
@@ -1556,6 +1589,7 @@ function rewardHtml(R) {
   if (!R) return '';
   const l = [`+${R.silver} silver, +1 ${CHEST_NAME[R.chest]}${R.swift ? ' \u00b7 <span class="new">\u2605 under par</span>' : ''}${R.ownBest ? ' \u00b7 <span class="new">own best</span>' : ''}`];
   if (R.token) l.push('<span class="new">Dock token from the Great Hall</span>');
+  if (R.gold) l.push('<span class="new">Gold chest from the Brewhouse</span>');
   if (R.chapter) l.push(`<span class="new">Chapter ${R.chapter - 1} complete!</span> The jarl has tasks before ${chapName(R.chapter)} opens.`);
   if (R.streak) l.push(`Streak: ${R.streak} in a row${R.sixth ? ' \u00b7 <span class="new">Sixth Sail hoisted: 6 ships may sail</span>' : ''}${R.horn ? ' \u00b7 <span class="new">Mead Horn earned</span>' : ''}`);
   R.ach.forEach(x => l.push(`<span class="new">${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}</span> \u00b7 ${x.chest ? CHEST_NAME[x.chest] : x.silver + ' silver'}`));
@@ -1665,7 +1699,8 @@ function showCard(kind, extra) {
       <li><span>1</span><div><b>Tap the barrel</b> at the bottom for silver. Quick taps build a catch streak: taps pay up to triple and the buildings work double while it lasts.</div></li>
       <li><span>2</span><div><b>Build the harbor.</b> Each building earns silver every minute, and half as much while the app is closed. Prices rise as the harbor grows.</div></li>
       <li><span>3</span><div><b>Spend silver on raids:</b> extra hammers and catapults, dock tokens, Mead Horns, and chests for the Longhouse.</div></li>
-      <li><span>4</span><div><b>Reach level ${RUNE_HB}</b> with every hall built and you can raise a runestone: start over, earning a quarter more silver from everything for good.</div></li></ul>
+      <li><span>4</span><div><b>Buy upgrades</b> once a building is big enough: each doubles it. A Barrel crew taps for you.</div></li>
+      <li><span>5</span><div><b>Reach level ${CHARTER_HB}</b> and sell the harbor for a charter: start over earning a quarter more here, forever. With every hall built and level ${RUNE_HB}, a runestone does the same for everything.</div></li></ul>
       <button class="cta" id="hbOk">To the harbor</button>`;
     setTimeout(() => { const b = $('hbOk'); if (b) b.onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'saga') {
@@ -1682,7 +1717,7 @@ function showCard(kind, extra) {
         <h3>Time</h3>${r('Raids beaten under par', st.swift)}${r('Own bests beaten', st.ownBest)}${r('Time raiding', fmtT(st.time))}
         <h3>Fighting</h3>${r('Axes thrown', st.axes)}${r('Shields broken', st.shields)}${r('Ships sailed', st.sailed)}${r('Lashed pairs sailed', Math.floor(st.lashed / 2))}${r('Full-load dock sailings', st.fullLoad)}${r('Hammers used', st.hammers)}${r('Catapults used', st.catapults)}
         <h3>Treasure</h3>${r('Silver in the purse', SAGA.silver)}${r('Silver earned all time', st.silverAll)}${r('Chests', Object.keys(CHEST_NAME).map(k => `${SAGA.chests[k] || 0} ${k}`).join(', '))}
-        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Runestones raised', st.runes)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}${r('Ore sold', fmtN(st.ore))}${r('Mine deeds', st.deeds)}
+        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Runestones raised', st.runes)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}${r('Ore sold', fmtN(st.ore))}${r('Mine deeds', st.deeds)}${r('Harbor charters', st.charters)}
         ${rec ? `<h3>Raid ${S.n}</h3>${r('Tries', rec.t)}${r('Wins', rec.w)}${r('Best time', rec.b ? fmtT(rec.b) : '\u2014')}${r('Par', fmtT(S.par))}${r('Under par', rec.s ? 'Yes \u2605' : 'Not yet')}${r('Hammers / catapults used', rec.h + ' / ' + rec.c)}` : ''}
         <p style="font-size:12px;margin-top:6px">Counting since ${SAGA.since}. Raids won before then count as wins, not as first tries.</p>`;
     }
@@ -1713,6 +1748,9 @@ function showCard(kind, extra) {
     const k = extra.k;
     html = `<h2>${chapName(k)}</h2><p style="font-style:italic">${chapBeat(k)}</p><div class="reward"><div class="rw"><span class="new">Chapter ${k} opens:</span> raids ${(k - 1) * 10 + 1} to ${k * 10}</div><div class="rw">+1 silver chest, +${rs(50 * k)} silver</div></div><button class="cta" id="storyGo">Raid ${(k - 1) * 10 + 1}</button>`;
     setTimeout(() => { $('storyGo').onclick = () => { $('ov').hidden = true; startLevel(Math.max(save.level, (k - 1) * 10 + 1)); }; });
+  } else if (kind === 'charter') {
+    html = `<h2>Sell the harbor?</h2><p style="font-size:14px">Every building, the barrel and its upgrades go back to nothing. In return you hold ${HB.charters + charterGain()} charter${HB.charters + charterGain() > 1 ? 's' : ''}: everything in the harbor earns x${(1 + .25 * (HB.charters + charterGain())).toFixed(2)} from now on, forever. Your silver, chests, Mead Horns and runestones stay.</p><button class="cta" id="charterGo">Sell for ${charterGain()} charter${charterGain() > 1 ? 's' : ''}</button><button class="link" id="cancel">Not yet</button>`;
+    setTimeout(() => { $('charterGo').onclick = () => { $('ov').hidden = true; sellCharter(); }; });
   } else if (kind === 'runePick') {
     const left = RUNE_BOONS.filter(b => !boonOn(b.id));
     html = `<h2>Choose a rune boon</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">Runestone ${SAGA.runes} grants one boon, forever:</p>${left.map(b => `<button class="link" data-rb="${b.id}" style="display:block;width:100%;text-align:left;background:var(--wood);color:#f3e9d2;border-radius:12px;padding:10px 14px;font-size:15px;line-height:1.3"><b>\u16B1 ${b.name}</b><br><small style="opacity:.85">${b.what}</small></button>`).join('')}`;
@@ -1810,6 +1848,10 @@ const HALLS = [
   { name: 'Loft', wants: [['W', 4, 2], ['T', 4, 2], ['F', 3, 1]], perk: 'A second hammer on every third raid' },
   { name: 'Lookout', wants: [['T', 5, 1], ['I', 5, 1], ['W', 4, 2]], perk: 'Fogbound ships show their color one place earlier' },
   { name: 'Great Hall', wants: [['T', 5, 1], ['I', 5, 1], ['F', 5, 1], ['W', 5, 1]], perk: 'A dock token every 5 wins' },
+  { name: 'Smithy', wants: [['I', 5, 2], ['I', 6, 1], ['T', 5, 1]], perk: 'Silver from raids doubled' },
+  { name: 'Weaving Hall', wants: [['W', 5, 2], ['W', 6, 1], ['F', 5, 1]], perk: 'A Mead Horn every 3 straight wins' },
+  { name: 'Brewhouse', wants: [['F', 5, 2], ['F', 6, 1], ['W', 5, 1]], perk: 'A gold chest every 10 wins' },
+  { name: "Jarl's Seat", wants: [['T', 6, 1], ['I', 6, 1], ['F', 6, 1], ['W', 6, 1], ['T', 5, 1]], perk: 'Every chest gives one more token' },
 ];
 const SELL = [2, 6, 15, 40, 100, 250];
 const TOKEN_RANGE = { wood: [1, 3], iron: [2, 5], silver: [4, 8], gold: [7, 12] }; // a chest gives a random count of tokens in its range; a token becomes a level I piece of any kind
@@ -1829,7 +1871,7 @@ const lhEmpties = () => LH.board.map((p, i) => p ? -1 : i).filter(i => i >= 0);
 // cells sized so all six columns and eight rows fit, whatever the phone; measured with the bar at its fixed height
 function lhFit() {
   const grid = $('lhGrid'), gr = grid.getBoundingClientRect();
-  if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(20, Math.min(72, Math.floor((gr.width - 20) / LH_COLS), Math.floor((gr.height - 24) / LH_ROWS))) + 'px');
+  if (gr.width && gr.height) grid.style.setProperty('--c', Math.max(18, Math.min(72, Math.floor((gr.width - 3 * (LH_COLS - 1)) / LH_COLS), Math.floor((gr.height - 3 * (LH_ROWS - 1)) / LH_ROWS))) + 'px');
 }
 window.addEventListener('resize', () => { if (!$('lh').hidden) { lhFit(); } });
 function openLH(from) {
@@ -1849,7 +1891,7 @@ $('lhClose').onclick = closeLH;
 // a chest gives a random handful of tokens; they wait in the queue until a kind is picked and an empty cell is tapped
 function openChest(kind) {
   if (!SAGA.chests[kind]) return;
-  const [lo, hi] = TOKEN_RANGE[kind], n = lo + Math.floor(Math.random() * (hi - lo + 1)) + (boonOn('lore') ? 1 : 0);
+  const [lo, hi] = TOKEN_RANGE[kind], n = lo + Math.floor(Math.random() * (hi - lo + 1)) + (boonOn('lore') ? 1 : 0) + (hallsDone() >= 10 ? 1 : 0);
   SAGA.chests[kind]--; STATS.chestsOpened++;
   for (let k = 0; k < n; k++) LH.pending.push({ ch: null, t: 1 });
   sfx('crack'); lhSel = -1; persist(); lhRender();
@@ -1869,6 +1911,7 @@ const lhNeighbors = i => [i - LH_COLS, i + LH_COLS, i % LH_COLS ? i - 1 : -1, (i
 function lhDrop(a, b) {
   const p = LH.board[a]; if (!p || a === b || b < 0) return false;
   const q = LH.board[b];
+  if (quadOf(b) !== p.ch) { buzz(); toast(`${LH_CHAINS[p.ch].name} stays in its own corner.`); return false; }
   if (!q) { LH.board[b] = p; LH.board[a] = null; return true; }
   if (q.ch !== p.ch || q.t !== p.t || p.t >= 6) { LH.board[b] = p; LH.board[a] = q; sfx('launch'); if (q.ch === p.ch && q.t === p.t) toast(`${pieceName(p.ch, p.t)} is the best of its kind: deliver or sell it.`); return true; } // different pieces swap places
   // two alike pieces become one of the next tier (the user's rule, 2026-10-13)
@@ -1903,7 +1946,7 @@ function raiseRune() {
   if (!runeReady()) return;
   SAGA.runes++; STATS.runes++;
   LH.board.fill(null); LH.hall = 0; LH.done = {};
-  HB.b = HB.b.map(() => 0); HB.tap = 0; HB.ms = 0; SAGA.bought = {}; HB.last = Date.now(); hbAcc = 0; combo = 0; tapLog = [];
+  HB.b = HB.b.map(() => 0); HB.tap = 0; HB.ms = 0; HB.ups = {}; SAGA.bought = {}; HB.last = Date.now(); hbAcc = 0; combo = 0; tapLog = [];
   SAGA.silver = 0; SAGA.boughtTokens = 0; lhSel = -1;
   checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`));
   sfx('win'); buzz(); persist(); $('ov').hidden = true; lhRender(); if (hbLive()) hbRender();
@@ -1912,7 +1955,47 @@ function raiseRune() {
 }
 const runeRow = () => `<div class="hbrow"><div class="ic">\u16B1</div><div class="txt"><b>Runestone${SAGA.runes ? ` <span style="color:var(--mute);font-weight:500">${SAGA.runes} raised</span>` : ''}</b><small>${runeReady() ? 'Ready! Start the longhouse and harbor over and earn a quarter more silver from everything, forever' : runeText()}</small></div><button class="boost" id="runeBtn" ${runeReady() ? '' : 'disabled'}>Raise<small>${runeReady() ? 'prestige' : 'not yet'}</small></button></div>`;
 const runeChip = el => { el.hidden = !SAGA.runes; el.textContent = `\u16B1 ${SAGA.runes} · silver x${runeMult().toFixed(2)}`; };
-function pieceEl(p) { const el = document.createElement('div'); el.className = `piece t${p.t}`; el.style.background = LH_CHAINS[p.ch].color; el.innerHTML = `${LH_CHAINS[p.ch].icon}<i>${TIER_NAME[p.t - 1]}</i>`; el.title = pieceName(p.ch, p.t); return el; }
+// every piece has its own drawing (user ask 2026-10-15); the numeral in the corner still says the tier
+const PIECE_ART = (() => {
+  const o = 'stroke="#2b2118" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"';
+  const T = '#e3c08a', Td = '#a3733f', I = '#d7dde5', Id = '#8a95a3', F = '#ffe9a8', Fd = '#d9962a', W = '#f3e9d2', Wd = '#c9b893';
+  return {
+    T: [
+      `<path d="M7 26 L25 6" ${o} stroke-width="3" stroke="${Td}"/><path d="M7 26 L25 6 M14 18 L9 13 M19 13 L24 16" ${o} fill="none"/>`,
+      `<rect x="3" y="12" width="26" height="9" rx="1.5" fill="${T}" ${o}/><path d="M7 16.5 H25 M10 14 H18 M14 19 H24" stroke="${Td}" stroke-width="1.2" fill="none"/>`,
+      `<rect x="2" y="9" width="28" height="14" rx="1.5" fill="${T}" ${o}/><path d="M6 13 H26 M6 19 H26" stroke="${Td}" stroke-width="1.3"/><circle cx="5" cy="16" r="1.6" fill="${Td}"/><circle cx="27" cy="16" r="1.6" fill="${Td}"/>`,
+      `<rect x="12" y="7" width="8" height="19" fill="${T}" ${o}/><rect x="8" y="4" width="16" height="4" rx="1" fill="${Td}" ${o}/><rect x="8" y="25" width="16" height="4" rx="1" fill="${Td}" ${o}/>`,
+      `<rect x="12" y="7" width="8" height="19" fill="${T}" ${o}/><rect x="8" y="4" width="16" height="4" rx="1" fill="${Td}" ${o}/><rect x="8" y="25" width="16" height="4" rx="1" fill="${Td}" ${o}/><path d="M14 10 L18 13 L14 16 L18 19 L14 22" stroke="${Td}" stroke-width="1.6" fill="none"/>`,
+      `<path d="M3 27 L16 5 L29 27 Z" fill="${T}" ${o}/><path d="M9 18 H23 M16 5 V27" stroke="#2b2118" stroke-width="1.6"/><path d="M6 27 L16 10 L26 27" stroke="${Td}" stroke-width="1.2" fill="none"/>`,
+    ],
+    I: [
+      `<path d="M6 22 Q4 14 10 11 Q14 5 20 8 Q27 8 27 16 Q28 24 20 25 Q12 27 6 22 Z" fill="${Id}" ${o}/><path d="M11 14 L14 18 M18 12 L22 15 M15 21 L19 20" stroke="${I}" stroke-width="1.8"/>`,
+      `<path d="M4 22 L9 11 H23 L28 22 Z" fill="${I}" ${o}/><path d="M9 11 L4 22 M8 18 H24" stroke="${Id}" stroke-width="1.2"/>`,
+      `<path d="M8 6 V26 M16 6 V26 M24 6 V26" stroke="#3a414b" stroke-width="2.4"/><path d="M5 6 H11 M13 6 H19 M21 6 H27" stroke="${I}" stroke-width="3"/><path d="M8 26 L8 28 M16 26 L16 28 M24 26 L24 28" stroke="#3a414b" stroke-width="1"/>`,
+      `<path d="M10 6 Q22 2 27 12 Q22 10 17 14 Q24 17 26 24 Q19 16 10 10 Z" fill="${I}" ${o}/><path d="M9 8 L4 26" stroke="${Td}" stroke-width="3"/>`,
+      `<circle cx="16" cy="16" r="12" fill="${Id}" ${o}/><circle cx="16" cy="16" r="6" fill="${I}" ${o}/><circle cx="16" cy="6.5" r="1.3" fill="#2b2118"/><circle cx="16" cy="25.5" r="1.3" fill="#2b2118"/><circle cx="6.5" cy="16" r="1.3" fill="#2b2118"/><circle cx="25.5" cy="16" r="1.3" fill="#2b2118"/>`,
+      `<path d="M4 11 H22 Q29 11 29 15 L24 15 L24 20 H13 L13 15 L7 15 Q4 15 4 11 Z" fill="#3a414b" ${o}/><rect x="9" y="20" width="18" height="4" fill="${Id}" ${o}/><rect x="6" y="24" width="24" height="3" fill="#3a414b" ${o}/>`,
+    ],
+    F: [
+      `<path d="M16 28 V8" stroke="${Fd}" stroke-width="2"/><ellipse cx="12" cy="12" rx="3" ry="2" fill="${F}" ${o} transform="rotate(-35 12 12)"/><ellipse cx="20" cy="12" rx="3" ry="2" fill="${F}" ${o} transform="rotate(35 20 12)"/><ellipse cx="12" cy="18" rx="3" ry="2" fill="${F}" ${o} transform="rotate(-35 12 18)"/><ellipse cx="20" cy="18" rx="3" ry="2" fill="${F}" ${o} transform="rotate(35 20 18)"/><ellipse cx="16" cy="7" rx="2" ry="3" fill="${F}" ${o}/>`,
+      `<path d="M4 20 Q4 10 16 10 Q28 10 28 20 Q28 25 16 25 Q4 25 4 20 Z" fill="${Fd}" ${o}/><path d="M9 14 L12 18 M14 13 L17 17 M19 13 L22 17" stroke="${F}" stroke-width="1.8"/>`,
+      `<path d="M16 16 L28 10 A13 13 0 1 1 16 3 Z" fill="${F}" ${o}/><path d="M16 16 L16 3 A13 13 0 0 1 28 10 Z" fill="${Fd}" ${o}/><circle cx="11" cy="19" r="1.6" fill="${Fd}"/><circle cx="18" cy="23" r="1.4" fill="${Fd}"/><circle cx="9" cy="12" r="1.2" fill="${Fd}"/>`,
+      `<path d="M8 20 Q6 8 17 8 Q29 8 27 20 Q25 27 16 26 Q8 26 8 20 Z" fill="#d9775c" ${o}/><path d="M11 20 Q10 12 17 12" stroke="${F}" stroke-width="2" fill="none"/><circle cx="6" cy="24" r="3" fill="${W}" ${o}/>`,
+      `<rect x="3" y="12" width="26" height="4" rx="1" fill="${Td}" ${o}/><path d="M7 16 V26 M25 16 V26" stroke="${Td}" stroke-width="2.5"/><ellipse cx="11" cy="10" rx="4" ry="2" fill="${F}" ${o}/><ellipse cx="21" cy="10" rx="4" ry="2" fill="#d9775c" ${o}/><rect x="15" y="5" width="3" height="6" fill="${I}" ${o}/>`,
+      `<path d="M7 6 Q28 4 26 18 Q24 28 12 25 Q6 22 10 14 Q14 9 7 6 Z" fill="${W}" ${o}/><path d="M7 6 Q12 7 10 12" stroke="${Fd}" stroke-width="2" fill="none"/><path d="M13 23 Q22 24 24 15" stroke="${Fd}" stroke-width="1.6" fill="none"/>`,
+    ],
+    W: [
+      `<path d="M8 22 Q3 20 6 15 Q4 9 11 9 Q14 4 20 7 Q27 6 26 13 Q30 18 25 21 Q24 26 17 24 Q12 27 8 22 Z" fill="${W}" ${o}/><path d="M11 15 Q14 12 17 15 M17 19 Q20 16 23 19" stroke="${Wd}" stroke-width="1.5" fill="none"/>`,
+      `<circle cx="16" cy="16" r="11" fill="${W}" ${o}/><path d="M6 13 Q16 10 26 13 M6 19 Q16 16 26 19 M10 7 Q14 16 10 25 M22 7 Q18 16 22 25" stroke="${Wd}" stroke-width="1.5" fill="none"/>`,
+      `<path d="M4 9 Q10 6 16 9 Q22 12 28 9 V22 Q22 25 16 22 Q10 19 4 22 Z" fill="${W}" ${o}/><path d="M4 14 Q10 11 16 14 Q22 17 28 14" stroke="${Wd}" stroke-width="1.5" fill="none"/>`,
+      `<path d="M6 6 H26 Q28 16 26 26 H6 Q4 16 6 6 Z" fill="${W}" ${o}/><rect x="10" y="6" width="4" height="20" fill="#d9342f"/><rect x="18" y="6" width="4" height="20" fill="#d9342f"/><path d="M4 5 H28" stroke="${Td}" stroke-width="2.5"/>`,
+      `<path d="M8 4 V28" stroke="${Td}" stroke-width="2.5"/><path d="M9 6 H27 L22 13 L27 20 H9 Z" fill="#d9342f" ${o}/><path d="M13 9 L17 13 L13 17" stroke="${W}" stroke-width="1.8" fill="none"/>`,
+      `<rect x="4" y="5" width="24" height="22" fill="#8e2a1e" ${o}/><path d="M4 9 H28 M4 23 H28" stroke="${W}" stroke-width="1.5"/><path d="M8 13 L12 19 L16 13 L20 19 L24 13" stroke="${W}" stroke-width="1.6" fill="none"/><path d="M6 27 V29 M10 27 V29 M14 27 V29 M18 27 V29 M22 27 V29 M26 27 V29" stroke="${W}" stroke-width="1.2"/>`,
+    ],
+  };
+})();
+const pieceArt = (ch, t) => `<svg viewBox="0 0 32 32" aria-hidden="true">${PIECE_ART[ch][Math.min(5, t - 1)]}</svg>`;
+function pieceEl(p) { const el = document.createElement('div'); el.className = `piece t${p.t}`; el.style.background = LH_CHAINS[p.ch].color; el.innerHTML = `${pieceArt(p.ch, p.t)}<i>${TIER_NAME[p.t - 1]}</i>`; el.title = pieceName(p.ch, p.t); return el; }
 function lhRender() {
   $('lhSilver').textContent = `${SAGA.silver} silver`;
   const tk = $('lhTokens'); tk.hidden = !LH.tokens; tk.textContent = `${LH.tokens} dock token${LH.tokens === 1 ? '' : 's'}`;
@@ -1920,7 +2003,7 @@ function lhRender() {
   // the order
   const hall = HALLS[LH.hall];
   $('lhOrder').innerHTML = hall
-    ? `<b class="h">Build the ${hall.name}</b> <span style="color:var(--mute)">${LH.hall + 1} of ${HALLS.length}</span><div class="wants">${hall.wants.map(([ch, t, n]) => `<span class="want${(LH.done[ch + t] || 0) >= n ? ' met' : ''}">${LH_CHAINS[ch].icon} ${pieceName(ch, t)} ${TIER_NAME[t - 1]} \u00b7 ${Math.min(n, LH.done[ch + t] || 0)}/${n}</span>`).join('')}</div><div class="perk">Finish it for: ${hall.perk.toLowerCase()}, plus a dock token, a gold chest and ${rs(250 * (LH.hall + 1))} silver. Each piece delivered pays silver too.</div>`
+    ? `<b class="h">Build the ${hall.name}</b> <span style="color:var(--mute)">${LH.hall + 1} of ${HALLS.length}</span><div class="wants">${hall.wants.map(([ch, t, n]) => `<span class="want${(LH.done[ch + t] || 0) >= n ? ' met' : ''}"><span class="wa" style="background:${LH_CHAINS[ch].color}">${pieceArt(ch, t)}</span>${pieceName(ch, t)} ${TIER_NAME[t - 1]} \u00b7 ${Math.min(n, LH.done[ch + t] || 0)}/${n}</span>`).join('')}</div><div class="perk">Finish it for: ${hall.perk.toLowerCase()}, plus a dock token, a gold chest and ${rs(250 * (LH.hall + 1))} silver. Each piece delivered pays silver too.</div>`
     : `<b class="h">The longhouse is complete!</b><div class="perk">Every hall is built and every reward stays on.</div>${runeRow()}`;
   const rb = $('runeBtn'); if (rb) rb.onclick = () => showCard('rune');
   runeChip($('lhRunes'));
@@ -1982,10 +2065,23 @@ const HB_B = [
   { name: 'Toll Bridge', ic: '\u{1F309}', base: 600, cost: 150000, what: 'Every cart pays a coin' },
 ];
 const fmtN = n => n >= 1e6 ? (n / 1e6).toFixed(n < 1e7 ? 2 : 1) + 'M' : n >= 1e4 ? (n / 1e3).toFixed(n < 1e5 ? 1 : 0) + 'k' : String(Math.floor(n));
-const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 25)) * runeMult() * (1 + .1 * hallsDone()) : 0; }; // every finished hall adds a tenth // silver per minute; every 25th level doubles it
+if (!HB.ups) HB.ups = {}; if (!HB.charters) HB.charters = 0;
+// bought upgrades: each doubles one building or the barrel; the crew taps for you. A charter is the harbor's own prestige (user ask 2026-10-15)
+const HB_UPS = [
+  { id: 'nets', ic: '\u{1FAA2}', name: 'Bigger nets', what: 'The Fish Rack earns double', cost: 600, b: 0, req: 10 },
+  { id: 'bellows', ic: '\u{1F525}', name: 'Twin bellows', what: 'The Smithy earns double', cost: 5000, b: 1, req: 10 },
+  { id: 'brewer', ic: '\u{1F37B}', name: 'Second brewer', what: 'The Mead Hall earns double', cost: 40000, b: 2, req: 10 },
+  { id: 'sailcloth', ic: '\u{1F3F4}', name: 'New sailcloth', what: 'The Trading Knarr earns double', cost: 250000, b: 3, req: 10 },
+  { id: 'tollgate', ic: '\u{1F6A7}', name: 'Iron toll gate', what: 'The Toll Bridge earns double', cost: 2000000, b: 4, req: 10 },
+  { id: 'hands', ic: '\u{1F590}', name: 'Quick hands', what: 'Every barrel tap pays double', cost: 2500, b: -1, req: 10 },
+  { id: 'crew', ic: '\u{1F9D1}', name: 'Barrel crew', what: 'The crew taps the barrel twice a second while you watch', cost: 15000, b: -2, req: 60 },
+];
+const CHARTER_HB = 100, charterMult = () => 1 + .25 * HB.charters, charterReady = () => hbLevel() >= CHARTER_HB, charterGain = () => 1 + Math.floor(Math.max(0, hbLevel() - CHARTER_HB) / 100);
+const upOn = id => !!HB.ups[id], upReq = u => u.b === -1 ? HB.tap >= u.req : u.b === -2 ? hbLevel() >= u.req : HB.b[u.b] >= u.req;
+const hbOut = i => { const l = HB.b[i]; return l ? HB_B[i].base * l * Math.pow(2, Math.floor(l / 25)) * runeMult() * charterMult() * (1 + .1 * hallsDone()) * (upOn(HB_UPS[i].id) ? 2 : 1) : 0; }; // every finished hall adds a tenth // silver per minute; every 25th level doubles it
 const hbCost = i => Math.round(HB_B[i].cost * Math.pow(1.15, HB.b[i]));
 const hbRate = () => HB_B.reduce((a, _, i) => a + hbOut(i), 0);
-const tapGain = () => Math.round((1 + HB.tap) * Math.pow(2, Math.floor(HB.tap / 25)) * runeMult());
+const tapGain = () => Math.round((1 + HB.tap) * Math.pow(2, Math.floor(HB.tap / 25)) * runeMult() * charterMult() * (upOn('hands') ? 2 : 1));
 const tapCost = () => Math.round(20 * Math.pow(1.18, HB.tap));
 let hbAcc = 0; // fractions of silver carried between settles
 // bank what the buildings earned since the last settle; away time counts up to eight hours
@@ -2026,7 +2122,7 @@ function openHB() {
   if (S && S.mode !== 'won' && S.mode !== 'lost' && S.mode !== 'paused' && S.mode !== 'home') { S.resumeMode = S.mode === 'bomb' || S.mode === 'catapult' ? 'play' : S.mode; S.mode = 'paused'; }
   const away = Math.max(hbPending.away, Date.now() - (HB.last || Date.now())), got = hbSettle() + hbPending.got; hbPending = { away: 0, got: 0 };
   if (got > 0 && away > 60e3) { STATS.haul = Math.max(STATS.haul, got); toast(away >= hbCap() ? `The hold was full: the harbor earned ${fmtN(got)} silver while you were away.` : `While you were raiding, the harbor earned ${fmtN(got)} silver.`); sfx('win'); }
-  buildTabs($('hbTabs'), 'hb'); $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } if (combo && Date.now() - comboT > 1200) combo = 0; hbSettle(); hbRender(true); }, 250);
+  buildTabs($('hbTabs'), 'hb'); $('hb').hidden = false; hbRender(); clearInterval(hbTimer); hbTimer = setInterval(() => { if ($('hb').hidden) { clearInterval(hbTimer); return; } if (combo && Date.now() - comboT > 1200) combo = 0; hbSettle(); if (upOn('crew')) giveSilver(Math.round(tapGain() * .5)); hbRender(true); }, 250);
   if (!save.seen.hb) { save.seen.hb = true; persist(); showCard('hbHelp'); }
 }
 function closeHB() { hbSettle(); persist(); clearInterval(hbTimer); $('hb').hidden = true; if (homeOpen) { homeOpen = false; showHome(); return; } if (S && S.mode === 'paused') { S.mode = S.resumeMode || 'play'; S.resumeMode = null; } if (S) { S.slotBoosts = LH.tokens > 0 && S.tray.length < 6 ? 1 : 0; hud(); } }
@@ -2042,6 +2138,15 @@ $('hbBarrel').onpointerdown = e => {
   hbRender(true);
 };
 function hbBuy(i) { const c = hbCost(i); if (HB.b[i] >= HB_MAX || SAGA.silver < c) { buzz(); return; } hbSettle(); SAGA.silver -= c; HB.b[i]++; STATS.harbor++; sfx('launch'); hbMilestones(); persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); hbRender(); }
+function hbUp(id) { const u = HB_UPS.find(x => x.id === id); if (!u || upOn(id) || !upReq(u) || SAGA.silver < u.cost) { buzz(); return; } hbSettle(); SAGA.silver -= u.cost; HB.ups[id] = true; STATS.harbor++; sfx('win'); persist(); hbRender(); toast(`${u.name}: ${u.what.toLowerCase()}.`); }
+function sellCharter() {
+  if (!charterReady()) { buzz(); return; }
+  const g = charterGain(); hbSettle(); HB.charters += g; STATS.charters += g;
+  HB.b = HB.b.map(() => 0); HB.tap = 0; HB.ms = 0; HB.ups = {}; HB.last = Date.now(); hbAcc = 0; combo = 0; tapLog = []; giveChest('silver');
+  sfx('win'); buzz(); persist(); checkAch().forEach(x => toast(`${x.a.sym} ${x.a.name} ${TIER_NAME[x.tier - 1]}`)); hbRender();
+  toast(`Charter ${HB.charters}: the new harbor earns x${charterMult().toFixed(2)} from every building and tap, forever. A silver chest waits in the Longhouse.`);
+}
+const charterRow = () => `<div class="hbrow"><div class="ic">\u{1F4DC}</div><div class="txt"><b>Harbor charter${HB.charters ? ` <span style="color:var(--mute);font-weight:500">${HB.charters} held \u00b7 x${charterMult().toFixed(2)}</span>` : ''}</b><small>${charterReady() ? `Ready: sell the harbor for ${charterGain()} charter${charterGain() > 1 ? 's' : ''}. Each one pays a quarter more from everything here, forever` : `Reach harbor level ${CHARTER_HB} (now ${hbLevel()}) to sell the harbor for a charter: start over, earning a quarter more from everything here, forever`}</small></div><button class="boost" id="charterBtn" ${charterReady() ? '' : 'disabled'}>Sell<small>${charterReady() ? 'for ' + charterGain() : 'not yet'}</small></button></div>`;
 function hbTapUp() { const c = tapCost(); if (HB.tap >= HB_MAX || SAGA.silver < c) { buzz(); return; } SAGA.silver -= c; HB.tap++; STATS.harbor++; sfx('launch'); hbMilestones(); persist(); hbRender(); }
 const KEY_PRICE = { wood: 500, iron: 2000, silver: 8000, gold: 30000 };
 // prices climb with the harbor (bigger harbor, dearer market) and each boon bought costs a fifth more than the last; a runestone resets both
@@ -2069,6 +2174,7 @@ function hbRender(light) {
     $('hbList').querySelectorAll('[data-b]').forEach(b => { const i = +b.dataset.b; b.disabled = i < 0 ? HB.tap >= HB_MAX || SAGA.silver < tapCost() : HB.b[i] >= HB_MAX || SAGA.silver < hbCost(i); });
     $('hbList').querySelectorAll('[data-k]').forEach(b => { b.disabled = SAGA.silver < keyCost(b.dataset.k); });
     $('hbList').querySelectorAll('[data-boon]').forEach(b => { b.disabled = SAGA.silver < boonCost(BOONS.find(x => x.id === b.dataset.boon)); });
+    $('hbList').querySelectorAll('[data-up]').forEach(b => { const u = HB_UPS.find(x => x.id === b.dataset.up); b.disabled = !upReq(u) || SAGA.silver < u.cost; });
     return;
   }
   $('hbScene').innerHTML = `<div class="town">${HB_B.map((b, i) => `<div class="bld${HB.b[i] ? '' : ' off'}">${b.ic}<i>${HB.b[i] ? 'lv ' + HB.b[i] : '—'}</i></div>`).join('')}</div>
@@ -2079,13 +2185,16 @@ function hbRender(light) {
   $('hbList').innerHTML = `<h3>Buildings</h3>` + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtN(hbOut(i))} a minute` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('')
     + row('\u{1F6E2}', 'Bigger barrel', 'More silver for every tap', HB.tap, HB.tap ? ` · +${fmtN(tapGain())} a tap` : '', -1, tapCost(), HB.tap >= HB_MAX)
     + `<h3>For the next raid</h3>` + BOONS.map(b => `<div class="hbrow"><div class="ic">${b.ic}</div><div class="txt"><b>${b.name}${b.id === 'hammer' && SAGA.boons.hammer ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.hammer} ready</span>` : b.id === 'cata' && SAGA.boons.cata ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.cata} ready</span>` : b.id === 'horn' ? ` <span style="color:var(--mute);font-weight:500">${SAGA.horns} of ${HORN_MAX}</span>` : b.id === 'token' ? ` <span style="color:var(--mute);font-weight:500">${LH.tokens} held</span>` : ''}</b><small>${b.what}</small></div><button class="boost" data-boon="${b.id}" ${SAGA.silver < boonCost(b) ? 'disabled' : ''}>Buy<small>${fmtN(boonCost(b))} silver</small></button></div>`).join('')
-    + `<h3>Runestone</h3>` + runeRow() + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${tokRange(k)}</small></div><button class="boost" data-k="${k}" ${SAGA.silver < keyCost(k) ? 'disabled' : ''}>Buy<small>${fmtN(keyCost(k))} silver</small></button></div>`).join('')
+    + `<h3>Upgrades</h3>` + HB_UPS.map(u => `<div class="hbrow"><div class="ic">${u.ic}</div><div class="txt"><b>${u.name}${upOn(u.id) ? ' <span style="color:#2f7a4a;font-weight:500">bought</span>' : ''}</b><small>${u.what}${upOn(u.id) ? '' : upReq(u) ? '' : ` \u00b7 needs ${u.b === -1 ? 'barrel' : u.b === -2 ? 'harbor' : HB_B[u.b].name} level ${u.req}`}</small></div>${upOn(u.id) ? '' : `<button class="boost" data-up="${u.id}" ${!upReq(u) || SAGA.silver < u.cost ? 'disabled' : ''}>Buy<small>${fmtN(u.cost)} silver</small></button>`}</div>`).join('')
+    + `<h3>Charter and runestone</h3>` + charterRow() + runeRow() + `<h3>Chests for the Longhouse</h3>` + Object.keys(KEY_PRICE).map(k => `<div class="hbrow"><div class="ic">\u{1F4E6}</div><div class="txt"><b>${CHEST_NAME[k][0].toUpperCase() + CHEST_NAME[k].slice(1)} <span style="color:var(--mute);font-weight:500">${SAGA.chests[k] || 0} held</span></b><small>${tokRange(k)}</small></div><button class="boost" data-k="${k}" ${SAGA.silver < keyCost(k) ? 'disabled' : ''}>Buy<small>${fmtN(keyCost(k))} silver</small></button></div>`).join('')
     + `<div class="hbrow"><div class="ic">\u25C6</div><div class="txt"><b>Longhouse token <span style="color:var(--mute);font-weight:500">${LH.pending.length} waiting</span></b><small>One piece for any corner of the board${boonOn('trade') ? ' \u00b7 Trade Winds: half price' : ''}</small></div><button class="boost" id="hbTok" ${SAGA.silver < tokenCost() ? 'disabled' : ''}>Buy<small>${fmtN(tokenCost())} silver</small></button></div>`;
   const ht = $('hbTok'); if (ht) ht.onclick = buyToken;
   $('hbList').querySelectorAll('[data-b]').forEach(b => b.onclick = () => +b.dataset.b < 0 ? hbTapUp() : hbBuy(+b.dataset.b));
   $('hbList').querySelectorAll('[data-k]').forEach(b => b.onclick = () => hbKey(b.dataset.k));
   $('hbList').querySelectorAll('[data-boon]').forEach(b => b.onclick = () => hbBoon(b.dataset.boon));
   const rb = $('runeBtn'); if (rb) rb.onclick = () => showCard('rune');
+  $('hbList').querySelectorAll('[data-up]').forEach(b => b.onclick = () => hbUp(b.dataset.up));
+  const cb = $('charterBtn'); if (cb) cb.onclick = () => showCard('charter');
 }
 let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() }; // banked while the game was closed; the Harbor screen tells the tale
 
@@ -2156,13 +2265,14 @@ function mnRender(light) {
   const tapBtn = (a, i, label, auto, sub) => `<button class="boost mntap${auto ? ' auto' : ''}" data-a="${a}" data-i="${i}">${auto ? 'Foreman' : label}<small>${auto ? 'running' : sub}</small></button>`;
   const rate = MN.c.f ? Math.min(cartRate(), MN.h.f ? Math.min(hoistRate(), MN.s.reduce((a, sh, i) => a + (sh.f ? shaftRate(i) : 0), 0)) + MN.sur : MN.sur) : 0;
   let h = `<div class="mnsum"><div><b>${f1(Math.max(0, rate))}</b> silver a second on its own<small style="display:block;color:var(--mute)">${MN.deeds ? `${MN.deeds} deed${MN.deeds > 1 ? 's' : ''}: everything x${(1 + .5 * MN.deeds).toFixed(1)}` : `Foremen keep working while the app is closed${hbAway() < 1 ? ', at half pace' : ''}`}</small></div><div style="text-align:right"><b>${MN.s.length}</b> shaft${MN.s.length > 1 ? 's' : ''}</div></div>`;
-  h += `<div class="mnrow"><div class="ic">\u{1F6D2}</div><div class="txt"><b>Ore carts <span>level ${MN.c.l}</span></b><small>Sell ${f1(cartRate())} ore a second · <span data-ore="sur">${fmtN(MN.sur)}</span> ore at the pithead</small><div class="mnbtns">${btn('cup', 0, 'Upgrade', cartUpCost())}${MN.c.f ? '' : btn('cfm', 0, 'Hire foreman', foremanCost('c'))}</div></div>${tapBtn('sell', 0, 'Sell', MN.c.f, '+' + fmtN(Math.max(1, cartRate() * 6)))}</div>`;
-  h += `<div class="mnrow"><div class="ic">\u{1F3D7}</div><div class="txt"><b>Hoist <span>level ${MN.h.l}</span></b><small>Lifts ${f1(hoistRate())} ore a second to the pithead</small><div class="mnbtns">${btn('hup', 0, 'Upgrade', hoistUpCost())}${MN.h.f ? '' : btn('hfm', 0, 'Hire foreman', foremanCost('h'))}</div></div>${tapBtn('haul', 0, 'Haul', MN.h.f, '' + fmtN(Math.max(1, hoistRate() * 6)) + ' ore')}</div>`;
-  h += `<h3>Shafts</h3>` + MN.s.map((sh, i) => `<div class="mnrow shaft"><div class="ic">⛏</div><div class="txt"><b>Shaft ${i + 1} <span>level ${sh.l}</span></b><small>Digs ${f1(shaftRate(i))} ore a second · <span data-ore="${i}">${fmtN(sh.ore)}</span> ore waiting</small><div class="mnbtns">${btn('up', i, 'Upgrade', shaftUpCost(i))}${sh.f ? '' : btn('fm', i, 'Hire foreman', foremanCost(i))}</div></div>${tapBtn('dig', i, 'Dig', sh.f, '+' + fmtN(Math.max(1, shaftRate(i) * 6)))}</div>`).join('');
+  const miners = (i, f) => { const n = Math.min(5, 1 + Math.floor(MN.s[i].l / 4)); let m = ''; for (let k = 0; k < n; k++) m += `<span class="miner${f ? ' go' : ''}" style="left:${12 + k * 14}%;animation-delay:${k * .17}s">\u{1F477}</span>`; return m; };
+  h += `<div class="mnrow carts"><div class="tunnel"><div class="label"><b>Ore carts</b> <span>level ${MN.c.l}</span><br>Sells ${f1(cartRate())} ore a second</div><div class="ore"><span data-ore="sur">${fmtN(MN.sur)}</span> ore at the pithead</div><span class="cart${MN.c.f ? ' go' : ''}">\u{1F6D2}</span><span class="bldg">\u{1F3E0}</span><div class="acts">${btn('cup', 0, 'Upgrade', cartUpCost())}${MN.c.f ? '' : btn('cfm', 0, 'Foreman', foremanCost('c'))}${tapBtn('sell', 0, 'Sell', MN.c.f, '+' + fmtN(Math.max(1, cartRate() * 6)))}</div></div></div>`;
+  h += `<div class="mnrow hoist"><div class="lift"><div class="cage" style="top:${MN.h.f ? 40 : 30}px">⚓</div></div><div class="tunnel"><div class="label"><b>Hoist</b> <span>level ${MN.h.l}</span><br>Lifts ${f1(hoistRate())} ore a second</div><div class="acts">${btn('hup', 0, 'Upgrade', hoistUpCost())}${MN.h.f ? '' : btn('hfm', 0, 'Foreman', foremanCost('h'))}${tapBtn('haul', 0, 'Haul', MN.h.f, fmtN(Math.max(1, hoistRate() * 6)) + ' ore')}</div></div></div>`;
+  h += MN.s.map((sh, i) => `<div class="mnrow shaft"><div class="lift"></div><div class="tunnel"><div class="label"><b>Shaft ${i + 1}</b> <span>level ${sh.l}</span><br>${f1(shaftRate(i))} ore a second</div><div class="ore"><span data-ore="${i}">${fmtN(sh.ore)}</span> ore</div>${miners(i, sh.f)}<span class="rock">\u{1FAA8}</span><div class="acts">${btn('up', i, 'Upgrade', shaftUpCost(i))}${sh.f ? '' : btn('fm', i, 'Foreman', foremanCost(i))}${tapBtn('dig', i, 'Dig', sh.f, '+' + fmtN(Math.max(1, shaftRate(i) * 6)))}</div></div></div>`).join('');
   if (MN.s.length < MN_MAX_SHAFTS) h += `<div class="mnrow"><div class="ic">\u{1F6A7}</div><div class="txt"><b>Dig a new shaft</b><small>Shaft ${MN.s.length + 1} is ${Math.round(Math.pow(2.2, MN.s.length) * 10) / 10}x as rich as the first</small></div>${btn('new', 0, 'Dig', newShaftCost())}</div>`;
   h += `<h3>Sell the mine</h3><div class="mnrow"><div class="ic">❖</div><div class="txt"><b>Deed ${MN.deeds + 1}</b><small id="mnProg">${fmtN(MN.earned)} of ${fmtN(deedNeed())} silver earned</small><div class="mnbar"><i style="width:${Math.min(100, MN.earned / deedNeed() * 100)}%"></i></div><small>Start a fresh mine that digs ${50 * (MN.deeds + 1)}% faster, forever, plus a gold chest</small></div><button class="boost" id="mnDeed" data-a="deed" data-i="0" ${MN.earned < deedNeed() ? 'disabled' : ''}>Sell<small>for a deed</small></button></div>`;
   list.innerHTML = h;
-  list.querySelectorAll('[data-a]').forEach(b => b.onclick = e => { const el = e.currentTarget; if (el.classList.contains('mntap')) { el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 90); } mnAct(el.dataset.a, +el.dataset.i); });
+  list.querySelectorAll('[data-a]').forEach(b => b.onclick = e => { const el = e.currentTarget; if (el.classList.contains('mntap')) { el.classList.add('hit'); setTimeout(() => el.classList.remove('hit'), 90); const row = el.closest('.mnrow'); row.querySelectorAll('.miner, .cart').forEach(m => { m.classList.add('go'); setTimeout(() => { if (!(el.dataset.a === 'dig' ? MN.s[+el.dataset.i].f : el.dataset.a === 'sell' ? MN.c.f : true)) m.classList.remove('go'); }, 1500); }); } mnAct(el.dataset.a, +el.dataset.i); });
 }
 
 window.JB = { get S() { return S; }, mkGl, lapHits, MN, openMN, closeMN, mnAct, mnSettle, showHome, playHome, placePending, raiseRune, runeReady, HB, hbBoon, BOONS, openHB, closeHB, hbBuy, hbSettle, hbRate, LH, HALLS, openLH, closeLH, openChest, lhDrop, deliver, tribute, sell, lhRender, SAGA, STATS, ACH, checkAch, win, lose, update, tapQueue, tapTray, queueItemPos, catapult, showCard, startLevel, save, buildLevel, exposed, solvable, planShips, lapHits, composeScene, difficulty, parseGrid, rngFrom };
