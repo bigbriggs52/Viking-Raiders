@@ -221,7 +221,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-0640",date:"2026-10-15 06:40 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-0647",date:"2026-10-15 06:47 UTC"};</script>
 
 
 <div id="app">
@@ -242,7 +242,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
     <button class="boost" id="bCata"><span class="pi">&#x1F3F9;</span><span class="pl">Catapult</span><b id="nCata">1</b></button>
   </div>
   <div id="lh" hidden>
-    <div class="hud"><div class="lvl">Longhouse</div><div class="chip" id="lhSilver">0 silver</div><div class="chip" id="lhTokens" hidden>0 dock tokens</div><div class="chip" id="lhRunes" hidden></div><button class="iconbtn" id="lhClose" aria-label="Back to the raid">✕</button></div>
+    <div class="hud"><div class="lvl">Longhouse</div><div class="chip" id="lhSilver">0 silver</div><div class="chip" id="lhTokens" hidden>0 dock tokens</div><div class="chip" id="lhPieces" hidden style="background:#ffd37a;color:#2b2118">0 tokens to place</div><div class="chip" id="lhRunes" hidden></div><button class="iconbtn" id="lhClose" aria-label="Back to the raid">✕</button></div>
     <div class="lhorder" id="lhOrder"></div>
     <div class="lhgrid" id="lhGrid"></div>
     <div class="lhshelf" id="lhShelf"></div>
@@ -636,7 +636,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.037.10.15.26.0240';
+const BUILD = 'VR1.038.10.15.26.0247';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1723,6 +1723,7 @@ function pieceEl(p) { const el = document.createElement('div'); el.className = `
 function lhRender() {
   $('lhSilver').textContent = `${SAGA.silver} silver`;
   const tk = $('lhTokens'); tk.hidden = !LH.tokens; tk.textContent = `${LH.tokens} dock token${LH.tokens === 1 ? '' : 's'}`;
+  const pc = $('lhPieces'); pc.hidden = !LH.pending.length; pc.textContent = `${LH.pending.length} token${LH.pending.length === 1 ? '' : 's'} to place`;
   // the order
   const hall = HALLS[LH.hall];
   $('lhOrder').innerHTML = hall
