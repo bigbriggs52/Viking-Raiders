@@ -149,7 +149,8 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .want.met { background: #d9ecd9; text-decoration: line-through; }
 .lhgrid { flex: 1; min-height: 0; position: relative; display: grid; grid-template-columns: repeat(6, var(--c, 48px)); grid-auto-rows: var(--c, 48px); gap: 4px; align-content: center; justify-content: center; touch-action: none; }
 .lhcell { position: relative; background: #c9b893; border-radius: 10px; box-shadow: inset 0 2px 0 rgba(0,0,0,.08); }
-.lhcell.drop { outline: 3px dashed #2b2118; outline-offset: -4px; }
+.lhcell.drop { box-shadow: inset 0 0 0 3px #ffd37a; animation: dropglow 1.6s ease-in-out infinite; }
+@keyframes dropglow { 50% { box-shadow: inset 0 0 0 3px rgba(255, 211, 122, .35); } }
 .lhcell.qT { background: #d9c3a3; } .lhcell.qI { background: #bfc6cc; } .lhcell.qF { background: #e6cf98; } .lhcell.qW { background: #e4ddd3; }
 .lhcell[data-q]::before { content: attr(data-q); position: absolute; inset: 0; display: grid; place-items: center; font-size: 26px; opacity: .22; }
 .piece.pop { animation: pop .42s cubic-bezier(.2, 1.4, .4, 1) both; }
@@ -175,7 +176,10 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .lhbar { display: flex; gap: 8px; height: 62px; align-items: stretch; }
 .lhbar .hint { overflow: hidden; }
 .lhbar .boost { font-size: 14px; }
-.lhbar .hint { flex: 1; display: grid; place-items: center; font-size: 13px; color: var(--mute); text-align: center; }
+.lhbar .hint { flex: 1; display: grid; place-items: center; font-size: 14px; color: #2b2118; text-align: center; background: rgba(243, 233, 210, .94); border-radius: 12px; padding: 6px 10px; line-height: 1.25; }
+.lhshelf .boost[disabled], .lhkinds .boost[disabled] { opacity: 1; background: #4a3220; color: #d9c3a3; box-shadow: 0 2px 0 #2b2118; }
+.lhshelf .boost[disabled] b { color: #d9c3a3; }
+#lh .hud, #hb .hud { flex-wrap: wrap; row-gap: 6px; }
 .tokbar { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; }
 .tokbar .hint { flex: none; display: block; font-size: 12px; padding: 0; }
 .lhkinds { display: flex; gap: 5px; }
@@ -226,7 +230,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261015-1318",date:"2026-10-15 13:18 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261015-1333",date:"2026-10-15 13:33 UTC"};</script>
 
 
 <div id="app">
@@ -652,7 +656,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.040.10.15.26.0918';
+const BUILD = 'VR1.041.10.15.26.0933';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
