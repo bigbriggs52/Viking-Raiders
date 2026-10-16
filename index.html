@@ -203,7 +203,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .mnsum small { display: block; color: var(--mute); font-size: 11px; }
 .mnhead { position: absolute; left: -14px; bottom: 20px; width: 92px; height: 160px; z-index: 2; cursor: pointer; }
 .mnhead svg { width: 100%; height: 100%; display: block; }
-.mnhead .cnt { position: absolute; left: 10px; top: 4px; white-space: nowrap; }
+.mnhead .cnt { position: absolute; left: 10px; top: -4px; white-space: nowrap; }
 .mnhead .mnlvl { position: absolute; left: 20px; bottom: 26px; }
 .mnhouse { position: absolute; right: 4px; bottom: 20px; width: 136px; height: 118px; z-index: 2; cursor: pointer; }
 .mnhouse svg { width: 100%; height: 100%; display: block; }
@@ -213,6 +213,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .mncart svg { width: 100%; height: 100%; display: block; }
 .mncart.back svg { transform: scaleX(-1); }
 .mncart .load, .mncage .load { display: none; } .mncart.full .load, .mncage.full .load { display: block; }
+.mncnt.load { left: 50%; transform: translateX(-50%); top: -20px; background: #ffd37a; color: #2b2118; }
 .mncart.go svg { animation: trundle .3s linear infinite; }
 @keyframes trundle { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2px; } }
 .mncnt { position: absolute; z-index: 3; background: rgba(0,0,0,.55); color: #ffd37a; font-weight: 800; font-size: 11px; padding: 2px 8px; border-radius: 99px; white-space: nowrap; font-variant-numeric: tabular-nums; text-shadow: none; }
@@ -221,7 +222,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 .mnunder { position: relative; padding-left: 64px; }
 .mncol { position: absolute; left: 0; top: 0; bottom: 0; width: 64px; overflow: hidden; background: #1d140d repeating-linear-gradient(0deg, transparent 0 14px, rgba(255,255,255,.05) 14px 16px); border-right: 4px solid #6b4a2e; box-sizing: border-box; cursor: pointer; }
 .mncol::before { content: ''; position: absolute; left: 10px; right: 14px; top: 0; bottom: 0; border-left: 3px solid #4a3220; border-right: 3px solid #4a3220; }
-.mncage { position: absolute; left: 10px; width: 40px; height: 52px; top: 6px; transition: top 1s ease-in-out; }
+.mncage { position: absolute; left: 10px; width: 40px; height: 52px; top: 26px; transition: top 1s ease-in-out; }
 .mncage::before { content: ''; position: absolute; left: 50%; bottom: 100%; height: 3000px; margin-left: -1px; border-left: 3px solid #c9a55a; }
 .mncage svg { width: 100%; height: 100%; display: block; position: relative; }
 .mntun { position: relative; height: 118px; overflow: hidden; background: #5a4030 repeating-radial-gradient(circle at 20% 30%, rgba(0,0,0,.16) 0 6px, transparent 6px 24px); border-bottom: 6px solid #2b1d12; cursor: pointer; }
@@ -325,7 +326,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261016-0428",date:"2026-10-16 04:28 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261016-0438",date:"2026-10-16 04:38 UTC"};</script>
 
 
 <div id="app">
@@ -790,7 +791,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.051.10.16.26.0028';
+const BUILD = 'VR1.052.10.16.26.0038';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1867,8 +1868,8 @@ function tap() { if (!save.vibe) return; try { navigator.vibrate && navigator.vi
 let lastTap = 0;
 document.addEventListener('touchend', e => {
   // a quick second tap must never zoom the page; on the Longhouse and Harbor screens that covers buttons too, which then get their click by hand
-  const now = Date.now(), btn = e.target.closest('button'), side = e.target.closest('#lh, #hb');
-  if (now - lastTap < 350 && (side || !btn)) { e.preventDefault(); if (btn && !btn.disabled) btn.click(); }
+  const now = Date.now(), btn = e.target.closest('button, [data-tap]'), side = e.target.closest('#lh, #hb, #mn');
+  if (now - lastTap < 350 && (side || !btn)) { e.preventDefault(); if (btn && !btn.disabled) btn.click(); } // the mine's shafts, cage and cart are tap targets too
   lastTap = now;
 }, { passive: false });
 document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
@@ -2270,7 +2271,8 @@ function mnTake(amt) { let left = amt, moved = 0; for (let i = MN.s.length - 1; 
 function mnHaul(amt) { const t = mnTake(amt); MN.sur += t; return t; }
 function mnSell(amt) { const t = Math.min(amt, MN.sur); MN.sur -= t; return mnEarn(t); }
 const mnTotal = () => Math.min(digRate() + (mnStock() > 1 ? 1e9 : 0), MN.h.f ? hoistRate() : 0, MN.c.f ? cartRate() : 0); // silver a second the foremen bring in on their own
-function mnStep(dt, k = 1, live) { MN.s.forEach((sh, i) => mnDig(i, shaftRate(i) * dt * k)); if (live) return 0; let got = 0; if (MN.h.f) mnHaul(hoistRate() * dt * k); if (MN.c.f) got += mnSell(cartRate() * dt * k); return got; }
+let mnSack = []; // what each crew carries before it tips the sack on the pile
+function mnStep(dt, k = 1, live) { MN.s.forEach((sh, i) => { if (live) mnSack[i] = (mnSack[i] || 0) + shaftRate(i) * dt; else mnDig(i, shaftRate(i) * dt * k); }); if (live) return 0; let got = 0; if (MN.h.f) mnHaul(hoistRate() * dt * k); if (MN.c.f) got += mnSell(cartRate() * dt * k); return got; }
 // bank what happened since the last settle: the shafts always dig; away from the mine the foremen lift and sell at the harbor's away rate (with it open, the trips on screen do that); run in slices so the silver flows shaft to hoist to carts
 function mnSettle() {
   const now = Date.now(), dt = Math.min(hbCap(), Math.max(0, now - (MN.last || now))) / 1000; MN.last = now; if (!dt) return 0;
@@ -2295,7 +2297,7 @@ function openMN() {
   if (!save.seen.mn) { save.seen.mn = true; persist(); showCard('mnHelp'); }
 }
 let mnCarry = { h: 0, c: 0 }; // what the cage and the cart hold mid-trip
-function mnLeave() { mnSettle(); MN.sur += mnCarry.h + mnCarry.c; mnCarry = { h: 0, c: 0 }; persist(); clearInterval(mnTimer); mnGen++; mnCloseSheet(); $('mn').hidden = true; }
+function mnLeave() { mnSettle(); MN.sur += mnCarry.h + mnCarry.c; mnCarry = { h: 0, c: 0 }; mnSack.forEach((v, i) => { if (MN.s[i]) MN.s[i].ore += v; }); mnSack = []; persist(); clearInterval(mnTimer); mnGen++; mnCloseSheet(); $('mn').hidden = true; }
 function closeMN() { mnLeave(); if (homeOpen) { homeOpen = false; showHome(); return; } if (S && S.mode === 'paused') { S.mode = S.resumeMode || 'play'; S.resumeMode = null; } }
 $('mnClose').onclick = closeMN;
 function mnPay(c) { if (SAGA.silver < c) { buzz(); return false; } mnSettle(); SAGA.silver -= c; sfx('launch'); return true; }
@@ -2325,7 +2327,7 @@ const HOUSE_SVG = `<svg viewBox="0 0 136 118"><path d="M8 66 Q68 -14 128 66 Z" f
 const SKY_SVG = `<svg class="bg" viewBox="0 0 390 236" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="mnskyg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fb3e3"/><stop offset="1" stop-color="#dbeef9"/></linearGradient></defs><rect width="390" height="236" fill="url(#mnskyg)"/><circle cx="262" cy="78" r="44" fill="#fff3b0" opacity=".3"/><circle cx="262" cy="78" r="24" fill="#fff6c8"/><path d="M0 160 L52 92 L96 130 L150 62 L205 128 L250 86 L306 136 L350 100 L390 134 L390 236 L0 236 Z" fill="#7b93ad"/><path d="M150 62 L136 86 L166 86 Z M250 86 L239 104 L262 104 Z M52 92 L41 110 L64 110 Z M350 100 L340 114 L361 114 Z" fill="#f4f8fb"/><path d="M96 130 L80 160 L200 160 L150 110 Z M306 136 L270 176 L360 176 Z" fill="#657d98"/><rect x="0" y="160" width="390" height="34" fill="#4d8fc2"/><path d="M0 178 Q60 170 120 178 T240 178 T390 176" stroke="#8fc0e6" stroke-width="2" fill="none" opacity=".7"/><path d="M0 194 Q80 172 170 196 Q260 174 390 192 L390 236 L0 236 Z" fill="#5d8f45"/><g fill="#2f5e2e"><path d="M40 200 l-9 20 h18 z M40 190 l-7 16 h14 z M70 206 l-8 18 h16 z M70 197 l-6 14 h12 z M300 198 l-9 20 h18 z M300 188 l-7 16 h14 z M330 206 l-8 18 h16 z M330 197 l-6 14 h12 z M360 202 l-7 16 h14 z"/></g><path d="M160 236 Q200 214 230 218" stroke="#c9a55a" stroke-width="7" fill="none" stroke-linecap="round"/></svg>`;
 // ---- the scene ----
 function mnFloat(host, x, y, text, cls) { if (!host) return; const f = document.createElement('div'); f.className = 'mnfloat' + (cls ? ' ' + cls : ''); f.style.left = x + 'px'; f.style.top = y + 'px'; f.textContent = text; host.appendChild(f); setTimeout(() => f.remove(), 1300); }
-const f1 = n => n >= 100 ? fmtN(n) : n >= 10 ? n.toFixed(1) : n.toFixed(2);
+const f1 = n => n >= 100 ? fmtN(n) : n >= 10 ? n.toFixed(1) : n.toFixed(2), fmtS = n => n >= 100 ? fmtN(n) : n.toFixed(1);
 const tunTop = i => i * 124 + 30; // where the cage stops for shaft i (tunnel height 118 + 6 border)
 // a shaft's miners walk to the rock face, dig, walk back and tip the ore on the pile; with a foreman they go again, by hand it is one trip per tap
 function mnCycleShaft(i, gen, manual) {
@@ -2335,6 +2337,7 @@ function mnCycleShaft(i, gen, manual) {
   setTimeout(() => { crew.classList.remove('walk'); crew.classList.add('mine'); tap();
     setTimeout(() => { crew.classList.remove('mine'); crew.classList.add('walk', 'back'); crew.style.left = '50px';
       setTimeout(() => { crew.classList.remove('walk', 'back');
+        const sack = mnSack[i] || 0; mnSack[i] = 0; if (sack > 0) { mnDig(i, sack); mnFloat(tun, 56, 44, '+' + fmtS(sack)); mnRender(true); } // the sack is tipped on the pile
         if (!manual && gen === mnGen && mnLive()) setTimeout(() => mnCycleShaft(i, gen, false), 250); else mnBusy.s[i] = false; // the miners never stop
       }, walkT); }, mineT); }, walkT);
 }
@@ -2345,10 +2348,10 @@ function mnCycleHoist(gen, manual) {
   if (tgt < 0) { if (manual) buzz(); else if (MN.h.f && gen === mnGen) setTimeout(() => mnCycleHoist(gen, false), 1000); else mnBusy.h = false; return; }
   mnBusy.h = true; const st = hoistStats(), down = (400 + 350 * (tgt + 1)) / st.speed;
   cage.classList.remove('full'); cage.style.transitionDuration = down + 'ms'; cage.style.top = tunTop(tgt) + 'px';
-  setTimeout(() => { mnCarry.h = mnTake(hoistCap()); cage.classList.add('full'); tap(); mnRender(true);
-    setTimeout(() => { cage.style.top = '6px';
+  setTimeout(() => { mnCarry.h = mnTake(hoistCap()); cage.classList.add('full'); $('mnCageN').textContent = fmtS(mnCarry.h); tap(); mnRender(true);
+    setTimeout(() => { cage.style.top = '26px';
       setTimeout(() => { cage.classList.remove('full');
-        const got = mnCarry.h; mnCarry.h = 0; MN.sur += got; persist(); mnFloat($('mnSky'), 70, 96, '+' + fmtR(got) + ' lifted'); mnRender(true);
+        const got = mnCarry.h; mnCarry.h = 0; MN.sur += got; persist(); mnFloat($('mnSky'), 70, 96, '+' + fmtS(got)); mnRender(true);
         if (!manual && MN.h.f && gen === mnGen && mnLive()) setTimeout(() => mnCycleHoist(gen, false), 300); else mnBusy.h = false;
       }, down); }, 500); }, down);
 }
@@ -2357,7 +2360,7 @@ function mnCycleCart(gen, manual) {
   const cart = $('mnCart'); if (!cart || !mnLive()) { mnBusy.c = false; return; }
   if (MN.sur < .01) { if (manual) buzz(); else if (MN.c.f && gen === mnGen) setTimeout(() => mnCycleCart(gen, false), 1000); else mnBusy.c = false; return; }
   mnBusy.c = true; const st = cartStats(), sky = $('mnSky'), far = Math.max(90, sky.clientWidth - 150 - 56), goT = 1400 / st.speed;
-  mnCarry.c = Math.min(cartCap(), MN.sur); MN.sur -= mnCarry.c; mnRender(true);
+  mnCarry.c = Math.min(cartCap(), MN.sur); MN.sur -= mnCarry.c; $('mnCartN').textContent = fmtS(mnCarry.c); mnRender(true);
   cart.classList.remove('back'); cart.classList.add('full', 'go'); cart.style.transitionDuration = goT + 'ms'; cart.style.left = far + 'px';
   setTimeout(() => { cart.classList.remove('full'); cart.classList.add('back'); cart.style.left = '76px';
     const got = mnEarn(mnCarry.c); mnCarry.c = 0; persist(); if (got > 0) { mnFloat(sky, far + 30, 90, '+' + fmtN(got) + ' silver', 'silver'); tap(); } mnRender(true);
@@ -2374,7 +2377,7 @@ function mnRender(light) {
   const lvlTxt = (k, i) => k === 's' ? `Shaft ${i + 1}<b>Lv ${MN.s[i].l}</b>` : k === 'h' ? `Hoist<b>Lv ${MN.h.l}</b>` : `Carts<b>Lv ${MN.c.l}</b>`;
   if (key === mnKey && scene.children.length) {
     scene.querySelectorAll('[data-lvl]').forEach(e => { const [k, i] = e.dataset.lvl.split(':'); e.innerHTML = lvlTxt(k, +i); });
-    scene.querySelectorAll('[data-ore]').forEach(e => { const k = e.dataset.ore; e.textContent = fmtR(k === 'sur' ? MN.sur : MN.s[+k].ore); });
+    scene.querySelectorAll('[data-ore]').forEach(e => { const k = e.dataset.ore; e.textContent = fmtS(k === 'sur' ? MN.sur : MN.s[+k].ore); });
     const sm = $('mnSlow'); if (sm) sm.textContent = slow; const dr = $('mnDig'); if (dr) dr.textContent = fmtR(dig); const hh = $('mnHoistR'); if (hh) hh.textContent = fmtR(hr); const cc = $('mnCartR'); if (cc) cc.textContent = fmtR(cr);
     scene.querySelectorAll('[data-pile]').forEach(e => { e.className = 'pile ' + pileClass(+e.dataset.pile); });
     scene.querySelectorAll('[data-cost]').forEach(b => { b.disabled = SAGA.silver < +b.dataset.cost; });
@@ -2386,15 +2389,15 @@ function mnRender(light) {
   mnKey = key;
   const btn = (a, i, label, cost) => `<button class="boost" data-a="${a}" data-i="${i}" data-cost="${cost}" ${SAGA.silver < cost ? 'disabled' : ''}>${label}<small>${fmtN(cost)} silver</small></button>`;
   const crew = i => { const n = shaftStats(i).miners; let m = ''; for (let k = 0; k < n; k++) m += `<span class="mnr" style="left:${k * 15}px;animation-delay:${k * .11}s">${MINER_SVG()}</span>`; return `<div class="mncrew" id="mnCrew${i}" style="width:${34 + (n - 1) * 15}px">${m}</div>`; };
-  const carts = () => { const n = cartStats().carts; return `<div class="mncart" id="mnCart" data-tap="c">${CART_SVG}${n > 1 ? `<span class="mncnt" style="right:-6px;top:-10px">x${n}</span>` : ''}</div>`; };
+  const carts = () => { const n = cartStats().carts; return `<div class="mncart" id="mnCart" data-tap="c">${CART_SVG}<span class="mncnt load" id="mnCartN"></span>${n > 1 ? `<span class="mncnt" style="right:-6px;top:-10px">x${n}</span>` : ''}</div>`; };
   let h = `<div class="mnsky" id="mnSky">${SKY_SVG}<div class="mnground"></div>
     <div class="mnsum"><div class="line">Dig <b id="mnDig">${fmtR(dig)}</b> · Lift <b id="mnHoistR">${fmtR(hr)}</b> · Sell <b id="mnCartR">${fmtR(cr)}</b> <span>silver a second</span></div><small><span id="mnSlow">${slow}</span>${MN.deeds ? ` · ${MN.deeds} deed${MN.deeds > 1 ? 's' : ''}: x${(1 + .5 * MN.deeds).toFixed(1)}` : ''}</small></div>
-    <div class="mnhead" data-tap="h">${HEAD_SVG}<div class="mncnt cnt"><span data-ore="sur">${fmtR(MN.sur)}</span> at the pithead</div><button class="mnlvl" data-sh="h" data-lvl="h:0">${lvlTxt('h')}</button></div>
+    <div class="mnhead" data-tap="h">${HEAD_SVG}<div class="mncnt cnt"><span data-ore="sur">${fmtS(MN.sur)}</span> at the pithead</div><button class="mnlvl" data-sh="h" data-lvl="h:0">${lvlTxt('h')}</button></div>
     ${carts()}
     <div class="mnhouse" data-tap="c">${HOUSE_SVG}<button class="mnlvl" data-sh="c" data-lvl="c:0">${lvlTxt('c')}</button></div>
-  </div><div class="mnunder"><div class="mncol" data-tap="h"><div class="mncage" id="mnCage">${CAGE_SVG}</div></div>`;
+  </div><div class="mnunder"><div class="mncol" data-tap="h"><div class="mncage" id="mnCage">${CAGE_SVG}<span class="mncnt load" id="mnCageN"></span></div></div>`;
   h += MN.s.map((sh, i) => `<div class="mntun" data-tap="s" data-i="${i}"><div class="in"></div><div class="rail"></div><div class="face"></div><div class="torch">${TORCH_SVG}</div>
-    <div class="mncnt cnt"><span data-ore="${i}">${fmtR(sh.ore)}</span> silver dug</div><div class="fm${sh.f ? '' : ' none'}" title="${sh.f ? 'Foreman' : 'No foreman yet'}">${sh.f ? FOREMAN_SVG : '<svg viewBox="0 0 30 42"><rect x="6" y="18" width="18" height="4" fill="#8d6540"/><rect x="6" y="4" width="4" height="34" fill="#8d6540"/><rect x="20" y="22" width="4" height="16" fill="#8d6540"/><rect x="6" y="4" width="18" height="3" fill="#8d6540"/></svg>'}</div>
+    <div class="mncnt cnt"><span data-ore="${i}">${fmtS(sh.ore)}</span> silver</div><div class="fm${sh.f ? '' : ' none'}" title="${sh.f ? 'Foreman' : 'No foreman yet'}">${sh.f ? FOREMAN_SVG : '<svg viewBox="0 0 30 42"><rect x="6" y="18" width="18" height="4" fill="#8d6540"/><rect x="6" y="4" width="4" height="34" fill="#8d6540"/><rect x="20" y="22" width="4" height="16" fill="#8d6540"/><rect x="6" y="4" width="18" height="3" fill="#8d6540"/></svg>'}</div>
     <div class="pile ${pileClass(i)}" data-pile="${i}">${PILE_SVG}</div>${crew(i)}<button class="mnlvl" data-sh="s" data-i="${i}" data-lvl="s:${i}">${lvlTxt('s', i)}</button></div>`).join('');
   h += `</div><div class="mnfoot">`;
   if (MN.s.length < MN_MAX_SHAFTS) h += `<div class="mnrow"><div class="ic">\u{1F6A7}</div><div class="txt"><b>Dig a new shaft</b><small>Shaft ${MN.s.length + 1} is ${Math.round(Math.pow(2.5, MN.s.length) * 10) / 10}x as rich as the first</small></div>${btn('new', 0, 'Dig', newShaftCost())}</div>`;
