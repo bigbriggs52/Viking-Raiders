@@ -322,7 +322,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261016-0341",date:"2026-10-16 03:41 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261016-0345",date:"2026-10-16 03:45 UTC"};</script>
 
 
 <div id="app">
@@ -787,7 +787,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.047.10.15.26.2341';
+const BUILD = 'VR1.048.10.15.26.2345';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1763,7 +1763,7 @@ function showCard(kind, extra) {
         <h3>Time</h3>${r('Raids beaten under par', st.swift)}${r('Own bests beaten', st.ownBest)}${r('Time raiding', fmtT(st.time))}
         <h3>Fighting</h3>${r('Axes thrown', st.axes)}${r('Shields broken', st.shields)}${r('Ships sailed', st.sailed)}${r('Lashed pairs sailed', Math.floor(st.lashed / 2))}${r('Full-load dock sailings', st.fullLoad)}${r('Hammers used', st.hammers)}${r('Catapults used', st.catapults)}
         <h3>Treasure</h3>${r('Silver in the purse', SAGA.silver)}${r('Silver earned all time', st.silverAll)}${r('Chests', Object.keys(CHEST_NAME).map(k => `${SAGA.chests[k] || 0} ${k}`).join(', '))}
-        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Runestones raised', st.runes)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtN(hbRate()) + ' a minute')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}${r('Silver mined', fmtN(st.ore))}${r('Mine deeds', st.deeds)}${r('Harbor charters', st.charters)}
+        <h3>Longhouse and Harbor</h3>${r('Chests opened', st.chestsOpened)}${r('Merges', st.merges3)}${r('Top-tier pieces made', st.merges5)}${r('Pieces delivered', st.delivered)}${r('Halls finished', st.halls + ' of ' + HALLS.length)}${r('Runestones raised', st.runes)}${r('Dock tokens used', st.tokensUsed)}${r('Harbor income', fmtR(hbRate() / 60) + ' a second')}${r('Barrel taps', st.taps)}${r('Best haul while away', fmtN(st.haul))}${r('Silver mined', fmtN(st.ore))}${r('Mine deeds', st.deeds)}${r('Harbor charters', st.charters)}
         ${rec ? `<h3>Raid ${S.n}</h3>${r('Tries', rec.t)}${r('Wins', rec.w)}${r('Best time', rec.b ? fmtT(rec.b) : '\u2014')}${r('Par', fmtT(S.par))}${r('Under par', rec.s ? 'Yes \u2605' : 'Not yet')}${r('Hammers / catapults used', rec.h + ' / ' + rec.c)}` : ''}
         <p style="font-size:12px;margin-top:6px">Counting since ${SAGA.since}. Raids won before then count as wins, not as first tries.</p>`;
     }
@@ -2225,10 +2225,10 @@ function hbRender(light) {
   }
   $('hbScene').innerHTML = `<div class="town">${HB_B.map((b, i) => `<div class="bld${HB.b[i] ? '' : ' off'}">${b.ic}<i>${HB.b[i] ? 'lv ' + HB.b[i] : '—'}</i></div>`).join('')}</div>
     <div class="rates" id="hbRates">${rates()}</div>
-    <div class="inc"><span>${r ? `${fmtN(r)} a minute here, ${fmtN(r * hbAway())} while away${hallsDone() ? `, halls +${hallsDone() * 10}%` : ''}` : 'Build a Fish Rack to start earning'}</span><span>Level ${lvl}</span></div>
+    <div class="inc"><span>${r ? `${fmtR(r / 60)} a second here, ${fmtR(r * hbAway() / 60)} while away${hallsDone() ? `, halls +${hallsDone() * 10}%` : ''}` : 'Build a Fish Rack to start earning'}</span><span>Level ${lvl}</span></div>
     ${next ? `<div class="ms"><i style="width:${Math.round(100 * (lvl - prev) / (next[0] - prev))}%"></i></div><div class="msl">Next reward at level ${next[0]}: ${next[2]}</div>` : '<div class="msl">Every harbor reward claimed</div>'}`;
   const row = (ic, name, what, lvl, out, i, cost, maxed) => `<div class="hbrow"><div class="ic">${ic}</div><div class="txt"><b>${name}${lvl ? ` <span style="color:var(--mute);font-weight:500">level ${lvl}</span>` : ''}</b><small>${what}${out}</small></div><button class="boost" data-b="${i}" ${maxed || SAGA.silver < cost ? 'disabled' : ''}>${maxed ? 'Finished' : lvl ? 'Upgrade' : 'Build'}<small>${maxed ? 'level ' + HB_MAX : fmtN(cost) + ' silver'}</small></button></div>`;
-  $('hbList').innerHTML = `<h3>Buildings</h3>` + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtN(hbOut(i))} a minute` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('')
+  $('hbList').innerHTML = `<h3>Buildings</h3>` + HB_B.map((b, i) => row(b.ic, b.name, b.what, HB.b[i], HB.b[i] ? ` · ${fmtR(hbOut(i) / 60)} a second` : '', i, hbCost(i), HB.b[i] >= HB_MAX)).join('')
     + row('\u{1F6E2}', 'Bigger barrel', 'More silver for every tap', HB.tap, HB.tap ? ` · +${fmtN(tapGain())} a tap` : '', -1, tapCost(), HB.tap >= HB_MAX)
     + `<h3>For the next raid</h3>` + BOONS.map(b => `<div class="hbrow"><div class="ic">${b.ic}</div><div class="txt"><b>${b.name}${b.id === 'hammer' && SAGA.boons.hammer ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.hammer} ready</span>` : b.id === 'cata' && SAGA.boons.cata ? ` <span style="color:var(--mute);font-weight:500">${SAGA.boons.cata} ready</span>` : b.id === 'horn' ? ` <span style="color:var(--mute);font-weight:500">${SAGA.horns} of ${HORN_MAX}</span>` : b.id === 'token' ? ` <span style="color:var(--mute);font-weight:500">${LH.tokens} held</span>` : ''}</b><small>${b.what}</small></div><button class="boost" data-boon="${b.id}" ${SAGA.silver < boonCost(b) ? 'disabled' : ''}>Buy<small>${fmtN(boonCost(b))} silver</small></button></div>`).join('')
     + `<h3>Upgrades</h3>` + HB_UPS.map(u => `<div class="hbrow"><div class="ic">${u.ic}</div><div class="txt"><b>${u.name}${upOn(u.id) ? ' <span style="color:#2f7a4a;font-weight:500">bought</span>' : ''}</b><small>${u.what}${upOn(u.id) ? '' : upReq(u) ? '' : ` \u00b7 needs ${u.b === -1 ? 'barrel' : u.b === -2 ? 'harbor' : HB_B[u.b].name} level ${u.req}`}</small></div>${upOn(u.id) ? '' : `<button class="boost" data-up="${u.id}" ${!upReq(u) || SAGA.silver < u.cost ? 'disabled' : ''}>Buy<small>${fmtN(u.cost)} silver</small></button>`}</div>`).join('')
@@ -2366,7 +2366,7 @@ function mnRender(light) {
     scene.querySelectorAll('[data-lvl]').forEach(e => { const [k, i] = e.dataset.lvl.split(':'); e.innerHTML = lvlTxt(k, +i); });
     scene.querySelectorAll('[data-pile]').forEach(e => { e.className = 'pile ' + pileClass(+e.dataset.pile); });
     scene.querySelectorAll('[data-cost]').forEach(b => { b.disabled = SAGA.silver < +b.dataset.cost; });
-    const rt = $('mnRate'); if (rt) rt.textContent = f1(Math.max(0, rate * 60));
+    const rt = $('mnRate'); if (rt) rt.textContent = fmtR(Math.max(0, rate));
     const pb = scene.querySelector('.mnbar i'); if (pb) pb.style.width = Math.min(100, MN.earned / deedNeed() * 100) + '%';
     const ps = $('mnProg'); if (ps) ps.textContent = `${fmtN(MN.earned)} of ${fmtN(deedNeed())} silver earned`;
     const db = $('mnDeed'); if (db) db.disabled = MN.earned < deedNeed();
@@ -2377,7 +2377,7 @@ function mnRender(light) {
   const crew = i => { const n = shaftStats(i).miners; let m = ''; for (let k = 0; k < n; k++) m += `<span class="mnr" style="left:${k * 15}px;animation-delay:${k * .11}s">${MINER_SVG()}</span>`; return `<div class="mncrew" id="mnCrew${i}" style="width:${34 + (n - 1) * 15}px">${m}</div>`; };
   const carts = () => { const n = cartStats().carts; return `<div class="mncart" id="mnCart">${CART_SVG}${n > 1 ? `<span class="mncnt" style="right:-6px;top:-10px">x${n}</span>` : ''}</div>`; };
   let h = `<div class="mnsky" id="mnSky">${SKY_SVG}<div class="mnground"></div>
-    <div class="mnsum"><div><b id="mnRate">${f1(Math.max(0, rate * 60))}</b> silver a minute from the foremen<small style="display:block;color:var(--mute)">${MN.deeds ? `${MN.deeds} deed${MN.deeds > 1 ? 's' : ''}: everything x${(1 + .5 * MN.deeds).toFixed(1)}` : `Foremen keep working while the app is closed${hbAway() < 1 ? ', at half pace' : ''}`}</small></div><div style="text-align:right"><b>${MN.s.length}</b> shaft${MN.s.length > 1 ? 's' : ''}</div></div>
+    <div class="mnsum"><div><b id="mnRate">${fmtR(Math.max(0, rate))}</b> silver a second from the foremen<small style="display:block;color:var(--mute)">${MN.deeds ? `${MN.deeds} deed${MN.deeds > 1 ? 's' : ''}: everything x${(1 + .5 * MN.deeds).toFixed(1)}` : `Foremen keep working while the app is closed${hbAway() < 1 ? ', at half pace' : ''}`}</small></div><div style="text-align:right"><b>${MN.s.length}</b> shaft${MN.s.length > 1 ? 's' : ''}</div></div>
     <div class="mnhead" data-tap="h">${HEAD_SVG}<div class="mncnt cnt">${MN.h.f ? 'foreman' : 'tap to lift'}</div><button class="mnlvl" data-sh="h" data-lvl="h:0">${lvlTxt('h')}</button></div>
     ${carts()}
     <div class="mnhouse" data-tap="c">${HOUSE_SVG}<button class="mnlvl" data-sh="c" data-lvl="c:0">${lvlTxt('c')}</button></div>
@@ -2408,9 +2408,9 @@ function mnSheetRender() {
   const now = stats(l), next = stats(l + n), f = MN.s[i] && k === 's' ? MN.s[i].f : k === 'h' ? MN.h.f : MN.c.f;
   const name = k === 's' ? `Shaft ${i + 1}` : k === 'h' ? 'The hoist' : 'The ore carts', fcost = foremanCost(k === 's' ? i : k);
   const row = (label, a, b, fmt) => `<div class="mnstat"><span class="k">${label}</span><b>${fmt(a)}</b><em>${b > a + 1e-9 ? '+' + fmt(b - a) : '+0'}</em></div>`;
-  const rows = k === 's' ? row('Silver a minute', now.rate * 60, next.rate * 60, f1) + row('Miners', now.miners, next.miners, v => String(Math.round(v))) + row('Walking speed', now.walk, next.walk, v => 'x' + v.toFixed(2)) + row('Digging speed', now.mine, next.mine, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v))
-    : k === 'h' ? row('Silver a minute', now.rate * 60, next.rate * 60, f1) + row('Cage speed', now.speed, next.speed, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v))
-    : row('Silver a minute', now.rate * 60, next.rate * 60, f1) + row('Carts', now.carts, next.carts, v => String(Math.round(v))) + row('Rolling speed', now.speed, next.speed, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v));
+  const rows = k === 's' ? row('Silver a second', now.rate, next.rate, v => v >= 10 ? fmtR(v) : v.toFixed(3)) + row('Miners', now.miners, next.miners, v => String(Math.round(v))) + row('Walking speed', now.walk, next.walk, v => 'x' + v.toFixed(2)) + row('Digging speed', now.mine, next.mine, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v))
+    : k === 'h' ? row('Silver a second', now.rate, next.rate, v => v >= 10 ? fmtR(v) : v.toFixed(3)) + row('Cage speed', now.speed, next.speed, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v))
+    : row('Silver a second', now.rate, next.rate, v => v >= 10 ? fmtR(v) : v.toFixed(3)) + row('Carts', now.carts, next.carts, v => String(Math.round(v))) + row('Rolling speed', now.speed, next.speed, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v));
   const boostAt = (Math.floor(l / 10) + 1) * 10, boostWhat = k === 'h' ? 'the cage gets a stronger winch' : k === 's' ? 'another miner joins the crew' : 'another cart joins the line';
   $('mnSheet').innerHTML = `<div class="top"><div class="face">${k === 'c' ? CART_SVG : k === 'h' ? CAGE_SVG : MINER_SVG()}</div><h2>${name}<small>Level ${l}${f ? ' · foreman hired' : ''}</small></h2><button class="iconbtn close" id="mnSheetX" aria-label="Close">✕</button></div>
     <div class="boostnote">Next boost at level ${boostAt}: ${boostWhat}.</div>${rows}
