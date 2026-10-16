@@ -1,5 +1,5 @@
 // Viking Raiders service worker: the game works offline after the first visit
-const CACHE = 'viking-raiders-VR1.049.10.15.26.2347';
+const CACHE = 'viking-raiders-VR1.050.10.16.26.0000';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

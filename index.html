@@ -323,7 +323,7 @@ button:focus-visible { outline: 3px solid var(--lemon); outline-offset: 2px; }
 </style>
 </head>
 <body>
-<script>window.VR_UPDATE={id:"U20261016-0347",date:"2026-10-16 03:47 UTC"};</script>
+<script>window.VR_UPDATE={id:"U20261016-0400",date:"2026-10-16 04:00 UTC"};</script>
 
 
 <div id="app">
@@ -788,7 +788,7 @@ function buildLevel(n, fails, tight) {
 }
 
 // ---------- persistence ----------
-const BUILD = 'VR1.049.10.15.26.2347';
+const BUILD = 'VR1.050.10.16.26.0000';
 const KEY = 'jellyblasters.v1'; // kept so earlier progress carries over
 let save = { level: 1, fails: {}, muted: false, music: true, vibe: true, seenHelp: false, seen: {}, clock: null, saga: null };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.level) save = Object.assign(save, s); } catch (e) {}
@@ -1735,7 +1735,7 @@ function showCard(kind, extra) {
     setTimeout(() => { $('runeGo').onclick = raiseRune; $('runeNo').onclick = () => { $('ov').hidden = true; }; });
   } else if (kind === 'mnHelp') {
     html = `<h2>The Silver Mine</h2><p style="margin:0 0 8px;color:var(--mute);font-size:14px">An idle mine under the mountain. Every dig, every lift of the cage and every cart that reaches the longhouse pays silver straight into your purse.</p><ul>
-      <li><span>1</span><div><b>Tap a shaft</b> and its miner walks to the rock face, digs, and brings back silver. Tap the hoist tower and the cage goes down for a load. Tap the longhouse and a cart rolls across. Each pays.</div></li>
+      <li><span>1</span><div><b>Tap a shaft</b> and its miner walks to the rock face, digs, and brings back silver. Tap the hoist tower and the cage goes down for a load. Tap the longhouse and a cart rolls across. Every tap pays silver on the spot, as many taps as you like.</div></li>
       <li><span>2</span><div><b>Tap a Level badge</b> to upgrade that part: one level at a time, ten, fifty or as many as you can afford. Every tenth level adds a miner or a cart.</div></li>
       <li><span>3</span><div><b>Hire a foreman</b> from the same panel and that part runs on its own, even while the app is closed. Dig new shafts: the deeper ones are richer.</div></li>
       <li><span>4</span><div><b>Sell the mine</b> once it has earned enough. You get a deed, start a fresh mine, and every deed makes all your mines dig half again as fast, forever.</div></li></ul>
@@ -2249,11 +2249,11 @@ let hbPending = { away: Date.now() - (HB.last || Date.now()), got: hbSettle() };
 if (!SAGA.mn) SAGA.mn = { s: [{ l: 1, f: false, ore: 0 }], h: { l: 1, f: false }, c: { l: 1, f: false }, sur: 0, deeds: 0, earned: 0, last: Date.now() };
 const MN = SAGA.mn, MN_MAX_SHAFTS = 12;
 const mnMult = () => (1 + .5 * MN.deeds) * runeMult();
-const shaftRateAt = (i, l) => Math.pow(2.2, i) * l * mnMult() / 60, shaftRate = i => shaftRateAt(i, MN.s[i].l); // silver a second: shaft 1 pays like the Fish Rack, each deeper shaft 2.2x (user 2026-10-15: earnings like the Harbor's)
-const liftRateAt = l => 2 * l * Math.pow(1.6, MN.s.length - 1) * mnMult() / 60, hoistRate = () => liftRateAt(MN.h.l); // the hoist and the carts grow with the number of shafts, as their prices do
+const mnDbl = l => Math.pow(2, Math.floor(l / 25)), shaftRateAt = (i, l) => Math.pow(2.5, i) * l * mnDbl(l) * mnMult() / 60, shaftRate = i => shaftRateAt(i, MN.s[i].l); // silver a second: shaft 1 pays like the Fish Rack, each deeper shaft 2.2x (user 2026-10-15: earnings like the Harbor's)
+const liftRateAt = l => 2 * l * mnDbl(l) * Math.pow(1.6, MN.s.length - 1) * mnMult() / 60, hoistRate = () => liftRateAt(MN.h.l); // the hoist and the carts grow with the number of shafts, as their prices do
 const cartRate = () => liftRateAt(MN.c.l);
-const foremanCost = i => Math.round(i === 'h' || i === 'c' ? 250 * Math.pow(1.6, MN.s.length - 1) : 150 * Math.pow(2.2, i));
-const newShaftCost = () => Math.round(200 * Math.pow(3, MN.s.length - 1));
+const foremanCost = i => Math.round(i === 'h' || i === 'c' ? 250 * Math.pow(1.6, MN.s.length - 1) : 150 * Math.pow(2.5, i));
+const newShaftCost = () => Math.round(200 * Math.pow(3.2, MN.s.length - 1));
 const deedNeed = () => Math.round(10000 * Math.pow(3, MN.deeds));
 let mnAcc = 0, mnTimer = 0, mnGen = 0, mnMul = 1, mnSheet = null, mnKey = '', mnBusy = { s: {}, h: false, c: false };
 const mnLive = () => !$('mn').hidden;
@@ -2271,11 +2271,11 @@ function mnSettle() {
 let mnPending = { away: Date.now() - (MN.last || Date.now()), got: mnSettle() };
 // the crew stats shown in the upgrade panel: every tenth level adds a miner (or a cart); walking, digging and the cage climb with the level
 const mnSpeed = l => 1 + .03 * (l - 1);
-const shaftStats = (i, l = MN.s[i].l) => { const rate = shaftRateAt(i, l), miners = 1 + Math.floor(l / 10), sp = mnSpeed(l), cycle = (2 * 1.2 + 1) / sp; return { rate, miners, walk: sp, mine: sp, load: rate * cycle / miners, trip: Math.max(1, Math.round(rate * 6)) }; };
-const hoistStats = (l = MN.h.l) => { const rate = liftRateAt(l), sp = mnSpeed(l); return { rate, speed: sp, load: rate * 3 / sp, trip: Math.max(1, Math.round(rate * 6)) }; };
-const cartStats = (l = MN.c.l) => { const rate = liftRateAt(l), carts = 1 + Math.floor(l / 10), sp = mnSpeed(l); return { rate, carts, speed: sp, load: rate * 2.8 / sp / carts, trip: Math.max(1, Math.round(rate * 6)) }; };
+const shaftStats = (i, l = MN.s[i].l) => { const rate = shaftRateAt(i, l), miners = 1 + Math.floor(l / 10), sp = mnSpeed(l), cycle = (2 * 1.2 + 1) / sp; return { rate, miners, walk: sp, mine: sp, load: rate * cycle / miners, trip: Math.max(1, Math.round(rate * 30)) }; };
+const hoistStats = (l = MN.h.l) => { const rate = liftRateAt(l), sp = mnSpeed(l); return { rate, speed: sp, load: rate * 3 / sp, trip: Math.max(1, Math.round(rate * 30)) }; };
+const cartStats = (l = MN.c.l) => { const rate = liftRateAt(l), carts = 1 + Math.floor(l / 10), sp = mnSpeed(l); return { rate, carts, speed: sp, load: rate * 2.8 / sp / carts, trip: Math.max(1, Math.round(rate * 30)) }; };
 const mnLevel = (k, i) => k === 's' ? MN.s[i].l : k === 'h' ? MN.h.l : MN.c.l;
-const mnBase = (k, i) => k === 's' ? 60 * Math.pow(2.2, i) : 90 * Math.pow(1.6, MN.s.length - 1); // level 1 pays for itself in about an hour, like the Harbor
+const mnBase = (k, i) => k === 's' ? 60 * Math.pow(2.5, i) : 90 * Math.pow(1.6, MN.s.length - 1); // level 1 pays for itself in about an hour, like the Harbor
 const bulkCost = (k, i, n) => { const base = mnBase(k, i), l = mnLevel(k, i); let c = 0; for (let j = 0; j < n; j++) c += Math.round(base * Math.pow(1.14, l - 1 + j)); return c; };
 const maxUp = (k, i) => { const base = mnBase(k, i), l = mnLevel(k, i); let n = 0, c = 0; while (n < 500) { const nc = Math.round(base * Math.pow(1.14, l - 1 + n)); if (c + nc > SAGA.silver) break; c += nc; n++; } return Math.max(1, n); };
 function openMN() {
@@ -2326,8 +2326,7 @@ function mnCycleShaft(i, gen, manual) {
   setTimeout(() => { crew.classList.remove('walk'); crew.classList.add('mine'); tap();
     setTimeout(() => { crew.classList.remove('mine'); crew.classList.add('walk', 'back'); crew.style.left = '50px';
       setTimeout(() => { crew.classList.remove('walk', 'back');
-        const amt = manual ? shaftStats(i).trip : shaftRate(i) * (2 * walkT + mineT + 250) / 1000; const got = mnDig(i, amt); persist();
-        if (got > 0) mnFloat(tun, 56, 44, '+' + fmtN(got) + ' silver', 'silver'); mnRender(true);
+        if (!manual) { const got = mnDig(i, shaftRate(i) * (2 * walkT + mineT + 250) / 1000); persist(); if (got > 0) mnFloat(tun, 56, 44, '+' + fmtN(got) + ' silver', 'silver'); mnRender(true); }
         if (!manual && MN.s[i].f && gen === mnGen && mnLive()) setTimeout(() => mnCycleShaft(i, gen, false), 250); else mnBusy.s[i] = false;
       }, walkT); }, mineT); }, walkT);
 }
@@ -2339,8 +2338,7 @@ function mnCycleHoist(gen, manual) {
   setTimeout(() => { cage.classList.add('full'); tap();
     setTimeout(() => { cage.style.top = '6px';
       setTimeout(() => { cage.classList.remove('full');
-        const amt = manual ? hoistStats().trip : hoistRate() * (2 * down + 800) / 1000; const got = mnHaul(amt); persist();
-        if (got > 0) mnFloat($('mnSky'), 70, 96, '+' + fmtN(got) + ' silver', 'silver'); mnRender(true);
+        if (!manual) { const got = mnHaul(hoistRate() * (2 * down + 800) / 1000); persist(); if (got > 0) mnFloat($('mnSky'), 70, 96, '+' + fmtN(got) + ' silver', 'silver'); mnRender(true); }
         if (!manual && MN.h.f && gen === mnGen && mnLive()) setTimeout(() => mnCycleHoist(gen, false), 300); else mnBusy.h = false;
       }, down); }, 500); }, down);
 }
@@ -2350,8 +2348,7 @@ function mnCycleCart(gen, manual) {
   mnBusy.c = true; const st = cartStats(), sky = $('mnSky'), far = Math.max(90, sky.clientWidth - 150 - 56), goT = 1400 / st.speed;
   cart.classList.remove('back'); cart.classList.add('full', 'go'); cart.style.transitionDuration = goT + 'ms'; cart.style.left = far + 'px';
   setTimeout(() => { cart.classList.remove('full'); cart.classList.add('back'); cart.style.left = '76px';
-    const amt = manual ? cartStats().trip : cartRate() * (2 * goT + 300) / 1000; const got = mnSell(amt); persist();
-    if (got > 0) { mnFloat(sky, far + 30, 90, '+' + fmtN(got) + ' silver', 'silver'); tap(); } mnRender(true);
+    if (!manual) { const got = mnSell(cartRate() * (2 * goT + 300) / 1000); persist(); if (got > 0) { mnFloat(sky, far + 30, 90, '+' + fmtN(got) + ' silver', 'silver'); tap(); } mnRender(true); }
     setTimeout(() => { cart.classList.remove('back', 'go');
       if (!manual && MN.c.f && gen === mnGen && mnLive()) setTimeout(() => mnCycleCart(gen, false), 300); else mnBusy.c = false;
     }, goT); }, goT);
@@ -2387,15 +2384,19 @@ function mnRender(light) {
     <div class="mncnt cnt">${sh.f ? 'foreman' : 'tap to dig'}</div><div class="fm${sh.f ? '' : ' none'}" title="${sh.f ? 'Foreman' : 'No foreman yet'}">${sh.f ? FOREMAN_SVG : '<svg viewBox="0 0 30 42"><rect x="6" y="18" width="18" height="4" fill="#8d6540"/><rect x="6" y="4" width="4" height="34" fill="#8d6540"/><rect x="20" y="22" width="4" height="16" fill="#8d6540"/><rect x="6" y="4" width="18" height="3" fill="#8d6540"/></svg>'}</div>
     <div class="pile ${pileClass(i)}" data-pile="${i}">${PILE_SVG}</div>${crew(i)}<button class="mnlvl" data-sh="s" data-i="${i}" data-lvl="s:${i}">${lvlTxt('s', i)}</button></div>`).join('');
   h += `</div><div class="mnfoot">`;
-  if (MN.s.length < MN_MAX_SHAFTS) h += `<div class="mnrow"><div class="ic">\u{1F6A7}</div><div class="txt"><b>Dig a new shaft</b><small>Shaft ${MN.s.length + 1} is ${Math.round(Math.pow(2.2, MN.s.length) * 10) / 10}x as rich as the first</small></div>${btn('new', 0, 'Dig', newShaftCost())}</div>`;
+  if (MN.s.length < MN_MAX_SHAFTS) h += `<div class="mnrow"><div class="ic">\u{1F6A7}</div><div class="txt"><b>Dig a new shaft</b><small>Shaft ${MN.s.length + 1} is ${Math.round(Math.pow(2.5, MN.s.length) * 10) / 10}x as rich as the first</small></div>${btn('new', 0, 'Dig', newShaftCost())}</div>`;
   h += `<h3>Sell the mine</h3><div class="mnrow"><div class="ic">❖</div><div class="txt"><b>Deed ${MN.deeds + 1}</b><small id="mnProg">${fmtN(MN.earned)} of ${fmtN(deedNeed())} silver earned</small><div class="mnbar"><i style="width:${Math.min(100, MN.earned / deedNeed() * 100)}%"></i></div><small>Start a fresh mine that digs ${50 * (MN.deeds + 1)}% faster, forever, plus a gold chest</small></div><button class="boost" id="mnDeed" data-a="deed" data-i="0" ${MN.earned < deedNeed() ? 'disabled' : ''}>Sell<small>for a deed</small></button></div></div>`;
   const keepScroll = scene.scrollTop; scene.innerHTML = h; scene.scrollTop = keepScroll;
   scene.querySelectorAll('[data-a]').forEach(b => b.onclick = () => mnAct(b.dataset.a, +b.dataset.i));
   scene.querySelectorAll('.mnlvl').forEach(b => b.onclick = e => { e.stopPropagation(); mnOpenSheet(b.dataset.sh, +(b.dataset.i || 0)); });
   scene.querySelectorAll('[data-tap]').forEach(el => el.onclick = () => { const k = el.dataset.tap, i = +(el.dataset.i || 0);
-    if (k === 's') { if (MN.s[i].f) { if (!mnBusy.s[i]) mnCycleShaft(i, mnGen, false); return; } if (!mnBusy.s[i]) mnCycleShaft(i, mnGen, true); }
-    else if (k === 'h') { if (MN.h.f) { if (!mnBusy.h) mnCycleHoist(mnGen, false); return; } if (!mnBusy.h) mnCycleHoist(mnGen, true); }
-    else { if (MN.c.f) { if (!mnBusy.c) mnCycleCart(mnGen, false); return; } if (!mnBusy.c) mnCycleCart(mnGen, true); } });
+    // every tap pays at once, like the barrel; the crew sets off if it is standing still
+    const got = mnEarn(k === 's' ? shaftStats(i).trip : k === 'h' ? hoistStats().trip : cartStats().trip); tap(); STATS.taps++;
+    const sky = $('mnSky'); if (k === 's') mnFloat(el, 56, 44, '+' + fmtN(got) + ' silver', 'silver'); else if (k === 'h') mnFloat(sky, 70, 96, '+' + fmtN(got) + ' silver', 'silver'); else mnFloat(sky, sky.clientWidth - 150, 90, '+' + fmtN(got) + ' silver', 'silver');
+    mnRender(true);
+    if (k === 's') { if (!mnBusy.s[i]) mnCycleShaft(i, mnGen, !MN.s[i].f); }
+    else if (k === 'h') { if (!mnBusy.h) mnCycleHoist(mnGen, !MN.h.f); }
+    else { if (!mnBusy.c) mnCycleCart(mnGen, !MN.c.f); } });
   mnStartLoops();
 }
 // ---- the upgrade panel behind each Level badge: the crew's numbers, how many levels to buy, and the foreman ----
@@ -2412,7 +2413,7 @@ function mnSheetRender() {
   const rows = k === 's' ? row('Silver a second', now.rate, next.rate, v => v >= 10 ? fmtR(v) : v.toFixed(3)) + row('Miners', now.miners, next.miners, v => String(Math.round(v))) + row('Walking speed', now.walk, next.walk, v => 'x' + v.toFixed(2)) + row('Digging speed', now.mine, next.mine, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v))
     : k === 'h' ? row('Silver a second', now.rate, next.rate, v => v >= 10 ? fmtR(v) : v.toFixed(3)) + row('Cage speed', now.speed, next.speed, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v))
     : row('Silver a second', now.rate, next.rate, v => v >= 10 ? fmtR(v) : v.toFixed(3)) + row('Carts', now.carts, next.carts, v => String(Math.round(v))) + row('Rolling speed', now.speed, next.speed, v => 'x' + v.toFixed(2)) + row('Silver per tap', now.trip, next.trip, v => fmtN(v));
-  const boostAt = (Math.floor(l / 10) + 1) * 10, boostWhat = k === 'h' ? 'the cage gets a stronger winch' : k === 's' ? 'another miner joins the crew' : 'another cart joins the line';
+  const boostAt = (Math.floor(l / 25) + 1) * 25, boostWhat = 'the pay doubles' + (k === 's' ? ', and every tenth level adds a miner' : k === 'c' ? ', and every tenth level adds a cart' : '');
   $('mnSheet').innerHTML = `<div class="top"><div class="face">${k === 'c' ? CART_SVG : k === 'h' ? CAGE_SVG : MINER_SVG()}</div><h2>${name}<small>Level ${l}${f ? ' · foreman hired' : ''}</small></h2><button class="iconbtn close" id="mnSheetX" aria-label="Close">✕</button></div>
     <div class="boostnote">Next boost at level ${boostAt}: ${boostWhat}.</div>${rows}
     <div class="mnmul">${[1, 10, 50, 'max'].map(m => `<button data-mul="${m}" class="${m === mnMul ? 'on' : ''}">${m === 'max' ? 'Max' : 'x' + m}</button>`).join('')}</div>
